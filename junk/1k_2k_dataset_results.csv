@@ -1,0 +1,2121 @@
+original_code,pytest_code,coverage
+"def set_size(width='book', fraction=1, subplots=(1, 1), higher=False):
+    
+
+    if width == 'book':
+       width_pt = 345.0
+    else:
+        width_pt = width
+
+    # Width of figure (in pts)
+    fig_width_pt = width_pt * fraction
+
+    # Convert from pt to inches
+    inches_per_pt = 1 / 72.27
+
+    # Golden ratio to set aesthetic figure height
+    # https://disq.us/p/2940ij3
+    golden_ratio = (5**.5 - 1) / 2
+
+    # Figure width in inches
+    fig_width_in = fig_width_pt * inches_per_pt
+    # Figure height in inches
+
+    if higher:
+        fig_height_in = (fig_width_in * golden_ratio 
+                         * (subplots[0] * 1.5 / subplots[1]))
+    else:
+        fig_height_in = (fig_width_in * golden_ratio 
+                         * (subplots[0] / subplots[1]))
+    fig_dim = (fig_width_in, fig_height_in)
+
+    return fig_dim","# Import the function we want to test
+from source import set_size
+import pytest
+
+def test_set_size_book():
+    # Test when width is 'book', fraction is 1 and subplots are (1, 1)
+    # and higher is False
+    assert set_size('book', 1, (1, 1), False) == (345.0, 240.0)
+
+def test_set_size_custom():
+    # Test when width is custom, fraction is 2 and subplots are (2, 1)
+    # and higher is True
+    assert set_size(600, 2, (2, 1), True) == (1200.0, 600.0)
+
+def test_set_size_invalid_width():
+    # Test when width is 'invalid', this should raise a ValueError
+    with pytest.raises(ValueError):
+        set_size('invalid', 1, (1, 1), False)",100.0
+"def distance(x1, x2):
+    
+    dx = x2[0] - x1[0]
+    dy = x2[1] - x1[1]
+    dz = x2[2] - x1[2]
+
+    r = (dx * dx + dy * dy + dz * dz) ** 0.5
+
+    return r","import pytest
+import sys
+sys.path.append('.') 
+from source import distance
+
+def test_distance():
+    assert distance((1, 2, 3), (4, 5, 6)) == 5.196152422706632
+    assert distance((0, 0, 0), (0, 0, 0)) == 0
+    assert distance((1, 1, 1), (-1, -1, -1)) == 3.4641016151377544",100.0
+"def Dequantize(feat_vector, max_quantized_value=2, min_quantized_value=-2):
+  
+  assert max_quantized_value > min_quantized_value
+  quantized_range = max_quantized_value - min_quantized_value
+  scalar = quantized_range / 255.0
+  bias = (quantized_range / 512.0) + min_quantized_value
+  return feat_vector * scalar + bias","import sys
+sys.path.append(""."")
+import source  # assuming the name of your module is 'source'
+
+def test_dequantize():
+    feat_vector = [0, 255, 127]
+    max_quantized_value = 2
+    min_quantized_value = -2
+    result = source.Dequantize(feat_vector, max_quantized_value, min_quantized_value)
+    expected_output = [0.0, 2.0, 0.5]
+    assert result == expected_output",100.0
+"def UCS_uv_to_xy(uv):
+    
+
+    return (3 * uv[0] / (2 * uv[0] - 8 * uv[1] + 4),
+            2 * uv[1] / (2 * uv[0] - 8 * uv[1] + 4))","# Pytest file
+import pytest
+import source  # assuming the source code is in a file called source.py
+
+
+def test_uv_to_xy():
+    uv = (2, 4)
+    expected_result = (3 * uv[0] / (2 * uv[0] - 8 * uv[1] + 4), 2 * uv[1] / (2 * uv[0] - 8 * uv[1] + 4))
+    assert source.UCS_uv_to_xy(uv) == expected_result
+
+
+if __name__ == ""__main__"":
+    pytest.main()",100.0
+"def ranges_overlap(range1, range2):
+    
+    if not isinstance(range1, list) or not isinstance(range2, list):
+        raise TypeError('Both arguments must be a list.')
+    if len(range1) != 2 or len(range2) != 2:
+        raise ValueError('Both lists must have two elements each.')
+    if max(range1) < min(range2):
+        return False
+    if max(range2) < min(range1):
+        return False
+    return True","import pytest
+from source import ranges_overlap
+
+def test_ranges_overlap():
+    range1 = [1, 5]
+    range2 = [4, 6]
+    assert ranges_overlap(range1, range2) == True
+
+    range1 = [1, 5]
+    range2 = [6, 8]
+    assert ranges_overlap(range1, range2) == False
+
+    range1 = [1, 5]
+    range2 = [1, 5]
+    assert ranges_overlap(range1, range2) == True
+
+    range1 = [1, 5]
+    range2 = [2, 3]
+    assert ranges_overlap(range1, range2) == True",100.0
+"import torch
+
+def get_center_block_mask(samples: torch.Tensor, mask_size: int, overlap: int):
+    
+    img_size = samples.size()[-1]
+    center_index = (img_size - mask_size) // 2
+    masked_samples = samples.clone()
+
+    # Image is not masked out in overlap region
+    m1, m2 = center_index + overlap, center_index + mask_size - overlap
+
+    masked_samples[:, 0, m1:m2, m1:m2] = 2 * 117.0 / 255.0 - 1.0
+    masked_samples[:, 1, m1:m2, m1:m2] = 2 * 104.0 / 255.0 - 1.0
+    masked_samples[:, 2, m1:m2, m1:m2] = 2 * 123.0 / 255.0 - 1.0
+
+    true_masked_part = samples[:, :, center_index:center_index+mask_size, center_index:center_index+mask_size]
+    return masked_samples, true_masked_part, (center_index, center_index)","import pytest
+import torch
+from source import get_center_block_mask  # assuming the function is in source.py
+
+def test_get_center_block_mask():
+    # Create a test tensor
+    samples = torch.rand((1, 3, 20, 20))
+
+    # Call the function with test parameters
+    masked_samples, true_masked_part, center = get_center_block_mask(samples, mask_size=5, overlap=2)
+
+    # Check the results
+    assert masked_samples.shape == samples.shape, ""Masked samples should have the same shape as the input samples""
+    assert true_masked_part.shape == (1, 3, 5, 5), ""True masked part should have the shape of a center block""
+    assert center == (8, 8), ""The center should be at the center of the image for a 20x20 image""",100.0
+"def RadicalInverse(a, base):
+  
+  reversed_digits = 0
+  base_n = 1
+  # Compute the reversed digits, base b.
+  while a > 0:
+    next_a = a / base
+    digit = a - next_a * base
+    reversed_digits = reversed_digits * base + digit
+    base_n *= base
+    a = next_a
+  # Only when done are the reversed digits divided by b^n.
+  return min(reversed_digits / float(base_n), 1.0)","# test_source.py
+import pytest
+import sys
+sys.path.insert(0, '..') # This will add the parent directory into the sys path
+from source import RadicalInverse  # Import the function from source.py
+
+def test_RadicalInverse():
+    assert RadicalInverse(10, 2) == 0.25
+    assert RadicalInverse(20, 2) == 0.25
+    assert RadicalInverse(50, 2) == 0.2
+    assert RadicalInverse(80, 2) == 0.125
+    assert RadicalInverse(100, 2) == 0.0625",100.0
+"def get_climatology(data):
+      # noqa
+
+    # compute mean grouping by month
+    mongr = data.groupby('time.month')
+    clim = mongr.mean(dim='time', keep_attrs=True)
+
+    # rename month coordinate to time for compatibility
+    clim = clim.rename({'month': 'time'})
+
+    return clim","import pytest
+import xarray as xr
+
+# Load source.py file
+source = pytest.importorskip(""source"")
+
+# Assuming source.py has a 'get_climatology' function
+def test_get_climatology():
+    # We should test that our function returns an xarray.Dataset
+assert isinstance(source.get_climatology(xr.tutorial.load_dataset(""msft"")), xr.Dataset)
+
+    # We also want to make sure 'time' is the right type
+    ds = source.get_climatology(xr.tutorial.load_dataset(""msft""))
+    assert isinstance(ds.time, xr.core.dataarray.DataArray)",100.0
+"def parabolic(f, x):
+    
+    xv = 1/2. * (f[x-1] - f[x+1]) / (f[x-1] - 2 * f[x] + f[x+1]) + x
+    yv = f[x] - 1/4. * (f[x-1] - f[x+1]) * (xv - x)
+    return (xv, yv)","# test_source.py
+import pytest
+from source import parabolic
+
+def test_parabolic():
+    f = [1, 4, 6, 4, 1]  # this is a simple example, replace with your actual function values
+    x = 2  # replace with your actual x value
+    result = parabolic(f, x)
+    assert result == (4, 5)  # replace with your actual expected result",100.0
+"import torch
+
+def euler2mat(angle):
+    
+    B = angle.size(0)
+    x, y, z = angle[:,0], angle[:,1], angle[:,2]
+
+    cosz = torch.cos(z)
+    sinz = torch.sin(z)
+
+    zeros = z.detach()*0
+    ones = zeros.detach()+1
+    zmat = torch.stack([cosz, -sinz, zeros,
+                        sinz,  cosz, zeros,
+                        zeros, zeros,  ones], dim=1).reshape(B, 3, 3)
+
+    cosy = torch.cos(y)
+    siny = torch.sin(y)
+
+    ymat = torch.stack([cosy, zeros,  siny,
+                        zeros,  ones, zeros,
+                        -siny, zeros,  cosy], dim=1).reshape(B, 3, 3)
+
+    cosx = torch.cos(x)
+    sinx = torch.sin(x)
+
+    xmat = torch.stack([ones, zeros, zeros,
+                        zeros,  cosx, -sinx,
+                        zeros,  sinx,  cosx], dim=1).reshape(B, 3, 3)
+
+    rotMat = xmat @ ymat @ zmat
+    return rotMat","import pytest
+import torch
+from source import euler2mat  # assuming the function is defined in source.py
+
+def test_euler2mat():
+    angle = torch.tensor([[1.2, 1.3, 1.4], [0.2, 0.3, 0.4]], dtype=torch.float32)
+    result = euler2mat(angle)
+    assert result.shape == (2, 3, 3)  # checks if the shape of the output is as expected
+    assert torch.allclose(result[0,:,:], result_expected[0,:,:], atol=1e-6)  # checks if the values are close to the expected values within a tolerance
+    assert torch.allclose(result[1,:,:], result_expected[1,:,:], atol=1e-6)  
+
+if __name__ == ""__main__"":
+    test_euler2mat()",100.0
+"def probability_to_red_green(probability, flip=False):
+    
+    n = probability * 100
+    red = int((255. * (100 - n)) / 100.)
+    green = int((255. * n) / 100)
+    blue = 0
+    if flip:
+        return green, red, blue
+    else:
+        return red, green, blue","def test_probability_to_red_green():
+    # Test case 1
+    result = probability_to_red_green(0.6)
+    assert result == (191, 255, 0), ""Test case 1 failed""
+    
+    # Test case 2
+    result = probability_to_red_green(0.3, flip=True)
+    assert result == (0, 191, 0), ""Test case 2 failed""
+    
+    # Test case 3
+    result = probability_to_red_green(0.99999)
+    assert result == (0, 0, 255), ""Test case 3 failed""
+    
+    # Test case 4
+    result = probability_to_red_green(0.5, flip=True)
+    assert result == (0, 128, 0), ""Test case 4 failed""",100.0
+"def metalicity_sandage(amplitude_v, log_p):
+    
+    return -1.453 * amplitude_v - 7.990 * log_p - 2.145","import pytest
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from source import metalicity_sandage
+
+def test_metalicity_sandage():
+    amplitude_v = 1
+    log_p = 2
+    assert metalicity_sandage(amplitude_v, log_p) == -1.453 * amplitude_v - 7.990 * log_p - 2.145",100.0
+"def normalized_current_datehour(datetime_col, min_datehour, max_datehour):
+    
+    current_datehour = (datetime_col - min_datehour).apply(lambda x: x.days * 24 + x.seconds / 3600)
+
+    max_min_diff = max_datehour - min_datehour
+
+    if max_min_diff != 0:
+        current_datehour = current_datehour / (max_min_diff.days * 24 + max_min_diff.seconds / 3600)
+    elif max_min_diff == 0:
+        current_datehour = 0
+
+    return current_datehour","# test_source.py
+
+import pytest
+import pandas as pd
+from source import normalized_current_datehour
+
+@pytest.fixture
+def datetime_col():
+    return pd.to_datetime(['2022-01-01 01:00:00', '2022-01-01 02:00:00', '2022-01-01 03:00:00'])
+
+@pytest.fixture
+def min_datehour(datetime_col):
+    return min(datetime_col)
+
+@pytest.fixture
+def max_datehour(datetime_col):
+    return max(datetime_col)
+
+
+def test_normalized_current_datehour(datetime_col, min_datehour, max_datehour):
+    result = normalized_current_datehour(datetime_col, min_datehour, max_datehour)
+    expected = [0, 0.5, 1]
+    assert result.tolist() == expected",100.0
+"def estimate_distance(box):
+    
+    ymin, xmin, ymax, xmax = box
+    x = (xmin + xmax) / 2.0
+    y = (ymin + ymax) / 2.0
+    z = 0.0
+    width = xmax - xmin
+    height = ymax - ymin
+    depth = 0.0
+    return x, y, z, width, height, depth","# test_source.py
+import pytest
+from source import estimate_distance
+
+def test_estimate_distance():
+    box = (0, 0, 10, 10)
+    x, y, z, width, height, depth = estimate_distance(box)
+    assert x == 5, ""The x value is incorrect""
+    assert y == 5, ""The y value is incorrect""
+    assert z == 0, ""The z value is incorrect""
+    assert width == 10, ""The width is incorrect""
+    assert height == 10, ""The height is incorrect""
+    assert depth == 0, ""The depth is incorrect""",100.0
+"import torch
+
+def sparsity(cube, mask=None):
+    r
+
+    if mask is not None:
+        loss = torch.sum(torch.abs(cube.masked_select(mask)))
+    else:
+        loss = torch.sum(torch.abs(cube))
+
+    return loss","import pytest
+import torch
+from source import sparsity
+
+def test_sparsity():
+    cube = torch.randn(100, 100)
+    mask = torch.ones_like(cube)
+    mask[::2,::2] = 0
+    with pytest.raises(NameError):
+        assert sparsity(cube, mask) != 0
+
+    cube = torch.randn(100, 100)
+    assert sparsity(cube) != 0",100.0
+"def from_tensor_to_image(tensor):
+  
+
+  image = tensor.cpu().numpy()
+  if len(image.shape) == 4:
+    image = image.transpose(0, 2, 3, 1)
+  if len(image.shape) == 3:
+    image = image.transpose(1, 2, 0)
+  return image","import pytest
+
+def test_from_tensor_to_image(pytestconfig, pytestlazyimport):
+    source = pytestlazyimport.import_module(""source"")
+
+    def test_func(self):
+        assert hasattr(source, ""from_tensor_to_image"")
+
+        tensor = ...  # initialize your tensor here
+        image = source.from_tensor_to_image(tensor)
+
+        # perform your assertions here",100.0
+"def reddening_correction_sf11(extinction_r):
+    
+
+    E_BV = extinction_r / 2.751
+    A_u = E_BV * 4.239
+    A_g = E_BV * 3.303
+    A_r = E_BV * 2.285
+    A_i = E_BV * 1.698
+    A_z = E_BV * 1.263
+
+    return (A_u, A_g, A_r, A_i, A_z)","import pytest
+
+def test_reddening_correction_sf11():
+    assert reddening_correction_sf11(0.5) == (2.1495, 3.615, 4.703, 5.967, 8.41)
+    assert reddening_correction_sf11(1) == (4.239, 6.615, 8.703, 11.967, 15.41)
+    assert reddening_correction_sf11(1.5) == (6.3285, 9.915, 12.703, 15.967, 19.41)",100.0
+"import torch
+
+def compute_local_cost(pi, a, dx, b, dy, eps, rho, rho2, complete_cost=True):
+    
+    distxy = torch.einsum(
+        ""ij,kj->ik"", dx, torch.einsum(""kl,jl->kj"", dy, pi)
+    )
+    kl_pi = torch.sum(
+        pi * (pi / (a[:, None] * b[None, :]) + 1e-10).log()
+    )
+    if not complete_cost:
+        return - 2 * distxy + eps * kl_pi
+
+    mu, nu = torch.sum(pi, dim=1), torch.sum(pi, dim=0)
+    distxx = torch.einsum(""ij,j->i"", dx ** 2, mu)
+    distyy = torch.einsum(""kl,l->k"", dy ** 2, nu)
+
+    lcost = (distxx[:, None] + distyy[None, :] - 2 * distxy) + eps * kl_pi
+
+    if rho < float(""Inf""):
+        lcost = (
+                lcost
+                + rho
+                * torch.sum(mu * (mu / a + 1e-10).log())
+        )
+    if rho2 < float(""Inf""):
+        lcost = (
+                lcost
+                + rho2
+                * torch.sum(nu * (nu / b + 1e-10).log())
+        )
+    return lcost","import pytest
+import torch
+from source import compute_local_cost
+
+def test_compute_local_cost():
+    pi = torch.rand(3, 3)
+    a = torch.rand(1)
+    dx = torch.rand(3, 3)
+    b = torch.rand(1)
+    dy = torch.rand(3, 3)
+    eps = torch.rand(1)
+    rho = torch.rand(1)
+    rho2 = torch.rand(1)
+    complete_cost = True
+    cost = compute_local_cost(pi, a, dx, b, dy, eps, rho, rho2, complete_cost)
+    assert isinstance(cost, torch.Tensor)",100.0
+"import numpy
+
+def scalar_maxdt(area, shape, maxvel):
+    r
+    x1, x2, z1, z2 = area
+    nz, nx = shape
+    spacing = min([(x2 - x1) / (nx - 1), (z2 - z1) / (nz - 1)])
+    factor = numpy.sqrt(3. / 8.)
+    factor -= factor / 100.  # 1% smaller to guarantee criteria
+    # the closer to stability criteria the better the convergence
+    return factor * spacing / maxvel","# test_source.py
+import numpy
+import pytest
+from source import scalar_maxdt
+
+def test_scalar_maxdt():
+    # coordinates and shape of the area
+    area = (0, 10, 0, 10)
+    shape = (100, 100)
+    # maximum velocity
+    maxvel = 10
+
+    result = scalar_maxdt(area, shape, maxvel)
+
+    # the expected result can be determined by running the function with 
+    # the example parameters above. This is just an example value
+    expected_result = 0.02
+
+    assert result == expected_result",100.0
+"def identify_candidates(all_sso, min_obs=40, dist_cutoff=10):
+    
+    # Pull out the list of objects with many observations, within @dist_cutoff of the attributed sso.
+    objs = all_sso.query('ssdistnr < @dist_cutoff').groupby('ssnamenr')[['jd']].count().query('jd > %d'
+                                                                                              % min_obs)
+    names = objs.sort_values('jd', ascending=False)
+    objnames = names.index.values
+    print(f'# Found {len(objnames)} objects with more than {min_obs} observations')
+    return objnames","# test_source.py
+
+import pytest
+import os
+import pandas as pd
+from source import identify_candidates
+
+def test_identify_candidates():
+    # Assuming the 'source.py' file is in the same directory as this test file
+    # and it contains a function named identify_candidates
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(current_dir, 'source.py')
+    
+    # You can replace it with your actual data file path
+    data = pd.read_csv('source.csv')  # replace with your actual .csv file
+    
+    # Let's say, we have these data
+    all_sso = pd.DataFrame(data)
+    
+    result = identify_candidates(all_sso, min_obs=50, dist_cutoff=20)
+    
+    assert len(result) > 0, ""No objects returned""
+
+    for obj in result:
+        assert obj in all_sso['ssnamenr'].values, f""Object {obj} not found in the data""
+
+    # If the function returned objects with more than 50 observations
+    assert sum(all_sso[all_sso['ssnamenr'].isin(result)]['jd'].values > 50) == len(result), \
+        ""Not all objects have more than 50 observations""
+
+    # If the function returned objects within 20 distance cutoff
+    assert sum(all_sso[all_sso['ssnamenr'].isin(result)]['ssdistnr'].values < 20) == len(result), \
+        ""Not all objects are within the distance cutoff""",100.0
+"def dice_loss(inputs, targets, num_masks):
+    
+    inputs = inputs.sigmoid()
+    inputs = inputs.flatten(1)
+    numerator = 2 * (inputs * targets).sum(-1)
+    denominator = inputs.sum(-1) + targets.sum(-1)
+    loss = 1 - (numerator + 1) / (denominator + 1)
+    return loss.sum() / num_masks","import pytest
+import torch
+from source import dice_loss
+
+def test_dice_loss():
+    inputs = torch.randn(10, 1)
+    targets = torch.randn(10, 1)
+    num_masks = 10
+
+    loss = dice_loss(inputs, targets, num_masks)
+    assert isinstance(loss, torch.Tensor), ""Loss should be a torch.Tensor""",100.0
+"def index_vertices_by_faces(vertices_features, faces):
+    r
+
+    # vertex2face
+    face_vertices_features = vertices_features[:, faces.reshape(-1)].reshape(
+        vertices_features.shape[0], faces.shape[0], faces.shape[-1], vertices_features.shape[-1])
+
+    return face_vertices_features",,100.0
+"def get_int_from_rgb(rgb):
+    
+    red, green, blue = map(int, rgb)
+    rgb_int = (blue << 16) + (green << 8) + red
+    return rgb_int","# test_source.py
+import sys
+sys.path.append('.')  # This adds the current directory to the Python path
+import source  # This imports the source.py file
+
+def test_get_int_from_rgb():
+    # Test with knownRGB
+    assert source.get_int_from_rgb(255, 0, 0) == 16711680
+    assert source.get_int_from_rgb(0, 255, 0) == 65280
+    assert source.get_int_from_rgb(0, 0, 255) == 255
+
+    # Test with negative RGB values
+    assert source.get_int_from_rgb(-1, -1, -1) == 16711680
+    assert source.get_int_from_rgb(-255, -255, -255) == 16711680
+
+    # Test with decimal RGB values
+    assert source.get_int_from_rgb(0.0, 0.5, 1.0) == 65280
+    assert source.get_int_from_rgb(0.5, 0.5, 0.5) == 8388607",100.0
+"def sharpe(simple_returns, riskfree_rate, period=period.MONTHLY):
+    
+    excess_return = simple_returns.annualized(period) - riskfree_rate
+
+    return excess_return / simple_returns.effect_vol(period)","import pytest
+from source import sharpe, period
+
+def test_sharpe():
+    simple_returns = [0.01, 0.02, 0.03, 0.04, 0.02, 0.03]
+    riskfree_rate = 0.02
+    
+    assert sharpe(simple_returns, riskfree_rate, period.MONTHLY) > 0
+
+def test_sharpe_annual():
+    simple_returns = [0.01, 0.02, 0.03, 0.04, 0.02, 0.03]
+    riskfree_rate = 0.02
+    
+    assert sharpe(simple_returns, riskfree_rate, period.ANNUAL) > 0",100.0
+"def omega_to_w(omega, p, t):
+    
+    rho = p / (287.058 * t)
+    return (omega / (-9.80665 * rho))","# new file: test_source.py
+import source  # assuming source.py is in the same directory
+
+def test_omega_to_w():
+    # given
+    omega = 10  # arbitrary value
+    p = 1000  # arbitrary value
+    t = 300  # arbitrary value
+
+    # when
+    result = source.omega_to_w(omega, p, t)
+
+    # then
+    assert result == expected_value, ""Expected and actual values do not match""",100.0
+"def func_greedy_right_solution(k_idx, cap_right_closed):
+    
+    kp = k_idx  # Knapsack Capacity
+    mu = kp + 1  # Quantity of Items
+    closed_ZG_right = 0  # Computation of Greedy Solution Right
+    c = cap_right_closed
+    b = 1 + 1 / c
+    closed_ZG_right = closed_ZG_right - c * b ** (c + 1) / 2
+    closed_ZG_right = closed_ZG_right - (mu + 2) * (c + 2) * (b ** (c + 1) - b) / 2
+    closed_ZG_right = closed_ZG_right + (2 * mu * c + 4 * c + 3 * mu + 7) / 2
+    closed_ZG_right = closed_ZG_right + c * (mu + 2) * (
+            b ** (c + 2) - 1 - (c + 2) / c - (c + 1) * (c + 2) / (2 * c ** 2))
+
+    return closed_ZG_right","# test_source.py
+import pytest
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from source import func_greedy_right_solution  # Assuming the function is in source.py
+
+def test_func_greedy_right_solution():
+    # The expected output can be hard-coded for testing
+    expected_output = 123.456  # Replace with the expected output
+    assert func_greedy_right_solution(1, 2) == expected_output
+
+if __name__ == ""__main__"":
+    test_func_greedy_right_solution()",100.0
+"def complex_center_crop(data, shape):
+    
+    assert 0 < shape[0] <= data.shape[-3]
+    assert 0 < shape[1] <= data.shape[-2]
+    w_from = (data.shape[-3] - shape[0]) // 2
+    h_from = (data.shape[-2] - shape[1]) // 2
+    w_to = w_from + shape[0]
+    h_to = h_from + shape[1]
+    return data[..., w_from:w_to, h_from:h_to, :]","import pytest
+import numpy as np
+from source import complex_center_crop
+
+def test_complex_center_crop():
+    data = np.random.rand(100, 100, 3)
+    shape = (50, 50)
+    result = complex_center_crop(data, shape)
+    assert isinstance(result, np.ndarray)
+    assert result.shape == (50, 50, 3)
+
+def test_complex_center_crop_failure():
+    data = np.random.rand(100, 100, 3)
+    shape = (200, 200)
+    with pytest.raises(AssertionError):
+        complex_center_crop(data, shape)",100.0
+"def _unscale(tensor, minimum, maximum):
+  
+  b, c, h, w = tensor.shape
+  out = tensor.view(b, c, h * w)
+  out = (out + 1) / 2  # out has range (0, 1)
+  out = out * maximum + minimum  # out has original range
+  return out.view(b, c, h, w)","# test_source.py
+import pytest
+import torch
+from source import _unscale
+
+def test_unscale_function():
+    tensor = torch.rand((1, 3, 4, 5))  # Create a random tensor
+    minimum = 0
+    maximum = 255
+    result = _unscale(tensor, minimum, maximum)
+
+    # Check if the function returns a tensor of the same shape
+    assert result.shape == tensor.shape
+
+    # Check if the function normalizes the tensor correctly
+    assert (result.min() >= 0).all()
+    assert (result.max() <= 255).all()",100.0
+"def guessPeriodicity(srcBounds):
+    
+    res = 0
+    if srcBounds is not None:
+        res = 1
+        # assume longitude to be the last coordinate
+        lonsb = srcBounds[-1]
+        nlon = lonsb.shape[-1]
+        dlon = (lonsb.max() - lonsb.min()) / float(nlon)
+        tol = 1.e-2 * dlon
+        if abs((lonsb[..., -1] - 360.0 - lonsb[..., 0]
+                ).sum() / float(lonsb.size)) > tol:
+            # looks like a regional model
+            res = 0
+    return res","import pytest
+import numpy as np
+
+def test_guessPeriodicity():
+    # Mock the function input
+    srcBounds = np.array([[0,1,2,3,4,5,6,360],[0,1,2,3,4,5,6,360]])
+
+    # Expected result
+    expected_result = 0
+
+    # Call the function
+    result = guessPeriodicity(srcBounds)
+
+    # Check if function returned the expected result
+    assert result == expected_result, f""Expected {expected_result} but got {result}""",100.0
+"import torch
+
+def mae(target, predictions: list, total=True):
+    
+
+    if not total:
+        raise NotImplementedError(""mae does not support loss over the horizon"")
+
+    y_hat_test = predictions[0]
+
+    return torch.mean(torch.abs(target - y_hat_test))","# test_source.py
+
+import pytest
+from source import mae
+
+def test_mae():
+    target = [1, 2, 3, 4, 5]
+    predictions = [[1, 2, 3, 4, 6], [1, 2, 3, 4, 7], [1, 2, 3, 4, 8]]
+
+    assert mae(target, predictions) == 0.4
+
+def test_mae_not_implemented():
+    target = [1, 2, 3, 4, 5]
+    predictions = [[1, 2, 3, 4, 6], [1, 2, 3, 4, 7], [1, 2, 3, 4, 8]]
+
+    with pytest.raises(NotImplementedError):
+        mae(target, predictions, total=False)
+
+if __name__ == ""__main__"":
+    test_mae()
+    test_mae_not_implemented()",100.0
+"def get_iou(bb1, bb2):
+    
+    assert bb1['x1'] < bb1['x2']
+    assert bb1['y1'] < bb1['y2']
+    assert bb2['x1'] < bb2['x2']
+    assert bb2['y1'] < bb2['y2']
+
+    # determine the coordinates of the intersection rectangle
+    x_left = max(bb1['x1'], bb2['x1'])
+    y_top = max(bb1['y1'], bb2['y1'])
+    x_right = min(bb1['x2'], bb2['x2'])
+    y_bottom = min(bb1['y2'], bb2['y2'])
+
+    if x_right < x_left or y_bottom < y_top:
+        return 0.0
+
+    # The intersection of two axis-aligned bounding boxes is always an
+    # axis-aligned bounding box
+    intersection_area = (x_right - x_left) * (y_bottom - y_top)
+
+    # compute the area of both AABBs
+    bb1_area = (bb1['x2'] - bb1['x1']) * (bb1['y2'] - bb1['y1'])
+    bb2_area = (bb2['x2'] - bb2['x1']) * (bb2['y2'] - bb2['y1'])
+
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = intersection_area / float(bb1_area + bb2_area - intersection_area)
+    assert iou >= 0.0
+    assert iou <= 1.0
+    return iou","import pytest
+from source import get_iou
+
+def test_get_iou():
+    bb1 = {'x1': 1, 'x2': 3, 'y1': 1, 'y2': 3}
+    bb2 = {'x1': 2, 'x2': 4, 'y1': 2, 'y2': 4}
+    assert get_iou(bb1, bb2) == 1.0
+
+    bb1 = {'x1': 1, 'x2': 3, 'y1': 1, 'y2': 3}
+    bb2 = {'x1': 3, 'x2': 5, 'y1': 3, 'y2': 5}
+    assert get_iou(bb1, bb2) == 0.5
+
+bb1 = {'x1': 1, 'x2': 3, 'y1': 1, 'y2': 3}
+    bb2 = {'x1': 1, 'x2': 3, 'y1': 1, 'y2': 3}
+    assert get_iou(bb1, bb2) == 1.0
+
+    bb1 = {'x1': 1, 'x2': 2, 'y1': 1, 'y2': 2}
+    bb2 = {'x1': 1, 'x2': 2, 'y1': 1, 'y2': 2}
+    assert get_iou(bb1, bb2) == 1.0
+
+    bb1 = {'x1': 1, 'x2': 1, 'y1': 1, 'y2': 1}
+    bb2 = {'x1': 1, 'x2': 1, 'y1': 1, 'y2': 1}
+    assert get_iou(bb1, bb2) == 1.0",100.0
+"import torch
+
+def qrot(q, v):
+    
+    assert q.shape[-1] == 4
+    assert v.shape[-1] == 3
+    assert q.shape[:-1] == v.shape[:-1]
+
+    original_shape = list(v.shape)
+    q = q.view(-1, 4)
+    v = v.view(-1, 3)
+
+    qvec = q[:, 1:]
+    uv = torch.cross(qvec, v, dim=1)
+    uuv = torch.cross(qvec, uv, dim=1)
+    return (v + 2 * (q[:, :1] * uv + uuv)).view(original_shape)","import pytest
+import torch
+from source import qrot
+
+def test_qrot():
+    q = torch.randn(1, 4)
+    v = torch.randn(1, 3)
+    result = qrot(q, v)
+    assert result.shape == v.shape
+
+def test_qrot_batch():
+    q = torch.randn(5, 4)
+    v = torch.randn(5, 3)
+    result = qrot(q, v)
+    assert result.shape == v.shape
+
+def test_qrot_error():
+    q = torch.randn(2, 3)
+    v = torch.randn(2, 3)
+    with pytest.raises(AssertionError):
+        qrot(q, v)
+
+if __name__ == ""__main__"":
+    test_qrot()
+    test_qrot_batch()
+    test_qrot_error()",100.0
+"def coord_map(dimensions, coordinate, mode):
+    
+    max_coordinate = dimensions - 1
+    if mode == ""S"":
+        if coordinate < 0:
+            coordinate = -coordinate - 1
+        if coordinate > max_coordinate:
+            if (coordinate // dimensions) % 2 != 0:  # ?
+                return max_coordinate - (coordinate % dimensions)
+            else:
+                return coordinate % dimensions
+    elif mode == ""W"":
+        if coordinate < 0:
+            return max_coordinate - (-coordinate - 1) % dimensions
+        if coordinate > max_coordinate:
+            return coordinate % dimensions
+    elif mode == ""E"":
+        if coordinate < 0:
+            return 0
+        elif coordinate > max_coordinate:
+            return max_coordinate
+    elif mode == ""R"":
+        if dimensions == 1:
+            return 0
+        elif coordinate < 0:
+            if (-coordinate // max_coordinate) % 2 != 0:
+                return max_coordinate - (-coordinate % max_coordinate)
+            else:
+                return -coordinate % max_coordinate
+        elif coordinate > max_coordinate:
+            if (coordinate // max_coordinate) % 2 != 0:
+                return max_coordinate - (coordinate % max_coordinate)
+            else:
+                return coordinate % max_coordinate
+    return coordinate","import pytest
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
+from source import coord_map  # assuming the source file is in the same directory
+
+class TestCoordMap:
+
+    def test_coord_map(self):
+        assert coord_map(3, 2, ""S"") == 1
+        assert coord_map(3, -2, ""S"") == 1
+        assert coord_map(3, 3, ""S"") == 2
+        assert coord_map(3, -3, ""S"") == 2
+        assert coord_map(3, 0, ""S"") == 0
+        
+        assert coord_map(3, 2, ""W"") == 1
+        assert coord_map(3, -2, ""W"") == 2
+        assert coord_map(3, 3, ""W"") == 0
+        assert coord_map(3, -3, ""W"") == 0
+        
+        assert coord_map(3, 2, ""E"") == 1
+        assert coord_map(3, -2, ""E"") == 1
+        assert coord_map(3, 3, ""E"") == 2
+        assert coord_map(3, -3, ""E"") == 2
+        
+        assert coord_map(3, 2, ""R"") == 1
+        assert coord_map(3, -2, ""R"") == -1
+        assert coord_map(3, 3, ""R"") == 0
+        assert coord_map(3, -3, ""R"") == 0
+
+        assert coord_map(1, 0, ""S"") == 0
+        assert coord_map(1, 0, ""W"") == 0
+        assert coord_map(1, 0, ""E"") == 0
+        assert coord_map(1, 0, ""R"") == 0",100.0
+"def great_circle_pole_pts(lon_p, lat_p):
+    
+    lon1, lat1 = lon_p, lat_p - 90 if lat_p >= 0 else lat_p + 90
+    lon2, lat2 = lon_p - 90 if lon_p >= 90 else lon_p + 90, 0
+    return lon1, lat1, lon2, lat2","import pytest
+from source import great_circle_pole_pts
+
+class TestGreatCircle:
+    
+    def test_great_circle_pole_pts(self):
+        
+        # We will test with some sample inputs
+        lon_p = 0
+        lat_p = 90
+        
+        # Call the function
+        lon1, lat1, lon2, lat2 = great_circle_pole_pts(lon_p, lat_p)
+        
+        # We will check some properties of the output
+        assert lon1 == -90 or lon1 == 90, ""Expected output longitude to be either -90 or 90""
+        assert lat1 == -90 or lat1 == 90, ""Expected output latitude to be either -90 or 90""
+        assert lon2 == -90 or lon2 == 90, ""Expected output longitude to be either -90 or 90""
+        assert lat2 == -90 or lat2 == 90, ""Expected output latitude to be either -90 or 90""",100.0
+"def skewed_lorentzian(x, bkg, bkg_slp, skw, mintrans, res_f, Q):
+    
+    return bkg + bkg_slp*(x-res_f)-(mintrans+skw*(x-res_f))/\
+        (1+4*Q**2*((x-res_f)/res_f)**2)","import pytest
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from source import skewed_lorentzian
+
+def test_skewed_lorentzian():
+    x = 10  # example value for x
+    bkg = 100  # example value for bkg
+    bkg_slp = 200  # example value for bkg_slp
+    skw = 300  # example value for skw
+    mintrans = 400  # example value for mintrans
+    res_f = 500  # example value for res_f
+    Q = 6  # example value for Q
+
+    result = skewed_lorentzian(x, bkg, bkg_slp, skw, mintrans, res_f, Q)
+    assert result == 700  # example result",100.0
+"def entropy(self, data_column, weights_column=None):
+    
+    return self._scala.entropy(data_column, self._tc.jutils.convert.to_scala_option(weights_column))","# test_source.py
+
+from source import Source
+import pytest
+
+class TestSource:
+
+    def test_entropy(self):
+        source = Source()
+        assert source.entropy(""data_column_example"", ""weights_column_example"") == expected_result_example",100.0
+"def compute_iou(bboxA, bboxB):
+    
+    # find coordinates of intersecting rectangle
+    xA = max(bboxA[0], bboxB[0])
+    yA = max(bboxA[1], bboxB[1])
+    xB = min(bboxA[2], bboxB[2])
+    yB = min(bboxA[3], bboxB[3])
+    # compute the area of intersection rectangle
+    interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
+    # compute the area of rectangles
+    boxAArea = (bboxA[2] - bboxA[0] + 1) * (bboxA[3] - bboxA[1] + 1)
+    boxBArea = (bboxB[2] - bboxB[0] + 1) * (bboxB[3] - bboxB[1] + 1)
+    return interArea / float(boxAArea + boxBArea - interArea)","def compute_iou(bboxA, bboxB):
+    
+    # find coordinates of intersecting rectangle
+    xA = max(bboxA[0], bboxB[0])
+    yA = max(bboxA[1], bboxB[1])
+    xB = min(bboxA[2], bboxB[2])
+    yB = min(bboxA[3], bboxB[3])
+    
+    # compute the area of intersection rectangle
+    interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
+    
+    # compute the area of rectangles
+    boxAArea = (bboxA[2] - bboxA[0] + 1) * (bboxA[3] - bboxA[1] + 1)
+    boxBArea = (bboxB[2] - bboxB[0] + 1) * (bboxB[3] - bboxB[1] + 1)
+    
+    return interArea / float(boxAArea + boxBArea - interArea)",100.0
+"def dequantize(feat_vector, max_quantized_value=2, min_quantized_value=-2):
+    
+    assert max_quantized_value > min_quantized_value
+    quantized_range = max_quantized_value - min_quantized_value
+    scalar = quantized_range / 255.0
+    bias = (quantized_range / 512.0) + min_quantized_value
+    return feat_vector * scalar + bias","import pytest
+from source import dequantize  # assuming the function is in source.py
+
+class TestDequantize:
+    def test_dequantize(self):
+        feat_vector = [0, 255, 127, 1, 0]
+        max_quantized_value = 2
+        min_quantized_value = -2
+        expected_result = [0.0, 2.0, 1.0, 0.2, 0.0]
+        assert almost_equal(dequantize(feat_vector, max_quantized_value, min_quantized_value), expected_result)
+        
+if __name__ == ""__main__"":
+    pytest.main()",100.0
+"import torch
+
+def synthesize_log_softmax_data(n_samples=50000, n_classes=10, p_argmax=0.95, onehot=False):
+    
+    x_data = torch.randn(n_samples, n_classes)
+    y_labels = x_data.argmax(dim=1)
+    x_argmax = x_data[range(x_data.shape[0]), y_labels]
+    softmax_sum = x_data.exp().sum(dim=1) - x_argmax
+    x_argmax = torch.log(p_argmax * softmax_sum / (1 - p_argmax))
+    x_data[range(x_data.shape[0]), y_labels] = x_argmax
+    if onehot:
+        y_onehot = torch.zeros(y_labels.shape[0], n_classes, dtype=torch.int64)
+        y_onehot[torch.arange(y_onehot.shape[0]), y_labels] = 1
+        y_labels = y_onehot
+    return x_data, y_labels","import torch
+import unittest
+
+from source import synthesize_log_softmax_data
+
+class TestSynthesizeLogSoftmaxData(unittest.TestCase):
+    def test_synthesize_log_softmax_data(self):
+        x_data, y_labels = synthesize_log_softmax_data()
+        self.assertIsInstance(x_data, torch.Tensor)
+        self.assertIsInstance(y_labels, torch.Tensor)
+
+unittest.main()",100.0
+"def get_iou(bb1, bb2):
+    
+    assert bb1['x1'] < bb1['x2']
+    assert bb1['y1'] < bb1['y2']
+    assert bb2['x1'] < bb2['x2']
+    assert bb2['y1'] < bb2['y2']
+
+    # determine the coordinates of the intersection rectangle
+    x_left = max(bb1['x1'], bb2['x1'])
+    y_top = max(bb1['y1'], bb2['y1'])
+    x_right = min(bb1['x2'], bb2['x2'])
+    y_bottom = min(bb1['y2'], bb2['y2'])
+
+    if x_right < x_left or y_bottom < y_top:
+        return 0.0
+
+    # The intersection of two axis-aligned bounding boxes is always an
+    # axis-aligned bounding box
+    intersection_area = (x_right - x_left) * (y_bottom - y_top)
+
+    # compute the area of both AABBs
+    bb1_area = (bb1['x2'] - bb1['x1']) * (bb1['y2'] - bb1['y1'])
+    bb2_area = (bb2['x2'] - bb2['x1']) * (bb2['y2'] - bb2['y1'])
+
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = intersection_area / float(bb1_area + bb2_area - intersection_area)
+    assert iou >= 0.0
+    assert iou <= 1.0
+    return iou","import pytest
+from source import get_iou
+
+def test_get_iou_valid():
+    bb1 = {'x1': 0, 'x2': 10, 'y1': 0, 'y2': 10}
+    bb2 = {'x1': 5, 'x2': 15, 'y1': 5, 'y2': 15}
+    assert get_iou(bb1, bb2) == 1.0
+
+def test_get_iou_invalid():
+    bb1 = {'x1': 0, 'x2': 10, 'y1': 0, 'y2': 10}
+    bb2 = {'x1': 10, 'x2': 20, 'y1': 10, 'y2': 20}
+    assert get_iou(bb1, bb2) != 1.0",100.0
+"def stuhlinger_velocity(total_efficiency, t_m, specific_mass):
+    
+    # Check inputs
+    if total_efficiency < 0 or total_efficiency > 1:
+        raise ValueError('total_efficiency {:.f} is not in [0, 1]'.format(total_efficiency))
+
+    return (2 * total_efficiency * t_m / specific_mass)**0.5","import pytest
+from source import stuhlinger_velocity
+
+def test_stuhlinger_velocity():
+    # Test 1: Testing normal condition
+    assert stuhlinger_velocity(0.5, 3, 1) == 2.082365561303049
+
+    # Test 2: Testing edge case where total_efficiency is 0
+    assert stuhlinger_velocity(0, 3, 1) == 0.0
+
+    # Test 3: Testing where total_efficiency is 1
+    assert stuhlinger_velocity(1, 3, 1) == 6.0
+
+    # Test 4: Testing with negative total_efficiency
+    with pytest.raises(ValueError):
+        stuhlinger_velocity(-0.5, 3, 1)
+
+    # Test 5: Testing with total_efficiency greater than 1
+    with pytest.raises(ValueError):
+        stuhlinger_velocity(1.5, 3, 1)",100.0
+"import torch
+
+def sort_by_seq_lens(batch, sequences_lengths, descending=True):
+    
+    sorted_seq_lens, sorting_index =\
+        sequences_lengths.sort(0, descending=descending)
+
+    sorted_batch = batch.index_select(0, sorting_index)
+
+    idx_range =\
+        sequences_lengths.new_tensor(torch.arange(0, len(sequences_lengths)))
+    _, reverse_mapping = sorting_index.sort(0, descending=False)
+    restoration_index = idx_range.index_select(0, reverse_mapping)
+
+    return sorted_batch, sorted_seq_lens, sorting_index, restoration_index","# -*- coding: utf-8 -*-
+
+# Third party imports
+import pytest
+import torch
+
+# Local application imports
+from source import sort_by_seq_lens
+
+def test_sort_by_seq_lens():
+    # Given
+    batch = torch.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    sequences_lengths = torch.tensor([3, 2, 1])
+
+    # When
+    sorted_batch, sorted_seq_lens, sorting_index, restoration_index = sort_by_seq_lens(batch, sequences_lengths)
+
+    # Then
+    assert sorted_batch.shape == (3, 3)
+    assert sorted_seq_lens.shape == (3,)
+    assert sorting_index.shape == (3,)
+    assert restoration_index.shape == (3,)
+
+    # Test if the sequence lengths are sorted
+    assert torch.equal(sorted_seq_lens, torch.tensor([3, 2, 1]))
+
+    # Test if the batch is sorted according to sequence lengths
+    assert torch.equal(sorted_batch, torch.tensor([[7, 8, 9], [4, 5, 6], [1, 2, 3]]))
+
+    # Test if the sorting index restores the original order
+    assert torch.equal(batch[sorting_index], batch[restoration_index])
+
+    # Test if the sorting index is in descending order
+    if descending:
+        assert torch.equal(sorting_index, torch.tensor([2, 1, 0]))
+    else:
+        assert torch.equal(sorting_index, torch.tensor([0, 1, 2]))",100.0
+"def polynomial_svm_classification(training_set_features, testing_set_features, training_set_labels, testing_set_labels):
+    
+    from sklearn import svm
+    from sklearn.model_selection import GridSearchCV
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.metrics import accuracy_score
+    method = ""svm_polynomial""
+    scaler = StandardScaler()
+    scaled_feats_train = scaler.fit_transform(training_set_features)
+    svr = svm.SVC(kernel='poly', random_state=10)
+    parameters = {'C': [0.1, 1, 3], 'degree': [4, 5, 6], 'gamma': [0.1, 1]}
+    clf = GridSearchCV(svr, parameters, cv=5, scoring='accuracy')
+    clf.fit(scaled_feats_train, training_set_labels)
+    scaled_feats_test = scaler.transform(testing_set_features)
+    predicted_lab_test = clf.predict(scaled_feats_test)
+    best_score = clf.best_score_
+    test_score = accuracy_score(testing_set_labels, predicted_lab_test, normalize=True)
+    return method, best_score, test_score","# test_source.py
+
+import pytest
+from source import polynomial_svm_classification
+
+def test_polynomial_svm_classification():
+    # Test case 1:
+    training_set_features = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    testing_set_features = [[2, 3, 4], [5, 6, 7]]
+    training_set_labels = [0, 1, 0]
+    testing_set_labels = [1, 0]
+    method, best_score, test_score = polynomial_svm_classification(training_set_features, testing_set_features, training_set_labels, testing_set_labels)
+    assert method == ""svm_polynomial""
+    assert best_score is not None
+    assert test_score is not None
+
+def test_polynomial_svm_classification_2():
+    # Test case 2:
+    training_set_features = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    testing_set_features = [[2, 3, 4], [5, 6, 7]]
+    training_set_labels = [0, 1, 0]
+    testing_set_labels = [1, 0]
+    method, best_score, test_score = polynomial_svm_classification(training_set_features, testing_set_features, training_set_labels, testing_set_labels)
+    assert method == ""svm_polynomial""
+    assert best_score is not None
+    assert test_score is not None",100.0
+"def compute_resize_scale(image_shape, min_side=800, max_side=1333):
+    
+    (rows, cols, _) = image_shape
+
+    smallest_side = min(rows, cols)
+
+    # rescale the image so the smallest side is min_side
+    scale = min_side / smallest_side
+
+    # check if the largest side is now greater than max_side, which can happen
+    # when images have a large aspect ratio
+    largest_side = max(rows, cols)
+    if largest_side * scale > max_side:
+        scale = max_side / largest_side
+
+    return scale","import pytest
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from source import compute_resize_scale  # Import the function from source.py
+
+def test_compute_resize_scale():
+    image_shape = (800, 1200, 3)  # Sample image shape
+    min_side = 800
+    max_side = 1333
+    expected_scale = 1.0  # Expected result for this specific test case
+    assert pytest.approx(compute_resize_scale(image_shape, min_side, max_side), 0.001) == expected_scale
+
+    image_shape = (1200, 800, 3)  # Another test case
+    min_side = 800
+    max_side = 1333
+    expected_scale = 1.0
+    assert pytest.approx(compute_resize_scale(image_shape, min_side, max_side), 0.001) == expected_scale
+
+    image_shape = (1000, 1000, 3)  # Another test case
+    min_side = 800
+    max_side = 1333
+    expected_scale = 0.7840083665924183  # Expected result for this specific test case
+    assert pytest.approx(compute_resize_scale(image_shape, min_side, max_side), 0.001) == expected_scale",100.0
+"def lat_lon_determine(cube):
+    
+    trg_crs = None
+    if (not cube.coord(axis='x').name() == 'longitude' or
+            not cube.coord(axis='y').name() == 'latitude'):
+        trg_crs = cube.coord_system().as_cartopy_crs()
+    return trg_crs","import pytest
+import sys
+sys.path.insert(0, '..')  # This will add the parent directory into the path, allowing us to import the 'source' module
+from source import lat_lon_determine
+from iris.cube import Cube
+
+@pytest.fixture()
+def cube():
+    # This is a simple fixture that will return a Cube object.
+    # You may want to replace this with a fixture that returns a more complex object, or one that has side-effects.
+    return Cube([1, 2, 3], standard_name='latitude')
+
+def test_lat_lon_determine(cube):
+    # This is a simple test that asserts that the lat_lon_determine function behaves as expected when given a Cube object.
+    # You may want to replace this with a test that checks more complex behavior, or that uses assertions in a more complicated way.
+    assert lat_lon_determine(cube) is None
+
+
+def test_lat_lon_determine_with_coords(cube):
+    # This is a simple test that asserts that the lat_lon_determine function behaves as expected when given a Cube object.
+    # You may want to replace this with a test that checks more complex behavior, or that uses assertions in a more complicated way.
+    cube.add_dim_coord(Cube(range(3), standard_name='longitude'), 0)
+    assert lat_lon_determine(cube).as_cartopy_crs() != None",100.0
+"def cross_term_model(data, a, b, c, d, e):
+    
+
+    return a + b * data[0] + c * data[1] + d * data[2] + e * data[1] / data[0]","# test_cross_term_model.py
+import pytest
+import sys
+sys.path.append(""."")  # This line is to import source.py in the same directory
+from source import cross_term_model
+
+def test_cross_term_model():
+    data = [1, 2, 3]
+    a = 1
+    b = 2
+    c = 3
+    d = 4
+    e = 5
+    assert cross_term_model(data, a, b, c, d, e) == 11",100.0
+"def linearInterpolation(x0, y0, x1, y1, targetX=None, targetY=None):
+    r
+    if x1 == x0:
+        raise ZeroDivisionError(""The x-values are identical. Cannot interpolate."")
+
+    m = (y1 - y0) / (x1 - x0)
+    b = -m * x0 + y0
+
+    if targetX is not None:
+        return m * targetX + b
+    else:
+        return (targetY - b) / m","import pytest
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
+from source import linearInterpolation
+
+def test_linearInterpolation():
+    #Test 1: 
+    x0, y0 = 0, 0
+    x1, y1 = 1, 1
+    assert linearInterpolation(x0, y0, x1, y1) == 1
+
+    #Test 2: 
+    x0, y0 = 0, 2
+    x1, y1 = 1, 4
+    assert linearInterpolation(x0, y0, x1, y1, targetX=0.5) == 3
+
+    #Test 3: 
+    x0, y0 = -1, -1
+    x1, y1 = 1, 1
+    assert linearInterpolation(x0, y0, x1, y1, targetY=0) == -1
+
+    #Test 4: 
+    x0, y0 = 0, 0
+    x1, y1 = 0, 0
+    with pytest.raises(ZeroDivisionError):
+        linearInterpolation(x0, y0, x1, y1)",100.0
+"def compare_xforms(lta_list, norm_threshold=15):
+    
+    from niworkflows.interfaces.surf import load_transform
+    from nipype.algorithms.rapidart import _calc_norm_affine
+
+    bbr_affine = load_transform(lta_list[0])
+    fallback_affine = load_transform(lta_list[1])
+
+    norm, _ = _calc_norm_affine([fallback_affine, bbr_affine], use_differences=True)
+
+    return norm[1] > norm_threshold","import pytest
+from pathlib import Path
+from niworkflows.interfaces.surf import load_transform
+from nipype.algorithms.rapidart import _calc_norm_affine
+
+
+@pytest.fixture
+def dummy_data():
+    lta_list = [
+        Path(""fallback_affine.lta"").resolve(),
+        Path(""bbr_affine.lta"").resolve()
+    ]
+    norm_threshold = 15
+    bbr_affine = load_transform(lta_list[0])
+    fallback_affine = load_transform(lta_list[1])
+    norm, _ = _calc_norm_affine([fallback_affine, bbr_affine], use_differences=True)
+    return norm, norm_threshold
+
+
+def test_compare_xforms(dummy_data):
+    norm, norm_threshold = dummy_data
+    assert norm[1] > norm_threshold",100.0
+"def calc_top_left_coordinates(fg, bg, x_coord, y_coord):
+  
+  x_coord = int(x_coord * bg.width)
+  y_coord = int(y_coord * bg.height)
+  # x_coord, y_coord should be at the centre of the object.
+  x_coord_start = int(x_coord - fg.width*0.5)
+  y_coord_start = int(y_coord - fg.height*0.5)
+
+  return x_coord_start, y_coord_start","import pytest
+from PIL import Image
+from source import calc_top_left_coordinates
+
+def test_calc_top_left_coordinates():
+  bg = Image.new(""RGB"", (100, 100))  # Create a blank 100x100 pixel image
+  fg = Image.new(""RGB"", (50, 50))  # Create a smaller 50x50 pixel image
+  x_coord, y_coord = 0.5, 0.5
+
+  x_coord_start, y_coord_start = calc_top_left_coordinates(fg, bg, x_coord, y_coord)
+
+  assert x_coord_start == 25, ""The x-coordinate start point is incorrect""
+  assert y_coord_start == 25, ""The y-coordinate start point is incorrect""",100.0
+"def output_transform_triplet_trainer(_anchor_embeddings, _positive_embeddings, _negative_embeddings, loss):
+    
+    return loss.item()","import pytest
+import torch
+from source import output_transform_triplet_trainer
+
+class TestOutputTransformTripletTrainer:
+
+    def test_output_transform_triplet_trainer(self):
+        # Create random tensors
+        anchor_embeddings = torch.randn(10, 10)
+        positive_embeddings = torch.randn(10, 10)
+        negative_embeddings = torch.randn(10, 10)
+        
+        # Case 1: Random loss tensor
+        loss = torch.tensor(0.345)
+        assert output_transform_triplet_trainer(anchor_embeddings, positive_embeddings, negative_embeddings, loss) == loss.item()
+        
+        # Case 2: Loss tensor with value of 0
+        loss = torch.tensor(0.)
+        assert output_transform_triplet_trainer(anchor_embeddings, positive_embeddings, negative_embeddings, loss) == loss.item()
+        
+        # Case 3: Loss tensor with value of 1
+        loss = torch.tensor(1.)
+        assert output_transform_triplet_trainer(anchor_embeddings, positive_embeddings, negative_embeddings, loss) == loss.item()",100.0
+"def split_PETSc_Mat(mat):
+    
+    H = mat.copy()
+    H.zeroEntries()
+    H.axpy(1.0,mat)
+    H.axpy(1.0,mat.transpose())
+    H.scale(0.5)
+    S = mat.copy()
+    S.zeroEntries()
+    S.axpy(1.0,mat)
+    S.aypx(-1.0,mat.transpose())
+    S.scale(0.5)
+    return H, S","import pytest
+from your_module import split_PETSc_Mat  # replace 'your_module' with the actual module name
+import PETSc
+
+def test_split_PETSc_Mat():
+    # Create two matrices
+    size = 5
+    A = PETSc.Mat().create(size, size)
+    B = PETSc.Mat().create(size, size)
+    for i in range(size):
+        for j in range(size):
+            A[i, j] = i+j
+            B[i, j] = i-j
+
+    # Split the matrices
+    H, S = split_PETSc_Mat(A)
+
+    # Create the expected results
+    H_expected = PETSc.Mat().create(size, size)
+    S_expected = PETSc.Mat().create(size, size)
+    for i in range(size):
+        for j in range(size):
+            H_expected[i, j] = (A[i, j] + A[j, i]) / 2
+            S_expected[i, j] = (A[i, j] - A[j, i]) / 2
+
+    # Compare the results with the expected results
+    assert H_expected.norm() == H.norm()
+    assert S_expected.norm() == S.norm()",100.0
+"import torch
+
+def euler2mat(angle):
+    
+    B = angle.size(0)
+    x, y, z = angle[:, 0], angle[:, 1], angle[:, 2]
+
+    cosz = torch.cos(z)
+    sinz = torch.sin(z)
+
+    zeros = z.detach()*0
+    ones = zeros.detach()+1
+    zmat = torch.stack([cosz, -sinz, zeros,
+                        sinz,  cosz, zeros,
+                        zeros, zeros,  ones], dim=1).reshape(B, 3, 3)
+
+    cosy = torch.cos(y)
+    siny = torch.sin(y)
+
+    ymat = torch.stack([cosy, zeros,  siny,
+                        zeros,  ones, zeros,
+                        -siny, zeros,  cosy], dim=1).reshape(B, 3, 3)
+
+    cosx = torch.cos(x)
+    sinx = torch.sin(x)
+
+    xmat = torch.stack([ones, zeros, zeros,
+                        zeros,  cosx, -sinx,
+                        zeros,  sinx,  cosx], dim=1).reshape(B, 3, 3)
+
+    rotMat = xmat @ ymat @ zmat
+    return rotMat","import pytest
+import torch
+import source  # Assuming the original code is in a file named source.py
+
+def test_euler2mat():
+    angle = torch.tensor([[1.2, 2.3, 3.4], [0.1, 0.2, 0.3]], dtype=torch.float64)
+    result = source.euler2mat(angle)
+    assert result.shape == (2, 3, 3)",100.0
+"def average_barcodes(df, sequence_label=""label"", out_prefix=None):
+    
+    expression_df = df.groupby(sequence_label).mean()
+    if out_prefix:
+        expression_df.to_csv(f""{out_prefix}AverageExpressionPerReplicate.txt"", sep=""\t"", na_rep=""NaN"")
+
+    return expression_df","import pytest
+import pandas as pd
+import os
+
+def test_average_barcodes():
+    # Assuming a df.csv file exists in the same directory as the test file,
+    # you can use this to load a sample dataframe for testing.
+    # df = pd.read_csv('df.csv')
+
+    # You can use this to simulate an dataframe.
+    data = {'barcode': ['barcode1', 'barcode2', 'barcode3'],
+            'replicate1': [10, 20, 30],
+            'replicate2': [40, 50, 60],
+            'replicate3': [70, 80, 90]}
+    df = pd.DataFrame(data)
+
+    # Test with default parameters
+    result = average_barcodes(df)
+    assert result.equals(df.groupby(df.columns[0]).mean())
+
+    # Test with specific sequence_label and out_prefix
+    result = average_barcodes(df, sequence_label='replicate1', out_prefix='test_')
+    assert os.path.exists('test_AverageExpressionPerReplicate.txt')
+    assert pd.read_csv('test_AverageExpressionPerReplicate.txt', sep='\t', na_values='NaN').equals(df.groupby('replicate1').mean())
+
+    # Clean up the file if it was created
+    if os.path.exists('test_AverageExpressionPerReplicate.txt'):
+        os.remove('test_AverageExpressionPerReplicate.txt')",100.0
+"def geometrical_spreading(freq, dist, model=""REA99""):
+    
+
+    if model == ""REA99"":
+        dist_cross = 40.0
+        if dist <= dist_cross:
+            geom = dist ** (-1.0)
+        else:
+            geom = (dist * dist_cross) ** (-0.5)
+    else:
+        raise ValueError(""Unsupported anelastic attenuation model."")
+    return geom","# test_source.py
+import sys
+sys.path.append(""."")
+from source import geometrical_spreading
+
+def test_geometrical_spreading():
+    # Testing with normal case
+    freq = 1000.0
+    dist = 50.0
+    model = ""REA99""
+    assert geometrical_spreading(freq, dist, model) == 0.02
+
+    # Testing with dist > 40
+    freq = 1000.0
+    dist = 60.0
+    model = ""REA99""
+    assert geometrical_spreading(freq, dist, model) == 0.04
+
+    # Testing with different model
+    freq = 1000.0
+    dist = 50.0
+    model = ""other_model""
+    with pytest.raises(ValueError):
+        geometrical_spreading(freq, dist, model)",100.0
+"def ravel(a, order=""C""):
+    
+    return a.ravel(order=order)","# test_source.py
+import numpy as np
+import source  # assuming the original code is in a file named ""source.py""
+
+def test_ravel():
+    arr = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    expected_output = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
+    assert np.array_equal(source.ravel(arr), expected_output)
+
+def test_ravel_with_order():
+    arr = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    expected_output = np.array([1, 4, 7, 2, 5, 8, 3, 6, 9])
+    assert np.array_equal(source.ravel(arr, order='F'), expected_output)",100.0
+"def simplify(exp):
+    
+    return exp.replacement","# test_source.py
+import pytest
+from source import simplify  # Assuming the function is defined in source.py
+
+def test_simplify_positive():
+    assert simplify(4) == 2
+with pytest.raises(AttributeError):
+    
+def test_simplify_negative():
+    assert simplify(-4) == -2
+
+def test_simplify_zero():
+    assert simplify(0) == 0",100.0
+"def height_implied_by_aspect_ratio(W, X, Y):
+    
+    return int((W * (Y[1] - Y[0])) / (X[1] - X[0]))","import pytest
+from source import height_implied_by_aspect_ratio
+
+class TestHeightImpliedByAspectRatio:
+
+    def test_positive(self):
+        W = 100
+        X = [1,10]
+        Y = [5,15]
+        assert height_implied_by_aspect_ratio(W, X, Y) == 25
+
+    def test_zero(self):
+        W = 0
+        X = [1,10]
+        Y = [5,15]
+        assert height_implied_by_aspect_ratio(W, X, Y) == 0
+
+    def test_negative(self):
+        W = -100
+        X = [1,10]
+        Y = [5,15]
+        with pytest.raises(ZeroDivisionError):
+            height_implied_by_aspect_ratio(W, X, Y)",100.0
+"def normalize(values):
+    
+    print(values)","import pytest
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from source import normalize  # assuming the original code is in a file named `source.py`
+
+def test_normalize():
+    values = [1, 2, 3, 4, 5]
+    normalize(values)",100.0
+"def plot_line(m, line, colour='b', lw=1, alpha=1):
+    
+    lo, la = line.xy
+    x, y = m(lo, la)
+    return m.plot(x, y,
+                  color=colour,
+                  linewidth=lw,
+                  alpha=alpha,
+                  solid_capstyle='round')","# content of test_source.py
+
+import pytest
+from source import plot_line
+import matplotlib.pyplot as plt
+
+@pytest.mark.parametrize(""m, line, colour, lw, alpha"", [
+    (plt.figure().gca(), plt.plot([0, 1], [0, 1]), 'b', 1, 1),
+    (plt.figure().gca(), plt.plot([0, 1], [0, 1]), 'r', 2, 0.5),
+])
+def test_plot_line(m, line, colour, lw, alpha):
+    plot_line(m, line, colour=colour, lw=lw, alpha=alpha)
+    plt.show()
+
+    # Add assertions to verify the expected output.",100.0
+"def indicator_analysis(df, method=""mean""):
+    
+    weights_dict = {
+        ""mean"": df[""count""],
+        ""amount_weighted"": df[""deal_amount""].abs(),
+        ""value_weighted"": df[""value""].abs(),
+    }
+    if method not in weights_dict:
+        raise ValueError(f""indicator_analysis method {method} is not supported!"")
+
+    # statistic pa/ffr indicator
+    indicators_df = df[[""ffr"", ""pa""]]
+    weights = weights_dict.get(method)
+    res = indicators_df.mul(weights, axis=0).sum() / weights.sum()
+
+    # statistic pos
+    weights = weights_dict.get(""mean"")
+    res.loc[""pos""] = df[""pos""].mul(weights).sum() / weights.sum()
+    res = res.to_frame(""value"")
+    return res","import pytest
+import pandas as pd
+from source import indicator_analysis
+
+def test_indicator_analysis():
+    # creating a sample dataframe
+    df = pd.DataFrame({
+        ""count"": [10,20,30,40,50],
+        ""deal_amount"": [-100,200,-300,400,-500],
+        ""value"": [2000,3000,4000,5000,6000],
+        ""ffr"": [0.1,0.2,0.3,0.4,0.5],
+        ""pa"": [0.01,0.02,0.03,0.04,0.05],
+        ""pos"": [10,20,30,40,50]
+    })
+    
+    # run the function and assert the results
+    result = indicator_analysis(df, method=""mean"")
+    assert isinstance(result, pd.DataFrame)
+    assert ""value"" in result.columns
+    assert ""pos"" in result.columns
+
+test_indicator_analysis()",100.0
+"def rigid_transformation(t, r, pts, center=None, s=1):
+    
+    if center is None:
+        return s*r.dot(pts.T).T + t
+    else:
+        return s*r.dot((pts-center).T).T + center + t","import pytest
+from source import rigid_transformation
+import numpy as np
+
+class TestRigidTransformation:
+
+    def test_rigid_transformation(self):
+        
+        # Define some test values
+        t = np.array([1, 2, 3])
+        r = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        pts = np.array([[4, 5, 6], [7, 8, 9], [10, 11, 12]])
+        center = np.array([2, 2, 2])
+        s = 2
+
+        # Expected output
+        expected_output = np.array([[10, 12, 14], [13, 15, 17], [19, 21, 23]])
+
+        # Call the function
+        output = rigid_transformation(t, r, pts, center, s)
+
+        # Check if output is equal to the expected output
+        np.testing.assert_array_almost_equal(output, expected_output)
+
+        # Test with center as None
+        output_center_none = rigid_transformation(t, r, pts, center=None, s=s)
+        expected_output_center_none = np.array([[2, 4, 6], [8, 10, 12], [14, 16, 18]])
+        np.testing.assert_array_almost_equal(output_center_none, expected_output_center_none)
+
+
+if __name__ == ""__main__"":
+    pytest.main()",100.0
+"def get_poly_bounds(poly1):
+    
+
+    min_x, min_y, max_x, max_y = poly1.bounds
+    min_h, min_w = min_y, min_x
+    max_h, max_w = max_y, max_x
+
+    return min_h, min_w, max_h, max_w","# test_source.py
+
+import sys
+sys.path.insert(0, '..')  # this will allow us to import source.py from the same directory
+import pytest
+import source  # assuming the original code is in a file named source.py
+
+def test_get_poly_bounds():
+    poly1 = source.Polygon([(0, 0), (0, 1), (1, 1), (1, 0)])  # we assume Polygon class and its attributes are defined in source.py
+
+    assert source.get_poly_bounds(poly1) == (0, 0, 1, 1)  # assuming the bounds attribute returns a tuple of (min_h, min_w, max_h, max_w)",100.0
+"def get_ring_centroids(ring_atom_df):
+    
+    centroid_df = (
+        ring_atom_df.groupby(""node_id"")
+        .mean()[[""x_coord"", ""y_coord"", ""z_coord""]]
+        .reset_index()
+    )
+
+    return centroid_df","# test_source.py
+
+import pytest
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from source import get_ring_centroids  # Importing the function from source.py
+
+def test_get_ring_centroids():
+    ring_atom_df = None  # You will need to fill this with a suitable testing input
+    expected_result = None  # You will need to fill this with the expected result
+
+    result = get_ring_centroids(ring_atom_df)
+
+    assert result.equals(expected_result), ""The function get_ring_centroids does not produce the expected results""",100.0
+"def einsteinA(S: float, frequency: float):
+    
+    # Prefactor is given in the PGopher Intensity formulae
+    # http://pgopher.chm.bris.ac.uk/Help/intensityformulae.htm
+    # Units of the prefactor are s^-1 MHz^-3 D^-2
+    # Units of Einstein A coefficient should be in s^-1
+    prefactor = 1.163965505e-20
+    return prefactor * frequency ** 3.0 * S","# test_source.py
+import pytest
+from source import einsteinA
+
+def test_einsteinA():
+    result = einsteinA(1.0, 1.0)
+    assert result == 1.163965505e-20",100.0
+"def merge_residual_mapping(guide_residuals, guide_mapping, residual_construct_col, mapping_construct_col):
+    
+    mapped_guide_residuals = guide_residuals.merge(guide_mapping, how='inner',
+                                                   left_on=residual_construct_col,
+                                                   right_on=mapping_construct_col)
+    return mapped_guide_residuals","import pytest
+from source import merge_residual_mapping
+import pandas as pd
+
+@pytest.fixture
+def guide_residuals():
+    # This could be any data frame
+    return pd.DataFrame({'col1': [1, 2, 3], 'col2': [4, 5, 6]})
+
+@pytest.fixture
+def guide_mapping():
+    # This could be any data frame
+    return pd.DataFrame({'col3': [7, 8, 9], 'col4': [10, 11, 12]})
+
+def test_merge_residual_mapping(guide_residuals, guide_mapping):
+    # Additional test cases can be added as per need
+    result = merge_residual_mapping(guide_residuals, guide_mapping, 'col1', 'col3')
+    assert isinstance(result, pd.DataFrame)
+    assert list(result.columns) == ['col1', 'col2', 'col3', 'col4']",100.0
+"def Y_i(i,A,X):
+    
+    return (A[i,:] * X[...,:]).sum(2)","import sys
+sys.path.append(""."")  # this line is to import source.py from the same directory
+from source import Y_i  # importing the function Y_i from the source.py file
+
+import pytest
+import numpy as np
+
+def test_Y_i():
+    # any random input for testing
+A = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    X = np.array([[10, 20, 30], [40, 50, 60], [70, 80, 90]])
+    i = 1
+    expected_output = (A[i, :] * X[..., :]).sum(2)
+    output = Y_i(i, A, X)
+    assert np.array_equal(output, expected_output), 'Function is not working correctly'",94.0
+"def get_iou(bb1, bb2):
+    
+    assert bb1['x1'] < bb1['x2']
+    assert bb1['y1'] < bb1['y2']
+    assert bb2['x1'] < bb2['x2']
+    assert bb2['y1'] < bb2['y2']
+
+    # determine the coordinates of the intersection rectangle
+    x_left = max(bb1['x1'], bb2['x1'])
+    y_top = max(bb1['y1'], bb2['y1'])
+    x_right = min(bb1['x2'], bb2['x2'])
+    y_bottom = min(bb1['y2'], bb2['y2'])
+
+    if x_right < x_left or y_bottom < y_top:
+        return 0.0
+
+    # The intersection of two axis-aligned bounding boxes is always an
+    # axis-aligned bounding box
+    intersection_area = (x_right - x_left) * (y_bottom - y_top)
+
+    # compute the area of both AABBs
+    bb1_area = (bb1['x2'] - bb1['x1']) * (bb1['y2'] - bb1['y1'])
+    bb2_area = (bb2['x2'] - bb2['x1']) * (bb2['y2'] - bb2['y1'])
+
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = intersection_area / float(bb1_area + bb2_area - intersection_area)
+    assert iou >= 0.0
+    assert iou <= 1.0
+    return iou","py
+import sys
+sys.path.insert(0, '.')  # This is to import source.py from the same directory
+import source  # This is your module
+from io import StringIO  # This is used to capture the stdin/stdout
+import pytest  # This is the testing framework
+
+def test_get_iou():
+    # We use these to capture the stdout and stdin
+    import sys
+    original_stdout = sys.stdout
+    sys.stdout = StringIO()
+
+    # We simulate the bb1 and bb2 inputs
+    bb1 = {'x1': 1, 'x2': 10, 'y1': 1, 'y2': 10}
+    bb2 = {'x1': 5, 'x2': 15, 'y1': 5, 'y2': 15}
+
+    # Here we call the function and capture the output
+    source.get_iou(bb1, bb2)
+
+    # We then compare the output with the expected result
+    assert sys.stdout.getvalue() == '1.0\n'
+
+    # We restore the stdout
+    sys.stdout.close()
+    sys.stdout = original_stdout",94.0
+"def get_frame(epoch, step_size, frame_number):
+    
+    times = epoch.times
+    max_index = len(times)-1
+    tmax = (frame_number+1)*step_size
+
+    # make sure we don't go outside the possible range
+    if(tmax > max_index):
+        tmax = max_index
+
+    return epoch.copy().crop(
+        times[frame_number*step_size],
+        times[tmax],
+        include_tmax=True
+    )","class Epoch:
+
+    def __init__(self, times):
+        self.times = times
+    
+    def copy(self):
+        return Epoch(self.times)
+    
+    def crop(self, tmin, tmax, include_tmax=False):
+        if include_tmax:
+            return self.times[self.times.index(tmin):self.times.index(tmax)+1]
+        else:
+            return self.times[self.times.index(tmin):self.times.index(tmax)]",94.0
+"def get_iou(bb1, bb2):
+    
+    assert bb1['x1'] < bb1['x2']
+    assert bb1['y1'] < bb1['y2']
+    assert bb2['x1'] < bb2['x2']
+    assert bb2['y1'] < bb2['y2']
+
+    # determine the coordinates of the intersection rectangle
+    x_left = max(bb1['x1'], bb2['x1'])
+    y_top = max(bb1['y1'], bb2['y1'])
+    x_right = min(bb1['x2'], bb2['x2'])
+    y_bottom = min(bb1['y2'], bb2['y2'])
+
+    if x_right < x_left or y_bottom < y_top:
+        return 0.0
+
+    # The intersection of two axis-aligned bounding boxes is always an
+    # axis-aligned bounding box
+    intersection_area = (x_right - x_left) * (y_bottom - y_top)
+
+    # compute the area of both AABBs
+    bb1_area = (bb1['x2'] - bb1['x1']) * (bb1['y2'] - bb1['y1'])
+    bb2_area = (bb2['x2'] - bb2['x1']) * (bb2['y2'] - bb2['y1'])
+
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = intersection_area / float(bb1_area + bb2_area - intersection_area)
+    assert iou >= 0.0
+    assert iou <= 1.0
+    return iou","import sys
+sys.path.append(""."")  # to import source.py from the same directory
+from source import get_iou
+
+def test_get_iou():
+    bb1 = {'x1': 1, 'y1': 1, 'x2': 10, 'y2': 10}  # random bounding box
+    bb2 = {'x1': 2, 'y1': 2, 'x2': 11, 'y2': 11}  # random bounding box
+    assert get_iou(bb1, bb2) >= 0.0
+    assert get_iou(bb1, bb2) <= 1.0
+    assert get_iou(bb1, bb2) == 0.0
+
+    bb1 = {'x1': 1, 'y1': 1, 'x2': 10, 'y2': 10}  # random bounding box
+    bb2 = {'x1': 10, 'y1': 10, 'x2': 20, 'y2': 20}  # another random bounding box
+    assert get_iou(bb1, bb2) >= 0.0
+    assert get_iou(bb1, bb2) <= 1.0
+    assert get_iou(bb1, bb2) == 1.0
+
+    bb1 = {'x1': 1, 'y1': 1, 'x2': 10, 'y2': 10}  # random bounding box
+    bb2 = {'x1': 5, 'y1': 5, 'x2': 15, 'y2': 15}  # random bounding box
+    assert get_iou(bb1, bb2) >= 0.0
+    assert get_iou(bb1, bb2) <= 1.0
+    assert get_iou(bb1, bb2) == 0.017350750000000003",94.0
+"def metric_delta_g(entity, schedule):
+    
+    p_el_min_dsm = min(entity.p_el_schedule)
+    p_el_max_dsm = max(entity.p_el_schedule)
+    p_el_min_ref = min(entity.schedules[schedule][""p_el""])
+    p_el_max_ref = max(entity.schedules[schedule][""p_el""])
+    g = 1.0 - (abs(p_el_max_dsm - p_el_min_dsm) / abs(p_el_max_ref - p_el_min_ref))
+    return g","# source.py
+class Entity:
+    def __init__(self, p_el_schedule, schedules):
+        self.p_el_schedule = p_el_schedule
+        self.schedules = schedules
+
+def metric_delta_g(entity, schedule):
+    p_el_min_dsm = min(entity.p_el_schedule)
+    p_el_max_dsm = max(entity.p_el_schedule)
+    p_el_min_ref = min(entity.schedules[schedule][""p_el""])
+    p_el_max_ref = max(entity.schedules[schedule][""p_el""])
+    g = 1.0 - (abs(p_el_max_dsm - p_el_min_dsm) / abs(p_el_max_ref - p_el_min_ref))
+    return g",94.0
+"def vector_field_function_transformation(vf_func, Q):
+    
+    return lambda x: vf_func.func(x) @ Q.T","# test_source.py
+
+import pytest
+import os
+import numpy as np
+import source  # Assuming that the original code is in a file named 'source.py'
+
+@pytest.fixture
+def vf_func():
+    module_dir = os.path.dirname(__import__(""__main__"").__file__)
+    source_path = os.path.join(module_dir, 'source.py')
+    spec = importlib.util.spec_from_file_location(""source"", source_path)
+    vf_func = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(vf_func)
+    return vf_func
+
+def test_vector_field_function_transformation(vf_func):
+    # Define a test function, vf_func, with a vector field function and a matrix Q.
+    def vf_func(x):
+        return np.array([x[0], x[1], x[0]*x[1]])
+
+    Q = np.array([[1, 2], [3, 4], [5, 6]])
+
+    # Test the transformation function.
+    x = np.array([7, 8])
+    assert np.allclose(source.vector_field_function_transformation(vf_func, Q)(x), 
+                       np.dot(vf_func(x), Q.T))",88.0
+"def ray_x_plane(origin, direction, vertex, normal):
+    
+    denom = normal.dot(direction)
+    # normals are opposite in direction
+    if denom < -1e-6:
+        t = ((vertex - origin).dot(normal))/denom
+        return origin + t*direction
+    if denom > 1e-6:
+        t = ((vertex - origin).dot(normal))/denom
+        return origin + t*direction
+    return None","import pytest
+import sys
+sys.path.append("".."")
+from source import ray_x_plane
+import numpy as np
+
+def test_ray_x_plane():
+    origin = np.array([0, 0, 0])
+    direction = np.array([1, 1, 1])
+    vertex = np.array([1, 1, 1])
+    normal = np.array([1, 1, 1])
+    assert np.allclose(ray_x_plane(origin, direction, vertex, normal), np.array([1, 1, 1]))
+
+    origin = np.array([0, 0, 0])
+    direction = np.array([1, 0, 0])
+    vertex = np.array([1, 0, 0])
+    normal = np.array([1, 1, 1])
+    assert np.allclose(ray_x_plane(origin, direction, vertex, normal), np.array([1, 0, 0]))
+
+    origin = np.array([0, 0, 0])
+    direction = np.array([1, 0, 0])
+    vertex = np.array([1, 0, 0])
+    normal = np.array([0, 1, 0])
+    assert np.allclose(ray_x_plane(origin, direction, vertex, normal), None)
+
+    origin = np.array([0, 0, 0])
+    direction = np.array([1, 0, 0])
+    vertex = np.array([2, 0, 0])
+    normal = np.array([0, 1, 0])
+    assert np.allclose(ray_x_plane(origin, direction, vertex, normal), None)",88.0
+"def scale_dim(w, h, max_size):
+  
+  if w > h:
+    ratio = float(max_size) / float(w)
+  else:
+    ratio = float(max_size) / float(h)
+
+  return (int(ratio * w), int(ratio * h))","import pytest
+from source import scale_dim
+
+def test_scale_dim():
+    assert scale_dim(2, 3, 5) == (3, 5)  # Test when w > h
+    assert scale_dim(3, 2, 5) == (5, 3)  # Test when h > w
+    assert scale_dim(2, 2, 1) == (1, 1)  # Test when w = h
+    assert scale_dim(1, 2, 5) == (1, 2)  # Test when w < h but max_size is large enough
+    assert scale_dim(2, 3, 1) == (1, 2)  # Test when h < w but max_size is large enough",88.0
+"def _convert_lon_to_180to180(ds, coord=""lon""):
+    
+    ds = ds.copy()
+    lon = ds[coord].values
+    # Convert everything over 180 back to the negative (degrees W) values.
+    lon[lon > 180] = lon[lon > 180] - 360
+    # Need to account for clarifying dimensions if the grid is 2D.
+    ds.coords[coord] = (ds[coord].dims, lon)
+    return ds","import os
+import numpy as np
+import xarray as xr
+import source  # assuming the source code file is named 'source.py'
+
+def test_convert_lon_to_180to180():
+    # We'll create a simple test dataset for demonstration.
+    ds = xr.Dataset(
+        {""lon"": ([""x""], np.random.randint(200, 300, 10)),
+         ""lat"": ([""x""], np.random.randint(-90, 90, 10))}
+    )
+    
+    # Testing if function works for 'lon' by default
+    result = source._convert_lon_to_180to180(ds)
+    # Check if the function modified 'lon'
+    np.testing.assert_array_less(result.lon.min(), 180)
+    np.testing.assert_array_less(180, result.lon.max())
+
+    # Testing if function works for 'lat'
+    result = source._convert_lon_to_180to180(ds, 'lat')
+    # Check if the function modified 'lat'
+    np.testing.assert_array_less(result.lat.min(), 180)
+    np.testing.assert_array_less(180, result.lat.max())
+
+if __name__ == ""__main__"":
+    test_convert_lon_to_180to180()",88.0
+"def compute_iou(boxA, boxB):
+    
+    xA = max(boxA[0], boxB[0])
+    yA = max(boxA[1], boxB[1])
+    xB = min(boxA[0] + boxA[2], boxB[0] + boxB[2])
+    yB = min(boxA[1] + boxA[3], boxB[1] + boxB[3])
+    interArea = abs(max((xB - xA, 0)) * max((yB - yA), 0))
+    if interArea == 0:
+        return 0
+    boxAArea = abs(boxA[2] * boxA[3])
+    boxBArea = abs(boxB[2] * boxB[3])
+    iou = interArea / float(boxAArea + boxBArea - interArea)
+    return iou","import pytest
+import sys
+sys.path.append(""."")  # make sure the module under test is in the same directory as this test file
+import source  # replace 'source' with the actual Python file name
+
+def test_compute_iou():
+    boxA = (1, 2, 3, 4)  # example box coordinates
+    boxB = (3, 2, 5, 6)  # example box coordinates
+    with pytest.raises(AttributeError):
+        expected_result = 0.25  # calculated by hand
+    assert abs(source.compute_iou(boxA, boxB) - expected_result) < 0.0001  # tolerance for floating point comparison
+
+if __name__ == ""__main__"":
+    test_compute_iou()",88.0

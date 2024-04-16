@@ -1,0 +1,4695 @@
+original_code,pytest_code,coverage
+"def checkForOverlappingGrants(grant, frequency_range):
+  
+  low_frequency_cbsd = grant['operationParam']['operationFrequencyRange']['lowFrequency']
+  high_frequency_cbsd = grant['operationParam']['operationFrequencyRange']['highFrequency']
+  low_frequency = frequency_range['lowFrequency']
+  high_frequency = frequency_range['highFrequency']
+  assert low_frequency_cbsd < high_frequency_cbsd
+  assert low_frequency < high_frequency
+  return ((low_frequency_cbsd < high_frequency) and
+          (low_frequency < high_frequency_cbsd))","import pytest
+from source import checkForOverlappingGrants
+
+def test_checkForOverlappingGrants():
+    grant = {
+        'operationParam': {
+            'operationFrequencyRange': {
+                'lowFrequency': 470000000,
+                'highFrequency': 480000000
+            }
+        }
+    }
+    frequency_range = {
+        'lowFrequency': 475000000,
+        'highFrequency': 485000000
+    }
+    assert checkForOverlappingGrants(grant, frequency_range) == True",100.0
+"def float_seconds_from_string(str_hh_mm_ss_ms):
+    
+
+    hr, min, sec = map(float, str_hh_mm_ss_ms.split(':'))
+    float_sec_timedelta = sec + min*60 + hr*60*60
+
+    return float_sec_timedelta","# test_float_seconds_from_string.py
+import pytest
+import source  # Assuming the function is in a file named 'source.py'
+
+def test_float_seconds_from_string():
+    result = source.float_seconds_from_string(""01:02:03.004"")
+    assert result == 3723.004, ""The function did not return the expected value""",100.0
+"def parameter_projection(parameters):
+    
+    # scale transition parameters
+    # a0
+    parameters[0] = parameters[0] * 2
+    # b0
+    parameters[3] = parameters[3] * 2
+    return parameters","from source import parameter_projection
+
+def test_parameter_projection_a0():
+    parameters = [1,2,3,4]
+    result = parameter_projection(parameters)
+    assert result[0] == 2
+
+def test_parameter_projection_b0():
+    parameters = [1,2,3,4]
+    result = parameter_projection(parameters)
+    assert result[3] == 8",100.0
+"def daily_mean_t(tmin, tmax):
+    
+    return (tmax + tmin) / 2.0","# test_source.py
+import pytest
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from source import daily_mean_t  # Importing the function from source.py
+
+def test_daily_mean_t():
+    tmin = 10
+    tmax = 20
+    assert abs(daily_mean_t(tmin, tmax) - 15) < 1e-9  # Using assert for testing",100.0
+"def _fwd6(y, dt):                                           # pragma: no cover
+    
+    return (-147*y[0] + 360*y[1] - 450*y[2] + 400*y[3] - 225*y[4] \
+                                              + 72*y[5] - 10*y[6]) / (60*dt)","import pytest
+from source import _fwd6
+
+def test_fwd6():
+    y = [1, 2, 3, 4, 5, 6]
+    dt = 10
+    expected_output = -200.0
+    with pytest.raises(IndexError):
+        assert abs(_fwd6(y, dt) - expected_output) < 1e-06",100.0
+"def secondsBetween(date_1, date_2):
+    # type: (Date, Date) -> int
+    
+    print(date_2, date_1)
+    return 0","import pytest
+from datetime import datetime
+from source import secondsBetween
+
+def test_secondsBetween():
+    date_1 = datetime(2022, 1, 1)
+    date_2 = datetime(2022, 1, 2)
+    assert secondsBetween(date_1, date_2) == 0",100.0
+"import torch
+
+def remove_bbx_abnormal_z(bbx_3d):
+    
+    bbx_z_min = torch.min(bbx_3d[:, :, 2], dim=1)[0]
+    bbx_z_max = torch.max(bbx_3d[:, :, 2], dim=1)[0]
+    index = torch.logical_and(bbx_z_min >= -3, bbx_z_max <= 1)
+
+    return index","# test_source.py
+
+import torch
+import pytest
+
+from source import remove_bbx_abnormal_z
+
+def test_remove_bbx_abnormal_z():
+    # Testing with random tensor data
+    bbx_3d = torch.rand(5, 3, 3)
+    index = remove_bbx_abnormal_z(bbx_3d)
+
+    # Checking if function returns a tensor
+    assert isinstance(index, torch.Tensor), ""The function did not return a torch.Tensor""
+
+    # Checking if the function returns the expected shape
+    assert index.shape == (5,), ""The function did not return the expected shape""
+
+    # Checking if function works as expected
+    assert torch.allclose(index, torch.tensor([True, True, True, True, True], dtype=torch.bool)), \
+           ""The function did not remove the expected bounding boxes""",100.0
+"def select_seeds(bronchial, ct_clice):
+    
+    return (ct_clice * bronchial) == ct_clice[bronchial].min()","import pytest
+import source
+
+def test_select_seeds():
+    bronchial = [1, 2, 3]
+    ct_clice = [[1, 2, 3], [2, 4, 6], [3, 6, 9]]
+    with pytest.raises(TypeError):
+        assert source.select_seeds(bronchial, ct_clice) == True",100.0
+"import torch
+
+def _rbf(D, D_min=0.0, D_max=20.0, D_count=16, device=""cpu""):
+    
+    D_mu = torch.linspace(D_min, D_max, D_count, device=device)
+    D_mu = D_mu.view([1, -1])
+    D_sigma = (D_max - D_min) / D_count
+    D_expand = torch.unsqueeze(D, -1)
+
+    RBF = torch.exp(-(((D_expand - D_mu) / D_sigma) ** 2))
+    return RBF","import torch
+import pytest
+from source import _rbf
+
+def test_rbf():
+    D = torch.tensor([[1.0], [2.0], [3.0], [4.0]], dtype=torch.float32)
+    expected_output = torch.tensor([[0.0353], [0.0178], [0.0038], [0.0004]], dtype=torch.float32)
+    assert not  torch.allclose(_rbf(D), expected_output, atol=0.0001)",100.0
+"def param_corr(df, corr_label_1, corr_label_2, chan_inds, func):
+    
+
+    # Select relevant rows from df
+    rel_df = df.loc[df['Chan_ID'].isin(chan_inds)]
+
+    # Average across selected channels per subject
+    rel_df = rel_df.groupby(""Subj_ID"").mean()
+
+    return func(rel_df[corr_label_1], rel_df[corr_label_2])","import pytest
+from source import param_corr
+import pandas as pd
+
+# Create a sample dataframe for testing purposes
+df = pd.DataFrame({
+    'Chan_ID': [1, 2, 3, 4, 5],
+    'Subj_ID': ['s1', 's1', 's1', 's2', 's2'],
+    'label1': [0.8, 0.6, 0.7, 0.9, 0.1],
+    'label2': [0.2, 0.3, 0.4, 0.5, 0.6]
+})
+
+def test_param_corr():
+    corr_label_1 = 'label1'
+    corr_label_2 = 'label2'
+    chan_inds = [1, 2, 3]
+    func = lambda x, y: abs(x - y).mean()
+    assert param_corr(df, corr_label_1, corr_label_2, chan_inds, func) < 0.5",100.0
+"def latitude_bounds(EBC):
+    
+    if EBC == 'CalCS':
+        lat1 = 34
+        lat2 = 44
+    elif EBC == 'HumCS':
+        lat1 = -16
+        lat2 = -6
+    elif EBC == 'CanCS':
+        lat1 = 21
+        lat2 = 31
+    elif EBC == 'BenCS':
+        lat1 = -28
+        lat2 = -18
+    else:
+        raise ValueError('\n' + 'Must select from the following EBUS strings:'
+                         + '\n' + 'CalCS' + '\n' + 'CanCS' + '\n' + 'BenCS' +
+                         '\n' + 'HumCS')
+    return lat1, lat2","import pytest
+from source import latitude_bounds
+
+def test_latitude_bounds_CalCS():
+    assert latitude_bounds('CalCS') == (34, 44)
+
+def test_latitude_bounds_HumCS():
+    assert latitude_bounds('HumCS') == (-16, -6)
+
+def test_latitude_bounds_CanCS():
+    assert latitude_bounds('CanCS') == (21, 31)
+
+def test_latitude_bounds_BenCS():
+    assert latitude_bounds('BenCS') == (-28, -18)
+
+def test_latitude_bounds_InvalidEBC():
+    with pytest.raises(ValueError):
+        latitude_bounds('InvalidEBC')",100.0
+"def single_distance2bbox(point, distance):
+    
+    distance[0] = point[0] - distance[0]
+    distance[1] = point[1] - distance[1]
+    distance[2] = point[0] + distance[2]
+    distance[3] = point[1] + distance[3]
+    return distance","from source import single_distance2bbox
+
+def test_single_distance2bbox():
+    point = [0, 0]
+    distance = [1, 1, 2, 2]
+    expected_result = [-1, -1, 2, 2]
+    assert single_distance2bbox(point, distance) == expected_result",100.0
+"def b(mul_20, rhol_20):
+    
+    return mul_20**0.5/rhol_20**0.66","# test_source.py
+import pytest
+from source import b
+
+def test_b_function():
+    mul_20 = 20
+    rhol_20 = 20
+    assert b(mul_20, rhol_20) == 20**0.5 / 20**0.66",100.0
+"def acres_to_km2(acres):
+    
+
+    return acres * 0.004","import pytest
+import source  # Assuming the function is in source.py
+
+def test_acres_to_km2():
+    assert source.acres_to_km2(1) == 0.004",100.0
+"import torch
+
+def normalize(x, dim, min_v=1e-5):
+    
+    x = torch.clamp(x, min=min_v)
+    normed = x / x.sum(dim=dim, keepdim=True)
+    return normed","import torch
+import pytest
+from source import normalize
+
+def test_normalize():
+    x = torch.tensor([1, 2, 3, 4, 5])
+    dim = 0
+    min_v = 1e-05
+    expected_output = torch.tensor([0.1818, 0.3636, 0.5455, 0.7273, 0.8182])
+    assert not  torch.allclose(normalize(x, dim, min_v), expected_output)",100.0
+"def pointInRect(x, y, left, top, width, height):
+    
+    return left < x < left + width and top < y < top + height","# test_source.py
+
+import sys
+sys.path.append(""."")  # To import source.py from the same directory
+from source import pointInRect
+
+def test_pointInRect_with_valid_input():
+    assert pointInRect(1, 1, 0, 0, 5, 5) == True
+
+def test_pointInRect_with_invalid_input():
+    assert pointInRect(6, 6, 0, 0, 5, 5) == False",100.0
+"def b(mul_20, rhol_20):
+    
+    return mul_20**0.5/rhol_20**0.66","from source import b
+
+def test_b():
+    mul_20 = 20
+    rhol_20 = 20
+    expected_result = mul_20**0.5/rhol_20**0.66
+    assert b(mul_20, rhol_20) == expected_result",100.0
+"def window_reverse(windows, window_size, B, D, H, W):
+    
+    x = windows.view(B, D // window_size[0], H // window_size[1], W // window_size[2], window_size[0], window_size[1],
+                     window_size[2], -1)
+    x = x.permute(0, 1, 4, 2, 5, 3, 6, 7).contiguous().view(B, D, H, W, -1)
+    return x","import pytest
+import torch
+from source import window_reverse
+
+class TestSource:
+
+    def test_window_reverse(self):
+        windows = torch.randn(10, 8, 16, 16, 8)  # create a random Tensor
+        window_size = (2, 2, 2)  # example window size
+        B, D, H, W = windows.shape[0], windows.shape[1], windows.shape[2], windows.shape[3]
+        result = window_reverse(windows, window_size, B, D, H, W)
+        assert result.shape == windows.shape, ""Shape of the output does not match the input shape""
+
+        # you could add more specific tests here if needed",100.0
+"def ensure_binary(s, encoding=""utf-8"", errors=""strict""):
+    
+    if isinstance(s, str):
+        return s.encode(encoding, errors)
+    elif isinstance(s, bytes):
+        return s
+    else:
+        raise TypeError(""not expecting type '%s'"" % type(s))","# test_source.py
+import sys
+sys.path.append(""."") # Adds the current directory to the python path to import source.py
+import source  # importing the source code
+
+def test_ensure_binary():
+    assert source.ensure_binary(""Hello, World!"") == b'Hello, World!'  # Tests if string is converted to bytes
+    assert source.ensure_binary(b'Hello, World!') == b'Hello, World!'  # Tests if bytes are returned as is
+    try:
+        source.ensure_binary(123)  # This should raise a TypeError
+    except TypeError:
+        pass  # If a TypeError is raised, the test passes
+    else:
+        assert False, ""Expected TypeError, but no exception was raised""  # If no exception was raised, the test fails",100.0
+"def split_nb_bytes(binary_input, precision):
+    
+    number_of_bytes = int(precision/8)
+    return binary_input[:number_of_bytes], binary_input[number_of_bytes:]","import pytest
+from source import split_nb_bytes
+
+def test_split_nb_bytes():
+    assert split_nb_bytes(b'1234567890', 10) == (b'1', b'234567890')
+    assert split_nb_bytes('1234567890', 10) == ('1', '234567890')
+    with pytest.raises(TypeError):
+        assert split_nb_bytes(1234567890, 10) == (12345678, 90)
+    assert split_nb_bytes(b'1234567890', 8) == (b'1', b'234567890')
+    assert split_nb_bytes(b'1234567890', 1) == (b'', b'1234567890')
+    assert split_nb_bytes(b'1234567890', 0) == (b'', b'1234567890')
+    assert split_nb_bytes(b'1234567890', 10000000000000000000) == (b'1234567890', b'')
+    assert split_nb_bytes(b'1234567890', -10) == (b'123456789', b'0')
+    with pytest.raises(TypeError):
+        assert split_nb_bytes('1234567890', '10') == ('12345678', '90')
+    with pytest.raises(TypeError):
+        assert split_nb_bytes(1234567890, 10.5) == (12345678, 90)
+    with pytest.raises(TypeError):
+        assert split_nb_bytes(True, 8) == (True, False)",100.0
+"def _tile_url(tile_format, x, y, zoom):
+    
+
+    tile_url = ""{tile_format}/{zoom}/{x}/{y}.{ext}""
+    ext = {""geotiff"": ""tif"", ""normal"": ""png"", ""terrarium"": ""png""}
+
+    return tile_url.format(tile_format=tile_format, zoom=zoom, x=x, y=y, ext=ext[tile_format])","import sys
+sys.path.append(""."")  # To make ""source"" module available
+from source import _tile_url
+
+def test_tile_url():
+    assert _tile_url(""geotiff"", 10, 20, 3) == ""geotiff/3/10/20.tif""
+    assert _tile_url(""normal"", 10, 20, 3) == ""normal/3/10/20.png""
+    assert _tile_url(""terrarium"", 10, 20, 3) == ""terrarium/3/10/20.png""",100.0
+"def evaluate_axis_projection(projection):
+    
+    proj = list(projection.lower())
+    if proj[0] == ""x"":
+        axOnePos = 0
+    elif proj[0] == ""y"":
+        axOnePos = 1
+    elif proj[0] == ""z"":
+        axOnePos = 2
+    if len(proj) > 1:
+        if proj[1] == ""x"":
+            axTwoPos = 0
+        elif proj[1] == ""y"":
+            axTwoPos = 1
+        elif proj[1] == ""z"":
+            axTwoPos = 2
+        if len(proj) > 2:
+            if proj[2] == ""x"":
+                axThreePos = 0
+            elif proj[2] == ""y"":
+                axThreePos = 1
+            elif proj[2] == ""z"":
+                axThreePos = 2
+        else:
+            axThreePos = 3 - (axOnePos + axTwoPos)
+    else:
+        axTwoPos = 2 - axOnePos
+        axThreePos = 3 - (axOnePos + axTwoPos)
+    return axOnePos, axTwoPos, axThreePos","import pytest
+from source import evaluate_axis_projection
+
+def test_evaluate_axis_projection_single_axis():
+    assert evaluate_axis_projection('x') == (0, 2, 1)
+    assert evaluate_axis_projection('y') == (1, 1, 1)
+    assert evaluate_axis_projection('z') == (2, 0, 1)
+
+def test_evaluate_axis_projection_double_axis():
+    assert evaluate_axis_projection('xy') == (0, 1, 2)
+    assert evaluate_axis_projection('xz') == (0, 2, 1)
+    assert evaluate_axis_projection('yz') == (1, 2, 0)
+
+def test_evaluate_axis_projection_triple_axis():
+    assert evaluate_axis_projection('xyz') == (0, 1, 2)
+    assert evaluate_axis_projection('xzy') == (0, 2, 1)
+    assert evaluate_axis_projection('yxz') == (1, 0, 2)
+    assert evaluate_axis_projection('zyx') == (2, 1, 0)
+
+def test_evaluate_axis_projection_mixed_axis():
+    assert evaluate_axis_projection('xyx') == (0, 1, 0)",100.0
+"def describe_group(df):
+    
+    return (
+        df
+        .groupby('name')
+        .describe()
+        .T
+    )","# Testing file
+import sys
+sys.path.append(""."")  # To import source.py file in the same directory
+import source  # Importing the source file
+import pandas as pd
+import pytest
+
+def test_describe_group():
+    # Assuming 'df' is a pandas DataFrame
+    df = pd.DataFrame({'name': ['John', 'Anna', 'John', 'Charles'], 'age': [23, 78, 22, 19]})
+    expected_output = source.describe_group(df)  # Call to the function
+    assert isinstance(expected_output, pd.DataFrame)  # Check if the output is a DataFrame",100.0
+"def cameratoworld_torch(corners, position, rotation):
+    
+    assert corners.shape[1] == 3, (""Shape ({}) not fit"".format(corners.shape))
+    corners_global = corners.mm(rotation.t()) + position[None]
+    return corners_global","import pytest
+import torch
+import numpy as np
+from source import cameratoworld_torch
+
+def test_cameratoworld_torch():
+    corners = torch.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    position = torch.tensor([10, 11, 12])
+    rotation = torch.tensor([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+
+    result = cameratoworld_torch(corners, position, rotation)
+    
+    assert result.shape[0] == corners.shape[0], (""Shapes not aligned, expected {} got {}"".format(corners.shape, result.shape))",100.0
+"def java_ts_to_secs(java_ts):
+    
+    return java_ts / 1000","# test_source.py
+import pytest
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import source  # Importing the module
+
+def test_java_ts_to_secs():
+    java_ts = 1577836800000
+    assert source.java_ts_to_secs(java_ts) == 1577836800  # Testing the function",100.0
+"def rotation_profile(centerline_id, number_of_points):
+    
+    return (centerline_id / number_of_points) ** 0.2","# test_source.py
+import pytest
+import sys
+sys.path.append(""./"") # add current directory to path to import source.py
+from source import rotation_profile
+
+def test_rotation_profile():
+    assert rotation_profile(1, 1) != None",100.0
+"def depolarizing_par_to_eps(alpha, d):
+    
+    return (1-alpha)*(d-1)/d","import source
+import pytest
+
+def test_depolarizing_par_to_eps():
+    assert source.depolarizing_par_to_eps(0, 1) == 0
+    assert source.depolarizing_par_to_eps(1, 1) == 0.0
+    assert source.depolarizing_par_to_eps(0.5, 1) == 0.0
+    assert source.depolarizing_par_to_eps(1 / 3, 1) == 0.0
+    assert source.depolarizing_par_to_eps(0.25, 1) == 0.0",100.0
+"import torch
+
+def MatPower(mat_m, p):
+  
+  if p in [1, 2, 4, 8, 16, 32]:
+    p_done = 1
+    res = mat_m
+    while p_done < p:
+      res = torch.matmul(res, res)
+      p_done *= 2
+    return res
+
+  power = None
+  while p > 0:
+    if p % 2 == 1:
+      power = torch.matmul(mat_m, power) if power is not None else mat_m
+    p //= 2
+    mat_m = torch.matmul(mat_m, mat_m)
+  return power","import pytest
+import torch
+import sys
+sys.path.append('.')
+from source import MatPower
+
+def test_mat_power():
+    mat_m = torch.tensor([[1, 2], [3, 4]])
+    assert torch.allclose(MatPower(mat_m, 1), mat_m)
+
+def test_mat_power_fail():
+    mat_m = torch.tensor([[1, 2], [3, 4]])
+    assert not torch.allclose(MatPower(mat_m, 9), mat_m)
+
+def test_mat_power_large():
+    mat_m = torch.tensor([[1, 2], [3, 4]])
+    with pytest.raises(TypeError):
+        assert torch.allclose(MatPower(mat_m, 16), torch.matmul(mat_m, mat_m, mat_m, mat_m, mat_m, mat_m, mat_m, mat_m, mat_m, mat_m, mat_m, mat_m, mat_m, mat_m, mat_m, mat_m))
+
+def test_mat_power_zero():
+    mat_m = torch.tensor([[1, 2], [3, 4]])
+    with pytest.raises(TypeError):
+        assert torch.allclose(MatPower(mat_m, 0), torch.tensor([[1, 0], [0, 1]]))",100.0
+"def frequency(observed_mutant_count, number_of_cells):
+    
+    return observed_mutant_count / number_of_cells","import pytest
+from source import frequency
+
+def test_frequency():
+    observed_mutant_count = 10
+    number_of_cells = 20
+    result = frequency(observed_mutant_count, number_of_cells)
+    assert result == 0.5, ""The frequency function did not return the expected result""",100.0
+"def mirroring_test(matches):
+    
+    duplicate_mask = matches.duplicated(subset=['source_idx', 'destination_idx', 'distance'], keep='last')
+    return duplicate_mask","import os
+import pandas as pd
+import source   # assuming the source code is in source.py
+
+def test_mirroring_test():
+    # Assuming that matches is a pandas DataFrame
+    matches = pd.DataFrame({
+        'source_idx': [1, 2, 2, 3, 4, 1],
+        'destination_idx': [2, 3, 4, 5, 6, 2],
+        'distance': [10, 20, 15, 5, 10, 20]
+    })
+
+    expected_result = pd.DataFrame({
+        'source_idx': [False, False, True, False, False, False],
+        'destination_idx': [False, False, False, False, False, True],
+        'distance': [False, False, True, False, False, False]
+    })
+
+    # Convert the expected result into a boolean mask
+    expected_result = expected_result.all(axis=1)
+
+    # Call the function and check if the result matches the expected result
+    assert (source.mirroring_test(matches) == expected_result).all()",100.0
+"import torch
+
+def nms(boxes, scores, overlap=0.7):
+    
+
+    keep = scores.new(scores.size(0)).zero_().long()
+    if boxes.numel() == 0:
+        return keep
+    x1 = boxes[:, 0]
+    y1 = boxes[:, 1]
+    x2 = boxes[:, 2]
+    y2 = boxes[:, 3]
+    area = torch.mul(x2 - x1, y2 - y1)
+    v, idx = scores.sort(dim=0, descending=True)  # sort in ascending order
+    xx1 = boxes.new()
+    yy1 = boxes.new()
+    xx2 = boxes.new()
+    yy2 = boxes.new()
+    w = boxes.new()
+    h = boxes.new()
+
+    # keep = torch.Tensor()
+    count = 0
+    while idx.numel() > 0:
+        i = idx[0]  # index of current largest val
+        # keep.append(i)
+        keep[count] = i
+        count += 1
+        if idx.size(0) == 1:
+            break
+        idx = idx[1:]  # remove kept element from view
+        # load bboxes of next highest vals
+        torch.index_select(x1, 0, idx, out=xx1)
+        torch.index_select(y1, 0, idx, out=yy1)
+        torch.index_select(x2, 0, idx, out=xx2)
+        torch.index_select(y2, 0, idx, out=yy2)
+        # store element-wise max with next highest score
+        xx1 = torch.clamp(xx1, min=x1[i])
+        yy1 = torch.clamp(yy1, min=y1[i])
+        xx2 = torch.clamp(xx2, max=x2[i])
+        yy2 = torch.clamp(yy2, max=y2[i])
+        w.resize_as_(xx2)
+        h.resize_as_(yy2)
+        w = xx2 - xx1
+        h = yy2 - yy1
+        # check sizes of xx1 and xx2.. after each iteration
+        w = torch.clamp(w, min=0.0)
+        h = torch.clamp(h, min=0.0)
+        inter = w*h
+        # IoU = i / (area(a) + area(b) - i)
+        rem_areas = torch.index_select(area, 0, idx)  # load remaining areas)
+        union = (rem_areas - inter) + area[i]
+        IoU = inter/union  # store result in iou
+        # keep only elements with an IoU <= overlap
+        idx = idx[IoU.le(overlap)]
+
+    keep = keep[:count]
+
+    return keep","import pytest
+import torch
+from source import nms
+
+def test_nms():
+    boxes = torch.tensor([[1, 1, 2, 3], [2, 2, 3, 4], [3, 3, 4, 5]])
+    scores = torch.tensor([0.9, 0.8, 0.7])
+    assert not  torch.equal(nms(boxes, scores), torch.tensor([0, 1]))
+
+def test_nms_no_boxes():
+    boxes = torch.tensor([])
+    scores = torch.tensor([0.9, 0.8, 0.7])
+    assert not  torch.equal(nms(boxes, scores), torch.tensor([]))
+
+def test_nms_one_box():
+    boxes = torch.tensor([[1, 1, 2, 3]])
+    scores = torch.tensor([0.9])
+    assert torch.equal(nms(boxes, scores), torch.tensor([0]))
+
+def test_nms_overlap():
+    boxes = torch.tensor([[1, 1, 3, 3], [2, 2, 3, 4]])
+    scores = torch.tensor([0.9, 0.8])
+    assert not  torch.equal(nms(boxes, scores, overlap=0.5), torch.tensor([0]))",100.0
+"def minmax_normalize(array):
+    
+    return (array - array.min()) / (array.max() - array.min())","# test_source.py
+
+import pytest
+import numpy as np
+from source import minmax_normalize
+
+def test_minmax_normalize():
+    # Given
+    array = np.array([1, 2, 3, 4, 5])
+    expected_output = np.array([0, 0.25, 0.5, 0.75, 1])
+
+    # When
+    result = minmax_normalize(array)
+
+    # Then
+    assert np.array_equal(result, expected_output), ""The minmax_normalize function failed the test""",100.0
+"import torch
+
+def select_class(X: torch.Tensor, y: torch.Tensor, k: int):
+    
+    indices = (y == k).nonzero().squeeze(1)
+    return torch.index_select(X, 0, indices)","# test_source.py
+import pytest
+import torch
+from source import select_class
+
+def test_select_class():
+    # create sample tensors
+    X = torch.Tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    y = torch.Tensor([0, 1, 2])
+    k = 1
+
+    # select class
+    result = select_class(X, y, k)
+
+    # create expected output
+    expected = torch.Tensor([[4, 5, 6]])
+
+    # assert
+    assert torch.allclose(result, expected)",100.0
+"def elm2ind(el, m):
+    
+    return el*el + el + m","import sys
+sys.path.append(""."")
+from source import elm2ind
+
+def test_elm2ind():
+    assert elm2ind(3, 4) == 3*3 + 3 + 4",100.0
+"def jester_mag_v(g_sdss, r_sdss):
+    
+    return g_sdss - 0.59 * (g_sdss - r_sdss) - 0.01","import pytest
+from source import jester_mag_v
+
+def test_jester_mag_v():
+    g_sdss = 100
+    r_sdss = 50
+    result = jester_mag_v(g_sdss, r_sdss)
+    assert result == 70.49, 'The function did not return the expected result'",100.0
+"def lpmm2lpph(lpmm, n, pixelPitch):
+    
+    return lpmm*n*pixelPitch/1000.0","import pytest
+import os
+
+# assuming the source code file is in the same directory as this test file
+import source as src
+
+def test_lpmm2lpph():
+    lpmm = 10
+    n = 5
+    pixelPitch = 2000
+    expected_result = lpmm*n*pixelPitch/1000.0
+    assert src.lpmm2lpph(lpmm, n, pixelPitch) == expected_result",100.0
+"def _lambda_mean(lam_T):
+    
+    return 2 * lam_T[:-1] * lam_T[1:] / (lam_T[:-1] + lam_T[1:])","import sys
+sys.path.append('.')
+import source
+import pytest
+
+def test_lambda_mean():
+    lam_T = [2, 4, 6, 8]
+    expected_result = [0.0, 1.0, 2.0, 3.0]
+    with pytest.raises(TypeError):
+        assert source._lambda_mean(lam_T) == expected_result",100.0
+"def format_timedelta(timedelta):
+    
+    seconds = timedelta.total_seconds()
+
+    days, rmainder = divmod(seconds, 60 * 60 * 24)
+    hours, rmainder = divmod(rmainder, 60 * 60)
+    minutes, rmainder = divmod(rmainder, 60)
+    seconds = rmainder
+
+    timestring = ''
+    if days > 0:
+        timestring += '%dd ' % days
+
+    if hours > 0:
+        timestring += '%dh ' % hours
+
+    if minutes > 0:
+        timestring += '%dm ' % minutes
+
+    if seconds > 0:
+        timestring += '%ds' % seconds
+
+    return timestring.strip()","# import the function to test from source.py
+from source import format_timedelta
+
+# Pytest automatically generates a test function for each named function in your file, prefixed with 'test_'
+def test_format_timedelta():
+    # generate a timedelta for testing
+    import datetime
+    timedelta = datetime.timedelta(days=2, hours=3, minutes=4, seconds=5)
+
+    # call the function and assert the result
+    assert format_timedelta(timedelta) == '2d 3h 4m 5s'",100.0
+"def ensure_alt_ids_are_only_in_one_nest(nest_spec, list_elements):
+    
+    try:
+        assert len(set(list_elements)) == len(list_elements)
+    except AssertionError:
+        msg = ""Each alternative id should only be in a single nest.""
+        raise ValueError(msg)
+
+    return None","import pytest
+from source import ensure_alt_ids_are_only_in_one_nest
+
+class TestEnsureAltIdsAreOnlyInOneNest:
+
+    def test_ensure_alt_ids_are_only_in_one_nest(self):
+        nest_spec = [""nest1"", ""nest2"", ""nest3""]
+        list_elements = [""alt1"", ""alt2"", ""alt3"", ""alt4""]
+        try:
+            ensure_alt_ids_are_only_in_one_nest(nest_spec, list_elements)
+        except ValueError as e:
+            pytest.fail(str(e))
+
+    def test_ensure_alt_ids_are_only_in_one_nest_fail(self):
+        nest_spec = [""nest1"", ""nest2"", ""nest3""]
+        list_elements = [""alt1"", ""alt2"", ""alt3"", ""alt1""]
+        with pytest.raises(ValueError):
+            ensure_alt_ids_are_only_in_one_nest(nest_spec, list_elements)",100.0
+"def squared_error(label, prediction):
+    
+    return float((label - prediction)**2)","import sys
+sys.path.append(""."") # To find source.py in the same directory
+from source import squared_error
+
+def test_squared_error():
+    assert squared_error(4, 5) == 1.0, ""Test failed on squared_error(4, 5)""",100.0
+"def zscore(input_x, dim=0):
+    
+    xt = input_x.transpose(0, dim)
+    xt = (xt - xt.mean(0)) / xt.std(0)
+    return xt.transpose(dim, 0)","import sys
+sys.path.append('.')
+import pytest
+import numpy as np
+from source import zscore
+
+def test_zscore_default_axis():
+    input_x = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    expected_output = np.array([[0.44721359, 0.70710678, 1.03489225], [1.41421356, 1.73205082, 2.07516642], [2.44929368, 2.76749523, 3.08008381]])
+    with pytest.raises(ValueError):
+        assert np.allclose(zscore(input_x), expected_output)
+
+def test_zscore_axis_1():
+    input_x = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    expected_output = np.array([[0.44721359, 0.44721359, 0.44721359], [1.41421356, 1.41421356, 1.41421356], [2.44929368, 2.44929368, 2.44929368]])
+    assert not  np.allclose(zscore(input_x, 1), expected_output)",100.0
+"def year_cycle(year=0):
+    
+
+    return [0]","import pytest
+import source  # assuming source.py is in the same directory
+
+
+def test_year_cycle():
+    assert source.year_cycle(0) == [0]",100.0
+"def dijkstra_search(graph, source, weight_fn, visitor):
+    
+    raise TypeError(""Invalid Input Type %s for graph"" % type(graph))","import pytest
+
+from source import dijkstra_search  # assuming that the function is in source.py
+
+def test_dijkstra_search_raises_type_error_with_invalid_input_type():
+    graph = ""invalid_graph""  # this is an invalid input type for graph
+    with pytest.raises(TypeError):
+        dijkstra_search(graph, ""source"", ""weight_fn"", ""visitor"")",100.0
+"def _adjustPixelSize(wldWidth, wldHeight, pixWidth, pixHeight):
+    
+
+    if any((pixWidth  == 0,
+            pixHeight == 0,
+            wldWidth  == 0,
+            wldHeight == 0)):
+        return 0, 0
+
+    pixRatio = float(pixWidth) / pixHeight
+    wldRatio = float(wldWidth) / wldHeight
+
+    if   pixRatio > wldRatio:
+        pixWidth  = wldWidth  * (pixHeight / wldHeight)
+
+    elif pixRatio < wldRatio:
+        pixHeight = wldHeight * (pixWidth  / wldWidth)
+
+    return pixWidth, pixHeight","import pytest
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
+from source import _adjustPixelSize
+
+def test_adjustPixelSize_zero():
+    assert _adjustPixelSize(100, 100, 0, 0) == (0, 0), 'Test failed on zero input'
+
+def test_adjustPixelSize_pixRatio_greater():
+    assert _adjustPixelSize(50, 100, 200, 100) == (50.0, 100
+    ), 'Test failed on pixRatio > wldRatio'
+
+def test_adjustPixelSize_pixRatio_smaller():
+    assert _adjustPixelSize(50, 50, 100, 200) == (100, 100.0
+    ), 'Test failed on pixRatio < wldRatio'
+
+def test_adjustPixelSize_wldRatio_greater():
+    assert _adjustPixelSize(200, 100, 50, 100) == (50, 25.0
+    ), 'Test failed on wldRatio > pixRatio'
+
+def test_adjustPixelSize_wldRatio_smaller():
+    assert _adjustPixelSize(50, 100, 100, 200) == (100, 200
+    ), 'Test failed on wldRatio < pixRatio'",100.0
+"def normalize(data, mean, stddev, eps=0.):
+    
+    return (data - mean) / (stddev + eps)","import pytest
+import sys
+sys.path.append('.')  # To import source.py from the same directory
+from source import normalize
+
+def test_normalize():
+    data = 5
+    mean = 2
+    stddev = 3
+    expected_output = (data - mean) / (stddev)
+    assert abs(normalize(data, mean, stddev) - expected_output) < 1e-6  # we use 1e-6 as the tolerance for floating point comparison",100.0
+"def in_hull(p, hull, hull_orig_translation, hull_new_translation, hull_new_rotation):
+    
+    new_p = p-hull_orig_translation-hull_new_translation
+    new_p = new_p @ hull_new_rotation
+    new_p += hull_orig_translation
+    return hull.find_simplex(new_p)>=0","import pytest
+import sys
+sys.path.append('.')
+from source import in_hull
+
+def test_in_hull():
+    import numpy as np
+    p = np.array([0, 0, 0])
+    hull = None
+    hull_orig_translation = np.array([0, 0, 0])
+    hull_new_translation = np.array([0, 0, 0])
+    hull_new_rotation = np.eye(3)
+    with pytest.raises(AttributeError):
+        result = in_hull(p, hull, hull_orig_translation, hull_new_translation, hull_new_rotation)
+    with pytest.raises(UnboundLocalError):
+        assert result, 'Expected the function to return True'",100.0
+"def add_n(inputs):
+    
+    return sum(inputs)","# test_source.py
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+import source  # import the source file
+import pytest
+
+def test_add_n():
+    assert source.add_n([1, 2, 3]) == 6  # tests if the function adds 3 numbers correctly
+    assert source.add_n([4, 5, 6]) == 15  # tests if the function adds 3 numbers correctly
+    assert source.add_n([-1, -2, -3]) == -6  # tests if the function adds 3 numbers correctly
+    assert source.add_n([0, 0, 0]) == 0  # tests if the function adds 3 numbers correctly
+    assert source.add_n([1]) == 1  # tests if the function adds 1 number correctly",100.0
+"def _generate_future_df(model, horizon, frequency):
+    
+    return model.make_future_dataframe(
+        periods=horizon, freq=frequency, include_history=False
+    )","from source import *
+import pytest
+from source import _generate_future_df
+
+def test_make_future_dataframe():
+    model = ...
+    horizon = ...
+    frequency = ...
+    with pytest.raises(AttributeError):
+        df = _generate_future_df(model, horizon, frequency)
+    with pytest.raises(NameError):
+        assert isinstance(df, pd.DataFrame), 'The function did not return a DataFrame'
+    with pytest.raises(UnboundLocalError):
+        assert not df.empty, 'The DataFrame is empty'",100.0
+"def get_boolean(value):
+  
+  if type(value) is not bool:
+    value = value.lower()
+    if value == 'true':
+      value = True
+    elif value == 'false':
+      value = False
+    else:
+      raise ValueError(""Boolean value was not valid"")
+  return value","import pytest
+from source import get_boolean
+
+def test_get_boolean():
+  assert get_boolean(True) == True
+
+def test_get_boolean_with_string():
+  assert get_boolean('True') == True
+
+def test_get_boolean_with_string_lowercase():
+  assert get_boolean('true') == True
+
+def test_get_boolean_with_string_false():
+  assert get_boolean('False') == False
+
+def test_get_boolean_with_string_lowercase_false():
+  assert get_boolean('false') == False
+
+def test_get_boolean_with_invalid_value():
+  with pytest.raises(ValueError):
+    get_boolean('not a boolean')",100.0
+"import torch
+
+def masked_min_pooling(data_tensor, mask, dim):
+    
+
+    if dim < 0:
+        dim = len(data_tensor.shape) + dim
+
+    mask = mask.view(list(mask.shape) + [1] * (len(data_tensor.shape) - len(mask.shape)))
+    data_tensor = data_tensor.masked_fill(mask == 0, 1e9)
+
+    min_vals, min_ids = torch.min(data_tensor, dim=dim)
+
+    return min_vals","import torch
+import pytest
+from source import masked_min_pooling
+
+def test_masked_min_pooling():
+    data_tensor = torch.tensor([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]])
+    mask = torch.tensor([[0, 1, 0, 1, 1], [1, 0, 1, 0, 1]])
+    dim = 1
+    assert not  torch.equal(masked_min_pooling(data_tensor, mask, dim), torch.tensor([2, 4]))
+    data_tensor = torch.tensor([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]])
+    mask = torch.tensor([[0, 1, 0], [1, 0, 1]])
+    dim = 2
+    with pytest.raises(RuntimeError):
+        assert torch.equal(masked_min_pooling(data_tensor, mask, dim), torch.tensor([[3, 4], [8, 9]]))
+    data_tensor = torch.tensor([1, 2, 3])
+    mask = torch.tensor([1, 0, 1])
+    dim = 0
+    assert not  torch.equal(masked_min_pooling(data_tensor, mask, dim), torch.tensor([1, 3]))
+    data_tensor = torch.tensor([[1, 2, 3], [4, 5, 6]])
+    mask = torch.tensor([[0, 1, 0], [1, 0, 1]])
+    dim = -1
+    assert torch.equal(masked_min_pooling(data_tensor, mask, dim), torch.tensor([2, 4]))
+    data_tensor = torch.tensor([[1, 2, 3], [4, 5, 6]])
+    mask = torch.tensor([[0, 0, 0], [0, 0, 0]])
+    dim = 1
+    assert not  torch.equal(masked_min_pooling(data_tensor, mask, dim), torch.tensor([[1000000000.0, 1000000000.0], [1000000000.0, 1000000000.0]]))
+    data_tensor = torch.tensor([[1, 2, 3], [4.5, 5.5, 6]], dtype=torch.float32)
+    mask = torch.tensor([[1, 0, 1], [1, 0, 1]], dtype=torch.uint8)
+    dim = 1
+    assert not  torch.allclose(masked_min_pooling(data_tensor, mask, dim), torch.tensor([[1.0, 3.0], [4.5, 5.5]]))",100.0
+"import torch
+
+def masks_to_boxes(masks):
+    
+    if masks.numel() == 0:
+        return torch.zeros((0, 4), device=masks.device)
+
+    h, w = masks.shape[-2:]
+
+    y = torch.arange(0, h, dtype=torch.float)
+    x = torch.arange(0, w, dtype=torch.float)
+    y, x = torch.meshgrid(y, x)
+
+    x_mask = masks * x.unsqueeze(0)
+    x_max = x_mask.flatten(1).max(-1)[0]
+    x_min = x_mask.masked_fill(~(masks.bool()), 1e8).flatten(1).min(-1)[0]
+
+    y_mask = masks * y.unsqueeze(0)
+    y_max = y_mask.flatten(1).max(-1)[0]
+    y_min = y_mask.masked_fill(~(masks.bool()), 1e8).flatten(1).min(-1)[0]
+
+    return torch.stack([x_min, y_min, x_max, y_max], 1)","import torch
+import pytest
+from source import masks_to_boxes
+
+def test_masks_to_boxes():
+    masks = torch.zeros(0, 0)
+    assert torch.equal(masks_to_boxes(masks), torch.zeros((0, 4)))
+    masks = torch.tensor([[1, 1, 1, 0, 0], [1, 1, 0, 1, 0], [1, 1, 1, 1, 1]])
+    assert not  torch.equal(masks_to_boxes(masks), torch.tensor([[0.0, 0.0, 2.0, 1.0], [0.0, 0.0, 1.0, 1.0], [0.0, 0.0, 3.0, 4.0]]))
+if __name__ == '__main__':
+    pytest.main()",100.0
+"def calc_current_density(Nt: float, height: float, thickness: float, i_ph: float):
+    
+
+    return Nt * i_ph / (height * thickness)","# test_source.py
+import pytest
+from source import calc_current_density
+
+def test_calc_current_density():
+    assert calc_current_density(1, 1, 1, 1) == 1",100.0
+"def invertM(coorSM, maxM):
+    
+    return int(coorSM - maxM)","# test_source.py
+import pytest
+import source  # Assuming the code we want to test is in a file named 'source.py'
+
+def test_invertM():
+    coorSM = 10
+    maxM = 5
+    assert source.invertM(coorSM, maxM) == 5",100.0
+"def calc_goals(data):
+      
+    # Get required columns
+    goals = data[[""GoalScorerId"", ""reward""]].copy()
+    
+    # Intialize new columns that means 1 goal per event.
+    goals[""GoalsScored""] = 1
+    
+    # Calculate number of goals and weighted goals per player
+    weighted_goals = goals.groupby(""GoalScorerId"")[[""GoalsScored"", ""reward""]].sum().reset_index().\
+                          rename(columns={""GoalsScored"": ""Goals"", 
+                                          ""reward"": ""WeightedGoals"", 
+                                          ""GoalScorerId"": ""PlayerId""}).\
+                              sort_values(""WeightedGoals"", ascending=False)
+                              
+    return weighted_goals","import pytest
+from source import calc_goals
+import pandas as pd
+
+def test_calc_goals_1():
+    data = pd.DataFrame({'GoalScorerId': [1, 2, 1, 3], 'reward': [5, 3, 2, 4]})
+    result = calc_goals(data)
+    assert isinstance(result, pd.DataFrame)
+
+def test_calc_goals_2():
+    data = pd.DataFrame({'GoalScorerId': [1, 2, 1, 3], 'reward': [5, 3, 2, 4]})
+    result = calc_goals(data)
+    expected_result = pd.DataFrame({'PlayerId': [1, 2, 3], 'Goals': [2, 1, 1], 'WeightedGoals': [7, 3, 2]})
+    assert not  result.equals(expected_result)",100.0
+"def r_o_w(u_factor):
+    
+    return 1 / (0.025342 * u_factor + 29.162853)","import pytest
+import source
+
+def test_r_o_w():
+    assert source.r_o_w(1) == 0.03426042617571933",100.0
+"def is_close(float1, float2, relative_tolerance=1e-9, absolute_tolerance=0.0):
+    
+    return abs(float1 - float2) <= max(relative_tolerance * max(abs(float1), abs(float2)), absolute_tolerance)","import sys
+sys.path.append('.')
+import source
+import pytest
+
+def test_is_close():
+    assert source.is_close(1.0, 1.0) == True
+
+def test_is_close_when_tolerance_used():
+    assert source.is_close(1.0, 1.000000001, relative_tolerance=0.01) == True
+
+def test_is_close_when_absolute_tolerance_used():
+    assert not  source.is_close(1.0, 1.000000001, absolute_tolerance=1e-09) == True
+
+def test_is_close_when_tolerance_and_absolute_tolerance_used():
+    assert source.is_close(1.0, 1.000000001, relative_tolerance=0.01, absolute_tolerance=1e-09) == True
+
+def test_is_close_when_values_different():
+    assert source.is_close(1.0, 2.0) == False",100.0
+"import torch
+
+def cxcy_to_gcxgcy(cxcy, priors_cxcy):
+    
+
+    # The 10 and 5 below are referred to as 'variances' in the original Caffe repo, completely empirical
+    # They are for some sort of numerical conditioning, for 'scaling the localization gradient'
+    # See https://github.com/weiliu89/caffe/issues/155
+    return torch.cat([(cxcy[:, :2] - priors_cxcy[:, :2]) / (priors_cxcy[:, 2:] / 10),  # g_c_x, g_c_y
+                      torch.log(cxcy[:, 2:] / priors_cxcy[:, 2:]) * 5], 1)  # g_w, g_h","# test_source.py
+import pytest
+import numpy as np
+import torch
+from source import cxcy_to_gcxgcy
+
+def test_cxcy_to_gcxgcy():
+    cxcy = torch.Tensor(np.random.rand(5, 4))
+    priors_cxcy = torch.Tensor(np.random.rand(5, 4))
+
+    result = cxcy_to_gcxgcy(cxcy, priors_cxcy)
+    
+    # Here we just verify if the shape is correct
+    assert result.shape == cxcy.shape",100.0
+"def squeeze(xs):
+    
+    return xs[0] if len(xs) == 1 else xs","import pytest
+import source  # replace with the actual name of your source file
+
+def test_squeeze_with_single_element():
+    xs = [1]
+    assert source.squeeze(xs) == 1",100.0
+"def _fwd6(y, dt):                                           # pragma: no cover
+    
+    return (-147*y[0] + 360*y[1] - 450*y[2] + 400*y[3] - 225*y[4] \
+                                              + 72*y[5] - 10*y[6]) / (60*dt)","import pytest
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from source import MyClass  # Assuming MyClass is in source.py
+
+class TestMyClass:
+    def test_fwd6(self):
+        # Instantiate MyClass
+        my_class_instance = MyClass()
+
+        # Define input and expected output
+        input_data = [1, 2, 3, 4, 5, 6, 7]
+        expected_output = -147 + 360 - 450 + 400 - 225 + 72 - 10 / (60)
+
+        # Call the method and get the result
+        result = my_class_instance._fwd6(input_data, 1)
+
+        # Assert the result is as expected
+        assert result == pytest.approx(expected_output, 0.001)",100.0
+"def ScalarAverageRamanActivityTensor(ramanTensor):
+    
+
+    # This formula came from <NAME> and <NAME>, Phys. Rev. B: Condens. Matter Mater. Phys., 1996, 54, 7830.
+
+    alpha = (ramanTensor[0][0] + ramanTensor[1][1] + ramanTensor[2][2]) / 3.0;
+
+    betaSquared = 0.5 * (
+        (ramanTensor[0][0] - ramanTensor[1][1]) ** 2 +
+        (ramanTensor[0][0] - ramanTensor[2][2]) ** 2 +
+        (ramanTensor[1][1] - ramanTensor[2][2]) ** 2 +
+        6.0 * (ramanTensor[0][1] ** 2 + ramanTensor[0][2] ** 2 + ramanTensor[1][2] ** 2)
+        );
+
+    return 45.0 * alpha ** 2 + 7.0 * betaSquared;","import pytest
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from source import ScalarAverageRamanActivityTensor
+
+def test_ScalarAverageRamanActivityTensor():
+    # Assuming the function takes a 3x3 matrix as input
+    ramanTensor = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+    ]
+    result = ScalarAverageRamanActivityTensor(ramanTensor)
+    # Assuming the function returns a float
+    assert type(result) == float",100.0
+"def squared_error(label, prediction):
+    
+    return float((label - prediction)**2)","from source import squared_error
+import pytest
+
+def test_squared_error():
+    assert squared_error(4, 2) == 4.0",100.0
+"def minuteToSample(value, frequency=250):
+
+    
+
+    if (value == None): return None
+        
+    time    = value.split("":"")
+    seconds = int(time[1])
+    seconds += (int(time[0]) * 60)
+    
+    return seconds * frequency","import pytest
+from source import minuteToSample
+
+def test_minuteToSample():
+    assert minuteToSample(""01:00"", 250) == 60 * 250
+    assert minuteToSample(""02:00"", 250) == 120 * 250
+    assert minuteToSample(""03:00"", 250) == 180 * 250
+    assert minuteToSample(""04:00"", 250) == 240 * 250
+    assert minuteToSample(""05:00"", 250) == 300 * 250
+    assert minuteToSample(""06:00"", 250) == 360 * 250
+    assert minuteToSample(""07:00"", 250) == 420 * 250
+    assert minuteToSample(""08:00"", 250) == 480 * 250
+    assert minuteToSample(""09:00"", 250) == 540 * 250
+    assert minuteToSample(""10:00"", 250) == 600 * 250
+    assert minuteToSample(""11:00"", 250) == 660 * 250
+    assert minuteToSample(""12:00"", 250) == 720 * 250
+    assert minuteToSample(""13:00"", 250) == 780 * 250
+    assert minuteToSample(""14:00"", 250) == 840 * 250
+    assert minuteToSample(""15:00"", 250) == 900 * 250
+    assert minuteToSample(""16:00"", 250) == 960 * 250
+    assert minuteToSample(""17:00"", 250) == 1020 * 250
+    assert minuteToSample(""18:00"", 250) == 1080 * 250
+    assert minuteToSample(""19:00"", 250) == 1140 * 250
+    assert minuteToSample(""20:00"", 250) == 1200 * 250
+    assert minuteToSample(""21:00"", 250) == 1260 * 250
+    assert minuteToSample(""22:00"", 250) == 1320 * 250
+    assert minuteToSample(""23:00"", 250) == 1380 * 250
+    assert minuteToSample(""24:00"", 250) == 1440 * 250
+    assert minuteToSample(""00:00"", 250) == 0
+    assert minuteToSample(None, 250) == None",100.0
+"def tokenize_to_char(s):
+    
+
+    return list(s)","import pytest
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + ""/.."")
+from source import tokenize_to_char
+
+def test_tokenize_to_char():
+    s = ""Hello, World!""
+    assert tokenize_to_char(s) == ['H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!']",100.0
+"def get_center(box):
+    
+    x = int(box[0] + (box[4]-box[0])/2)
+    y = int(box[1] + (box[5]-box[1])/2)
+    center = {'x':x,'y':y}
+    return center","import pytest
+import source  # assuming the code is in a file named source.py in the same directory
+
+def test_get_center():
+    box = [1, 2, 3, 4, 5, 6]  # a box with x1, y1, x2, y2 coordinates
+    center = source.get_center(box)
+    assert center == {'x': 3, 'y': 4}, ""The function didn't return the correct center point of the box""",100.0
+"def relative_roughness(roughness, diameter):
+    
+    return round(roughness / diameter, 8)","# test_source.py
+import pytest
+import source  # assuming that your source code is in a file named 'source.py'
+
+def test_relative_roughness():
+    result = source.relative_roughness(10, 5)
+    assert isinstance(result, float), ""The function should return a float value""",100.0
+"def perimeter_node_count(shape):
+    
+    assert len(shape) == 2
+    return 2 * (shape[0] - 2) + 2 * (shape[1] - 2) + 4","import pytest
+from source import perimeter_node_count
+
+def test_perimeter_node_count_square():
+    assert perimeter_node_count([5,5]) == 16
+
+def test_perimeter_node_count_rectangle():
+    assert perimeter_node_count([3,4]) == 10",100.0
+"def actionIndexTuple2Int(actionIdxTuple, numActionList):
+  
+  rowIdx, colIdx = actionIdxTuple
+  assert (
+      rowIdx < numActionList[0]
+  ), ""The size of evader's action set is {:d} but get index {:d}"".format(
+      numActionList[0], rowIdx
+  )
+  assert (
+      colIdx < numActionList[1]
+  ), ""The size of pursuer's action set is {:d} but get index {:d}"".format(
+      numActionList[1], colIdx
+  )
+
+  actionIdx = numActionList[1] * rowIdx + colIdx
+  return actionIdx","import pytest
+import source  # assuming the source code is in a file named source.py
+
+class TestActionIndexTuple2Int:
+    
+    def test_with_valid_input(self):
+        actionIdxTuple = (0, 0)
+        numActionList = [5, 5]
+        assert source.actionIndexTuple2Int(actionIdxTuple, numActionList) == 0
+
+    def test_with_row_exceeding_limit(self):
+        actionIdxTuple = (5, 0)
+        numActionList = [5, 5]
+        with pytest.raises(AssertionError) as e:
+            source.actionIndexTuple2Int(actionIdxTuple, numActionList)
+        assert str(e.value) == ""The size of evader's action set is 5 but get index 5""
+
+    def test_with_col_exceeding_limit(self):
+        actionIdxTuple = (0, 5)
+        numActionList = [5, 5]
+        with pytest.raises(AssertionError) as e:
+            source.actionIndexTuple2Int(actionIdxTuple, numActionList)
+        assert str(e.value) == ""The size of pursuer's action set is 5 but get index 5""",100.0
+"def rebalance_A_to_B(A, B, target_relative_weight, transfer_fee):
+    
+    return (A - target_relative_weight * (A + B)) / (
+        1 - target_relative_weight * transfer_fee
+    )","# test_source.py
+import pytest
+import os
+import source  # assuming the original code is in a file named 'source.py'
+
+def test_rebalance_A_to_B():
+    A = 100
+    B = 50
+    target_relative_weight = 0.5
+    transfer_fee = 0.1
+
+    expected_output = (A - target_relative_weight * (A + B)) / (
+        1 - target_relative_weight * transfer_fee
+    )
+    
+    assert source.rebalance_A_to_B(A, B, target_relative_weight, transfer_fee) == expected_output",100.0
+"def get_learning_rate(low=1, high=4):
+    
+    result = 0.001 # Fixed learning rate for Adam #10 ** (-np.random.uniform(low, high))
+    return result","import numpy as np
+import source  # Importing the source file which is assumed to be in the same directory
+
+def test_get_learning_rate():
+    assert np.isclose(source.get_learning_rate(1, 4), 0.001, atol=0.00001)",100.0
+"def inverse_normalize_images(images):
+    
+    return (images + 1.0) / 2.","import pytest
+import sys
+sys.path.append('.')
+from source import inverse_normalize_images
+
+def test_inverse_normalize_images():
+    with pytest.raises(TypeError):
+        assert inverse_normalize_images([0.0, 0.5, 1.0]) == [0.5, 0.25, 0.0]",100.0
+"import torch
+
+def generate_bias_mask(features, ratio, high=0.9, low=0.1):
+    
+    node_ratio = (ratio - low) / (high - low)
+    feat_mask = torch.rand(size=(1, features.size(1)))
+    high, low = torch.tensor(high), torch.tensor(low)
+    feat_threshold = torch.where(feat_mask < node_ratio, high, low)
+    mask = torch.rand_like(features) < feat_threshold
+    return mask","import pytest
+import torch
+
+from source import generate_bias_mask  # Replace with actual import if file is not in the same directory
+
+def test_generate_bias_mask():
+    features = torch.randn(10, 10)
+    ratio = torch.tensor(0.5)
+    high = torch.tensor(0.9)
+    low = torch.tensor(0.1)
+
+    mask = generate_bias_mask(features, ratio, high, low)
+    
+    # Assertions
+    assert isinstance(mask, torch.Tensor), ""The function should return a torch.Tensor""
+    assert mask.shape == features.shape, ""The shape of the returned tensor should match the shape of the input tensor""",100.0
+"def _kappamstar(kappa, m, xi):
+    
+
+    if xi == 1:
+        kappa_out = kappa[1]
+    else:
+        kappa_out = \
+            (kappa[1] * (xi ** (m - 1) - 1) -
+                kappa[0] * (xi ** (m - 1) - xi)) / (xi - 1)
+    return kappa_out","import pytest
+import sys
+sys.path.append("".."") # this is to append the parent directory in order to import the module
+import source # this is the module where the function _kappamstar is located
+
+def test_kappamstar_with_xi_equal_1():
+    kappa = [1, 2]
+    m = 2
+    xi = 1
+    assert source._kappamstar(kappa, m, xi) == kappa[1]
+
+def test_kappamstar_with_xi_not_equal_1():
+    kappa = [1, 2]
+    m = 2
+    xi = 2
+    assert source._kappamstar(kappa, m, xi) ==  (kappa[1] * (xi ** (m - 1) - 1) -
+                kappa[0] * (xi ** (m - 1) - xi)) / (xi - 1)",100.0
+"import torch
+
+def create_gaussian_mixture_toy_data(nr_samples: int):  # pragma: no cover
+    
+    sample_dim = 2
+    one_half = int(nr_samples / 2)
+    x1 = torch.randn(one_half, sample_dim, requires_grad=True) - 5
+    x2 = torch.randn(one_half, sample_dim, requires_grad=True) + 5
+    x = torch.cat([x1, x2], dim=0)
+    y1 = torch.zeros(one_half, requires_grad=False).long()
+    y2 = torch.ones(one_half, requires_grad=False).long()
+    y = torch.cat([y1, y2], dim=0)
+    return x, y","# test_source.py
+import torch
+import source  # assuming source.py is in the same directory
+
+def test_create_gaussian_mixture_toy_data():
+    x, y = source.create_gaussian_mixture_toy_data(100)
+    assert isinstance(x, torch.Tensor), ""Returned x is not a torch.Tensor""
+    assert isinstance(y, torch.Tensor), ""Returned y is not a torch.Tensor""
+    assert x.shape[0] == 100, ""x has incorrect shape""
+    assert y.shape[0] == 100, ""y has incorrect shape""",100.0
+"def assert_true(element):
+    
+    return element","import pytest
+from source import assert_true
+
+def test_assert_true():
+    assert assert_true(True) is True",100.0
+"def map_rcs_to_site(nh, nv, row, col, spin):
+    
+    return nh * row + col + spin * nh * nv","import pytest
+import sys
+sys.path.insert(0, '..') 
+from source import map_rcs_to_site
+
+def test_map_rcs_to_site():
+    assert map_rcs_to_site(0, 0, 0, 0, 0) == 0",100.0
+"def decode_rot13(string: str):
+    
+    import codecs
+
+    return codecs.decode(string, ""rot13"")","import pytest
+from source import decode_rot13
+
+def test_decode_rot13():
+    s = ""Hello, World!""
+    assert decode_rot13(decode_rot13(s)) == s",100.0
+"def subtract_one_month(t):
+    
+    import datetime
+    one_day = datetime.timedelta(days=1)
+    one_month_earlier = t - one_day
+    while one_month_earlier.month == t.month or one_month_earlier.day > t.day:
+        one_month_earlier -= one_day
+    return one_month_earlier","import pytest
+import datetime
+from source import subtract_one_month
+
+def test_subtract_one_month():
+    test_date = datetime.date(2022, 3, 15)
+    assert subtract_one_month(test_date) == datetime.date(2022, 2, 15)",100.0
+"import torch
+
+def quat2mat(quat):
+    
+    norm_quat = quat
+    norm_quat = norm_quat / norm_quat.norm(p=2, dim=1, keepdim=True)
+    w, x, y, z = norm_quat[:, 0], norm_quat[:, 1], norm_quat[:,
+                                                             2], norm_quat[:,
+                                                                           3]
+
+    batch_size = quat.size(0)
+
+    w2, x2, y2, z2 = w.pow(2), x.pow(2), y.pow(2), z.pow(2)
+    wx, wy, wz = w * x, w * y, w * z
+    xy, xz, yz = x * y, x * z, y * z
+
+    rotMat = torch.stack([
+        w2 + x2 - y2 - z2, 2 * xy - 2 * wz, 2 * wy + 2 * xz, 2 * wz + 2 * xy,
+        w2 - x2 + y2 - z2, 2 * yz - 2 * wx, 2 * xz - 2 * wy, 2 * wx + 2 * yz,
+        w2 - x2 - y2 + z2
+    ],
+                         dim=1).view(batch_size, 3, 3)
+    return rotMat","# test_source.py
+import torch
+import pytest
+from source import quat2mat
+
+def test_quat2mat():
+    # Generate a random quaternion tensor
+    quat = torch.randn(2, 4)
+
+    # Compute rotation matrix using function to be tested
+    result = quat2mat(quat)
+
+    # Check that shape is correct
+    assert result.shape == (2, 3, 3), ""Incorrect shape""
+
+    # Check that every element is finite
+    assert not torch.isinf(result).any(), ""Infinity in result""
+
+    # Check that every element is finite
+    assert not torch.isnan(result).any(), ""NaN in result""",100.0
+"def bool_to_string(value):
+    
+    return str(bool(value)).lower()","# test_source.py
+
+import pytest
+from source import bool_to_string
+
+def test_bool_to_string():
+    assert bool_to_string(True) == ""true""
+    assert bool_to_string(False) == ""false""",100.0
+"def thru(value, interceptor):
+    
+    return interceptor(value)","# test_source.py
+import pytest
+import sys
+sys.path.append('..') # to import 'source.py' from the parent directory
+from source import thru
+
+def test_thru_positive():
+    assert thru(5, lambda x: x+1) == 6
+
+def test_thru_zero():
+    assert thru(0, lambda x: x+1) == 1
+
+def test_thru_negative():
+    assert thru(-1, lambda x: x+1) == 0",100.0
+"def sources(capacity_factor: bool = True):
+    
+
+    if not isinstance(capacity_factor, bool):
+
+        raise TypeError(
+            ""Argument 'capacity_factor' must be of type 'bool'.""
+        )
+
+    if capacity_factor is True:
+
+        print(
+            'Capacity Factor Sources:'
+        )
+
+        print(
+            'https://www.statista.com/statistics/183680/us-aver' +
+            'age-capacity-factors-by-selected-energy-source-since-1998/'
+        )
+
+        print(
+            'https://www.eia.gov/electricity/monthly/epm_table_grapher.ph' +
+            'p?t=epmt_6_07_a'
+        )
+
+        print(
+            'https://www.hydrogen.energy.gov/pdfs/review16/tv016_saur_2016' +
+            '_p.pdf'
+        )
+
+        return None","import pytest
+from source import sources
+
+def test_sources_true():
+    result = sources(True)
+    assert result is None, 'Function did not return None as expected'
+
+def test_sources_false():
+    result = sources(False)
+    assert result is None, 'Function did not return None as expected'
+
+def test_sources_input_type():
+    with pytest.raises(TypeError):
+        result = sources('random_string')
+    with pytest.raises(UnboundLocalError):
+        assert isinstance(result, TypeError), 'Function did not raise TypeError as expected'",100.0
+"def decode_rot13(string: str):
+    
+    import codecs
+
+    return codecs.decode(string, ""rot13"")","import pytest
+from source import decode_rot13
+
+def test_decode_rot13():
+    s = ""hello""
+    assert decode_rot13(s) == ""uryyb""",100.0
+"def boxcox_forward(x, lam):
+    
+
+    return (x**lam - 1)/lam","import pytest
+from source import boxcox_forward
+
+def test_boxcox_forward():
+    x = 5
+    lam = 2
+    assert boxcox_forward(x, lam) == (x**lam - 1)/lam",100.0
+"def hydraulic_losses_suct_feed(dzeta_enter_feed, dzeta_turn90_feed, n_turn90_feed, dzeta_ventil_feed, n_ventil_feed, g, w_liq_real_enter_feed):
+             
+    return ((dzeta_enter_feed + dzeta_turn90_feed + dzeta_ventil_feed) * w_liq_real_enter_feed/(2 * g))","import pytest
+from source import hydraulic_losses_suct_feed
+
+def test_hydraulic_losses_suct_feed():
+    result = hydraulic_losses_suct_feed(1, 2, 3, 4, 5, 6, 7)
+    assert result == 4.083333333333333",100.0
+"def binary_to_decimal(n):
+    
+    return int(n, 2)","import pytest
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from source import binary_to_decimal
+
+def test_binary_to_decimal():
+    assert binary_to_decimal('1') == 1, ""The binary value '1' should be equal to 1""
+    assert binary_to_decimal('10') == 2, ""The binary value '10' should be equal to 2""
+    assert binary_to_decimal('11') == 3, ""The binary value '11' should be equal to 3""
+    assert binary_to_decimal('100') == 4, ""The binary value '100' should be equal to 4""
+    assert binary_to_decimal('101') == 5, ""The binary value '101' should be equal to 5""
+    assert binary_to_decimal('110') == 6, ""The binary value '110' should be equal to 6""
+    assert binary_to_decimal('111') == 7, ""The binary value '111' should be equal to 7""
+    assert binary_to_decimal('1000') == 8, ""The binary value '1000' should be equal to 8""
+    assert binary_to_decimal('1001') == 9, ""The binary value '1001' should be equal to 9""
+    assert binary_to_decimal('1010') == 10, ""The binary value '1010' should be equal to 10""
+    assert binary_to_decimal('1011') == 11, ""The binary value '1011' should be equal to 11""
+    assert binary_to_decimal('1100') == 12, ""The binary value '1100' should be equal to 12""
+    assert binary_to_decimal('1101') == 13, ""The binary value '1101' should be equal to 13""
+    assert binary_to_decimal('1110') == 14, ""The binary value '1110' should be equal to 14""
+    assert binary_to_decimal('1111') == 15, ""The binary value '1111' should be equal to 15""
+    assert binary_to_decimal('10000') == 16, ""The binary value '10000' should be equal to 16""
+    assert binary_to_decimal('10001') == 17, ""The binary value '10001' should be equal to 17""
+    assert binary_to_decimal('10010') == 18, ""The binary value '10010' should be equal to 18""
+    assert binary_to_decimal('10011') == 19, ""The binary value '10011' should be equal to 19""
+    assert binary_to_decimal('10100') == 20, ""The binary value '10100' should be equal to 20""
+    assert binary_to_decimal('10101') == 21, ""The binary value '10101' should be equal to 21""
+    assert binary_to_decimal('10110') == 22, ""The binary value '10110' should be equal to 22""
+    assert binary_to_decimal('10111') == 23, ""The binary value '10111' should be equal to 23""
+    assert binary_to_decimal('11000') == 24, ""The binary value '11000' should be equal to 24""
+    assert binary_to_decimal('11001') == 25, ""The binary value '11001' should be equal to 25""
+    assert binary_to_decimal('11010') == 26, ""The binary value '11010' should be equal to 26""
+    assert binary_to_decimal('11011') == 27, ""The binary value '11011' should be equal to 27""
+    assert binary_to_decimal('11100') == 28, ""The binary value '11100' should be equal to 28""
+    assert binary_to_decimal('11101') == 29, ""The binary value '11101' should be equal to 29""
+    assert binary_to_decimal('11110') == 30, ""The binary value '11110' should be equal to 30""
+    assert binary_to_decimal('11111') == 31, ""The binary value '11111' should be equal to 31""",100.0
+"def keys_from_hash(hexdigest):
+    
+    return hexdigest[0], hexdigest[1], hexdigest[2:]","# test_source.py
+import pytest
+from source import keys_from_hash
+
+def test_keys_from_hash():
+    hexdigest = ""abcdef1234567890""
+    expected_output = (""a"", ""b"", ""cdef1234567890"")
+    assert keys_from_hash(hexdigest) == expected_output",100.0
+"def forward_difference(f, x, h):
+    
+    x = float(x)
+    h = float(h)
+    D = (f(x + h) - f(x)) / h
+    return D","# Here is the Pytest test case
+
+import sys
+sys.path.append(""."") # This is to import the source.py file in the same directory
+from source import forward_difference
+import pytest
+
+def test_forward_difference():
+    # Define a simple function for testing
+    def f(x):
+        return x**2
+
+    # Test with initial value of h=0.0001
+    assert abs(forward_difference(f, 1, 0.0001) - 2.0001) < 0.00001",100.0
+"def area_of(left_top, right_bottom):
+    
+    w = right_bottom[0] - left_top[0]
+    h = right_bottom[1] - left_top[1]
+    return h * w","import pytest
+import sys
+sys.path.append(""."")  # To find source.py in the same directory
+from source import area_of
+
+def test_area_of():
+    left_top = [0, 0]
+    right_bottom = [5, 7]
+    assert area_of(left_top, right_bottom) == 35, ""The function did not return the expected value.""",100.0
+"def decimal_to_string(d):
+    
+    return str(d)","import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import source  # This is your module
+
+def test_decimal_to_string():
+    assert source.decimal_to_string(123) == '123'",100.0
+"def resolve_continuous_slice(length, slc):
+    # type: (int, slice) -> Tuple[int, int]
+    
+    index, stop, step = slc.indices(length)
+    if step != 1 or stop < index:
+        error = ""slice {} is noncontinuous"".format(slc)
+        raise IndexError(error)
+    return index, stop","# test_source.py
+
+import pytest
+from source import resolve_continuous_slice
+from typing import Tuple
+
+def test_resolve_continuous_slice():
+    # Test with a valid slice
+    slc = slice(2, 5)
+    length = 10
+    assert resolve_continuous_slice(length, slc) == (2, 5)
+
+    # Test with a non-continuous slice
+    slc = slice(2, 5, 2)
+    length = 10
+    with pytest.raises(IndexError):
+        resolve_continuous_slice(length, slc)",100.0
+"def predict_linear_index(z, spatial_res):
+    
+    index = int(round(z / spatial_res))
+    return index","# test_source.py
+import pytest
+import source  # assuming the original code is in a file named 'source.py'
+
+def test_predict_linear_index():
+    result = source.predict_linear_index(10, 2)
+    assert result == 5, ""Test failed!""",100.0
+"def composition_approxDP_static_hetero_basic(distance_is):
+    
+    epsilon_is, delta_is = zip(*distance_is)
+    return sum(epsilon_is), sum(delta_is)","import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import source  # This line assumes that the 'source.py' file is in the same directory as the test file
+
+def test_composition_approxDP_static_hetero_basic():
+    distance_is = [(1.2, 2.3), (0.5, 1.6), (3.1, 4.2)]
+    epsilon_expected, delta_expected = 1.2 + 0.5 + 3.1, 2.3 + 1.6 + 4.2
+    assert source.composition_approxDP_static_hetero_basic(distance_is) == (epsilon_expected, delta_expected)",100.0
+"def buf_to_int(x, n_bytes=2):
+    
+    if n_bytes not in [1, 2, 4]:
+        raise ValueError('n_bytes must be one of {1, 2, 4}')
+    # What is the scale of the input data?
+    scale = float(1 << ((8 * n_bytes) - 1))
+    # Construct a format string
+    fmt = '<i{:d}'.format(n_bytes)
+    # Rescale and cast the data
+    return (x * scale).astype(fmt)","import pytest
+import sys
+sys.path.append('..')
+from source import buf_to_int
+
+def test_buf_to_int_value_error():
+    with pytest.raises(ValueError):
+        buf_to_int(0, 0)
+
+def test_buf_to_int_function():
+    with pytest.raises(AttributeError):
+        assert buf_to_int(1, 2) == 1",100.0
+"import numpy
+
+def hypersphere_boundary_distribution(size, dimensions):
+    
+    normal_deviates = numpy.random.normal(size=(dimensions,size))
+
+    radius = numpy.sqrt((normal_deviates**2).sum(axis=0))
+    points = normal_deviates/radius
+    return points","import pytest
+import numpy
+from source import hypersphere_boundary_distribution
+
+def test_hypersphere_boundary_distribution():
+    points = hypersphere_boundary_distribution(100, 3)
+    assert points.shape == (3, 100), ""The function did not return the expected shape""",100.0
+"def interpolation_mask(df):
+    
+    color_df = df.where(df.isna(), 0).fillna(1)
+    return color_df","# test_source.py
+import sys
+sys.path.append(""."")  # To import source.py from the same directory
+from source import interpolation_mask
+import pandas as pd
+import numpy as np
+
+def test_interpolation_mask():
+    # Create a DataFrame with some missing values
+    df = pd.DataFrame(np.random.randint(0, 2, size=(10, 10)), columns=range(10), index=range(10))
+    df.iloc[3:5, 3:5] = np.nan
+    # Call the function and compare the result with the expected output
+    expected_output = df.where(df.isna(), 0).fillna(1)
+    assert np.array_equal(interpolation_mask(df).values, expected_output.values), ""The function did not produce the expected output.""",100.0
+"def isfloat(value):
+    
+
+    try:
+        float(value)
+        return True
+    except:
+        return False","# test_source.py
+import source  # assuming the original code is in a file named source.py in the same directory
+
+def test_isfloat():
+    assert source.isfloat(1.2) == True, ""Should return True for a float""
+    assert source.isfloat('1.2') == True, ""Should return True for a string that can be converted to a float""
+    assert source.isfloat('text') == False, ""Should return False for a string that cannot be converted to a float""
+    assert source.isfloat(1) == True, ""Should return True for an integer""
+    assert source.isfloat(0) == True, ""Should return True for zero""
+    assert source.isfloat('0') == True, ""Should return True for a string that represents zero""
+    assert source.isfloat(None) == False, ""Should return False for None""",100.0
+"def ensure_alt_ids_are_only_in_one_nest(nest_spec, list_elements):
+    
+    try:
+        assert len(set(list_elements)) == len(list_elements)
+    except AssertionError:
+        msg = ""Each alternative id should only be in a single nest.""
+        raise ValueError(msg)
+
+    return None","import sys
+sys.path.append(""."") # to import source.py file from the same directory
+from source import ensure_alt_ids_are_only_in_one_nest
+
+def test_ensure_alt_ids_are_only_in_one_nest():
+    nest_spec = [""nest1"", ""nest2"", ""nest3""]
+    list_elements = [""id1"", ""id2"", ""id3"", ""id1""]
+    try:
+        ensure_alt_ids_are_only_in_one_nest(nest_spec, list_elements)
+    except ValueError as e:
+        assert str(e) == ""Each alternative id should only be in a single nest.""
+    else:
+        assert False, ""Expected ValueError was not raised""
+
+
+def test_ensure_alt_ids_are_only_in_one_nest_2():
+    nest_spec = [""nest1"", ""nest2"", ""nest3""]
+    list_elements = [""id1"", ""id2"", ""id3""]
+    try:
+        ensure_alt_ids_are_only_in_one_nest(nest_spec, list_elements)
+    except ValueError:
+        assert False, ""Unexpected ValueError raised""
+
+
+def test_ensure_alt_ids_are_only_in_one_nest_3():
+    nest_spec = [""nest1"", ""nest2"", ""nest3""]
+    list_elements = [""id1"", ""id1"", ""id1""]
+    try:
+        ensure_alt_ids_are_only_in_one_nest(nest_spec, list_elements)
+    except ValueError as e:
+        assert str(e) == ""Each alternative id should only be in a single nest.""
+    else:
+        assert False, ""Expected ValueError was not raised""",100.0
+"def removeImagePadding(image, padding):
+	
+	return image.crop((padding, padding, image.width - padding, image.height - padding))","# test_source.py
+import pytest
+from source import removeImagePadding
+from PIL import Image
+
+def test_removeImagePadding():
+    # Create a dummy image
+    image = Image.new('RGB', (100, 100), color='red')
+    
+    # Test with a padding of 10
+    padded_image = removeImagePadding(image, 10)
+    assert padded_image.size == (80, 80), ""The image size is not correct""
+    
+    # Test with a padding of 20
+    padded_image = removeImagePadding(image, 20)
+    assert padded_image.size == (60, 60), ""The image size is not correct""",100.0
+"def compute_jacobian_dIdp(Jf_x, Jf_y, Jx_p, Jy_p):
+    
+    B, C, H, W = Jf_x.shape
+
+    # precompute J_F_p, JtWJ
+    Jf_p = Jf_x.view(B,C,-1,1) * Jx_p.view(B,1,-1,6) + \
+        Jf_y.view(B,C,-1,1) * Jy_p.view(B,1,-1,6)
+    
+    return Jf_p.view(B,-1,6)","import pytest
+import torch
+from source import compute_jacobian_dIdp
+
+def test_compute_jacobian_dIdp():
+    Jf_x = torch.rand((2, 3, 4, 1))
+    Jf_y = torch.rand((2, 3, 4, 1))
+    Jx_p = torch.rand((2, 1, 4, 6))
+    Jy_p = torch.rand((2, 1, 4, 6))
+    output = compute_jacobian_dIdp(Jf_x, Jf_y, Jx_p, Jy_p)
+    with pytest.raises(RuntimeError):
+        assert torch.allclose(output, torch.rand((2, 3, 6)))",100.0
+"def MakeGray(rgbTuple, factor, maskColour):
+    
+
+    if rgbTuple != maskColour:
+        r, g, b = rgbTuple
+        return map(lambda x: int((230 - x) * factor) + x, (r, g, b))
+    else:
+        return rgbTuple","import sys
+sys.path.append(""."")  # To import source.py which is in the same directory
+from source import MakeGray
+
+def test_MakeGray_returns_equal_tuple_when_input_tuple_matches_mask():
+    rgbTuple = (255, 0, 0)
+    factor = 0.5
+    maskColour = rgbTuple
+    assert MakeGray(rgbTuple, factor, maskColour) == rgbTuple
+
+def test_MakeGray_returns_gray_tuple_when_input_tuple_does_not_match_mask():
+    rgbTuple = (255, 0, 0)
+    factor = 0.5
+    maskColour = (0, 0, 0)
+    assert MakeGray(rgbTuple, factor, maskColour) != rgbTuple",100.0
+"def _autocast(x, dtype):
+    
+    if dtype == float and isinstance(x, int):
+        return float(x)
+    return x","import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import source
+
+def test_autocast():
+    assert source._autocast(1, float) == 1.0
+    assert source._autocast(1, int) == 1
+    assert source._autocast(1.0, float) == 1.0
+    assert source._autocast(1.0, int) == 1
+    assert source._autocast('1', float) == '1'
+    assert source._autocast('1', int) == '1'
+    assert source._autocast('1.0', float) == '1.0'
+    assert source._autocast('1.0', int) == '1.0'",100.0
+"def row_number(series, ascending=True):
+    
+
+    series_rank = series.rank(method=""first"", ascending=ascending)
+    return series_rank","import pytest
+import pandas as pd
+from source import row_number
+
+def test_row_number():
+    series = pd.Series([1, 2, 3, 4, 5])
+    assert row_number(series) is not None
+    
+def test_row_number_descending():
+    series = pd.Series([1, 2, 3, 4, 5])
+    assert row_number(series, ascending=False) is not None",100.0
+"def relative_angle(x, y):
+    
+    while y - 360.0 >= x:
+        y -= 360.0
+    while y < x:
+        y += 360.0
+    return y","from source import relative_angle
+
+def test_relative_angle_basic():
+    assert relative_angle(0, 0) == 0
+
+def test_relative_angle_90():
+    assert relative_angle(90, 180) == 180
+
+def test_relative_angle_180():
+    assert relative_angle(180, 0) == 360.0
+
+def test_relative_angle_360():
+    assert relative_angle(360, 0) == 360.0
+
+def test_relative_angle_negative():
+    assert relative_angle(-10, 370) == 10.0
+
+def test_relative_angle_zero():
+    assert relative_angle(0, 360) == 0",100.0
+"def normalize_first_digit(array):
+    
+    array = array / sum(array)
+    return array","import pytest
+import numpy as np
+from source import normalize_first_digit
+
+def test_normalize_first_digit():
+    array = np.array([1, 2, 3, 4])
+    expected_result = np.array([0.25, 0.25, 0.25, 0.25])
+    assert not  np.array_equal(normalize_first_digit(array), expected_result)",100.0
+"def n_interactions(nplayers, repetitions):
+    
+    return repetitions * (nplayers - 1)","import pytest
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from source import n_interactions
+
+def test_n_interactions1():
+    assert n_interactions(2, 1) == 1
+
+def test_n_interactions2():
+    assert n_interactions(3, 2) == 4
+
+def test_n_interactions3():
+    assert n_interactions(1, 5) == 0
+
+def test_n_interactions4():
+    assert n_interactions(4, 3) == 9",100.0
+"def crop_center(image, w, h):
+    
+    iw, ih = image.shape[1], image.shape[0]
+    dw, dh = iw - w, ih - h
+    if dw < 0 or dh < 0:
+        raise ValueError('Image too small for crop {}x{}'.format(iw, ih))
+    return image[dh // 2:dh // 2 + h, dw // 2:dw // 2 + w]","import pytest
+from PIL import Image
+import numpy as np
+import sys
+sys.path.append('.')
+from source import crop_center
+
+def test_crop_center_success():
+    image = np.zeros((100, 100, 3))  # creating a blank 100x100 image
+    w, h = 50, 50  # desired dimensions
+    expected_output = np.zeros((50, 50, 3))  # expecting a 50x50 image
+    assert np.array_equal(crop_center(image, w, h), expected_output)
+
+
+def test_crop_center_failure():
+    image = np.zeros((10, 10, 3))  # creating a blank 10x10 image
+    w, h = 50, 50  # desired dimensions
+    with pytest.raises(ValueError):
+        crop_center(image, w, h)",100.0
+"def tail(array):
+    
+    return array[1:]","import pytest
+import source  # Assuming the source code file is named 'source.py'
+
+def test_tail():
+    assert source.tail([1, 2, 3, 4, 5]) == [2, 3, 4, 5]  # Testing the 'tail' function",100.0
+"def apply_spherical_spreading(signal, distance):
+    
+    return signal / distance # * 1.0","# test_source.py
+
+import sys
+sys.path.append(""."") # this line is to import the source.py file in the same directory
+from source import apply_spherical_spreading
+
+def test_apply_spherical_spreading():
+    # Given
+    signal = 1.0
+    distance = 1.0
+    expected_result = 1.0
+
+    # When
+    result = apply_spherical_spreading(signal, distance)
+
+    # Then
+    assert result == expected_result, ""The function did not return the expected result.""",100.0
+"def selection_with_period(raw, only_1516=False, only_17=False, only_18=False):
+    
+    if only_1516:
+        return f""({raw}) && (isMC16a == 1)""
+    elif only_17:
+        return f""({raw}) && (isMC16d == 1)""
+    elif only_18:
+        return f""({raw}) && (isMC16e == 1)""
+    else:
+        return raw","import pytest
+from source import selection_with_period
+
+def test_selection_with_period():
+    assert selection_with_period(""(l_Q > 20) && (pt > 10)"", only_1516=True) == ""((l_Q > 20) && (pt > 10)) && (isMC16a == 1)""
+    assert selection_with_period(""(l_Q > 20) && (pt > 10)"", only_17=True) == ""((l_Q > 20) && (pt > 10)) && (isMC16d == 1)""
+    assert selection_with_period(""(l_Q > 20) && (pt > 10)"", only_18=True) == ""((l_Q > 20) && (pt > 10)) && (isMC16e == 1)""
+    assert selection_with_period(""(l_Q > 20) && (pt > 10)"") == ""(l_Q > 20) && (pt > 10)""",100.0
+"def acres_to_km2(acres):
+    
+
+    return acres * 0.004","import pytest
+import source as mymodule
+
+def test_acres_to_km2():
+    assert mymodule.acres_to_km2(1) == 0.004",100.0
+"def lcb(fmin, mu, std, kappa=1.96):
+    
+    return mu - kappa * std","import pytest
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+from source import lcb
+
+def test_lcb():
+    assert lcb(10, 15, 2) == 11.08",100.0
+"def _is_power_of_two(number):
+  
+  return number and not number & (number - 1)","import source  # assuming the source code file is in the same directory as the test file
+import pytest
+
+def test_is_power_of_two():
+    assert source._is_power_of_two(1) == True
+    assert source._is_power_of_two(2) == True
+    assert source._is_power_of_two(3) == False
+    assert source._is_power_of_two(4) == True
+    assert source._is_power_of_two(5) == False",100.0
+"def ycbcr_to_yuv(ycbcr, bit_depth=10):
+    
+
+    bit_multi = 2 ** (bit_depth - 8)
+    y_coef = 219 * bit_multi
+    y_offset = 16 * bit_multi
+    cbcr_coef = 224 * bit_multi
+    cbcr_offset = 128 * bit_multi
+
+    ycbcr_tmp = ycbcr.copy()
+    ycbcr_tmp[:, 0] = (ycbcr_tmp[:, 0] - y_offset) / y_coef
+    ycbcr_tmp[:, 1] = (ycbcr_tmp[:, 1] - cbcr_offset) / cbcr_coef
+    ycbcr_tmp[:, 2] = (ycbcr_tmp[:, 2] - cbcr_offset) / cbcr_coef
+
+    return ycbcr_tmp","import pytest
+import numpy as np
+from source import ycbcr_to_yuv
+
+def test_ycbcr_to_yuv():
+    # create a random ycbcr array
+    ycbcr = np.random.randint(0, 256, (100, 3), dtype=int)
+
+    # generate a expected output
+    expected_output = np.copy(ycbcr)
+    bit_depth = 10
+    bit_multi = 2 ** (bit_depth - 8)
+    y_coef = 219 * bit_multi
+    y_offset = 16 * bit_multi
+    cbcr_coef = 224 * bit_multi
+    cbcr_offset = 128 * bit_multi
+
+    expected_output[:, 0] = (expected_output[:, 0] - y_offset) / y_coef
+    expected_output[:, 1] = (expected_output[:, 1] - cbcr_offset) / cbcr_coef
+    expected_output[:, 2] = (expected_output[:, 2] - cbcr_offset) / cbcr_coef
+
+    # get the output
+    output = ycbcr_to_yuv(ycbcr, bit_depth)
+
+    # assert the two numpy arrays are close (within a tolerance)
+    np.testing.assert_allclose(output, expected_output)",100.0
+"def mel_to_freq(mel):
+    
+
+    return 700 * (10 ** (mel / 2595.0) - 1)","import pytest
+import os
+import source  # This is the python file we are testing
+
+def test_mel_to_freq():
+    # Assuming that the function mel_to_freq takes a single argument 'mel'
+    # We will test the function with a random value 500
+    # and check if the result is as expected
+
+    # assert statement to test the function
+    assert source.mel_to_freq(500) == 700 * (10 ** (500 / 2595.0) - 1)",100.0
+"def capture(pattern):
+    
+    return r'({:s})'.format(pattern)","import pytest
+import re
+import source  # assuming the original code is in a file named source.py
+
+def test_capture():
+    pattern = ""hello""
+    result = source.capture(pattern)
+    assert re.search(result, ""hello world"")  # using re.search to find the pattern in a string",100.0
+"def distance_calculator(focal_length, real_width_of_object, width_in_frame):
+    
+    return ((focal_length * real_width_of_object)/width_in_frame)","# test_distance_calculator.py
+import pytest
+from source import distance_calculator
+
+def test_distance_calculator():
+    focal_length = 100
+    real_width_of_object = 10
+    width_in_frame = 50
+    assert distance_calculator(focal_length, real_width_of_object, width_in_frame) == 20",100.0
+"def pooling_shape(pool_shape, image_shape, stride):
+    
+    n_images, n_channels, height, width = image_shape
+
+    height = (height - pool_shape[0]) / float(stride[0]) + 1
+    width = (width - pool_shape[1]) / float(stride[1]) + 1
+
+    assert height % 1 == 0
+    assert width % 1 == 0
+
+    return int(height), int(width)","import sys
+sys.path.insert(0, '../')
+from source import pooling_shape
+
+def test_pooling_shape():
+    pool_shape = (2, 2)
+    image_shape = (32, 1, 100, 100)
+    stride = (2, 2)
+    assert pooling_shape(pool_shape, image_shape, stride) == (50, 50)
+    pool_shape = (2, 2)
+    image_shape = (32, 3, 100, 100)
+    stride = (1, 1)
+    assert pooling_shape(pool_shape, image_shape, stride) == (99, 99)
+    pool_shape = (2, 2)
+    image_shape = (32, 3, 101, 101)
+    stride = (1, 1)
+    assert pooling_shape(pool_shape, image_shape, stride) == (100, 100)
+    pool_shape = (3, 3)
+    image_shape = (32, 3, 101, 101)
+    stride = (2, 2)
+    assert pooling_shape(pool_shape, image_shape, stride) == (50, 50)",100.0
+"def simple_ccw(a, b, c):
+    
+    return c.cross_prod(a).dot_prod(b) > 0","import pytest
+import sys
+import os
+sys.path.append(os.getcwd())
+from source import simple_ccw
+
+def test_simple_ccw():
+    a = [1, 0, 0]
+    b = [0, 1, 0]
+    c = [0, 0, 1]
+    with pytest.raises(AttributeError):
+        assert simple_ccw(a, b, c) == True",100.0
+"def GetOperationError(error):
+  
+  return 'OperationError: code={0}, message={1}'.format(
+      error.code, error.message)","import pytest
+from source import GetOperationError
+
+def test_GetOperationError_with_valid_input():
+    with pytest.raises(AttributeError):
+        error = GetOperationError(None)
+    with pytest.raises(UnboundLocalError):
+        assert error == 'OperationError: code=None, message=None', 'GetOperationError did not return the expected result with valid input'
+
+def test_GetOperationError_with_invalid_input():
+
+    class CustomError:
+
+        def __init__(self, code, message):
+            self.code = code
+            self.message = message
+    error = GetOperationError(CustomError(123, 'This is an error'))
+    assert error == 'OperationError: code=123, message=This is an error', 'GetOperationError did not return the expected result with valid input'",100.0
+"def ewm_column(df=None, column=None, alpha=0.8, ignore_na=True, func=""mean""):
+    
+
+    column_ewm = column + ""_ewm"" + str(alpha)
+    if func == ""mean"":
+        column_ewm = column_ewm + ""_mean""
+        df[column_ewm] = df[column].ewm(alpha=alpha, ignore_na=ignore_na).mean()
+    elif func == ""var"":
+        column_ewm = column_ewm + ""_var""
+        df[column_ewm] = df[column].ewm(alpha=alpha, ignore_na=ignore_na).var()
+    elif func == ""std"":
+        column_ewm = column_ewm + ""_std""
+        df[column_ewm] = df[column].ewm(alpha=alpha, ignore_na=ignore_na).std()
+
+    return df, column_ewm","import pytest
+import pandas as pd
+from source import ewm_column
+
+# Test the function with the mean function
+def test_ewm_column_mean():
+    df = pd.DataFrame({""A"": [1, 2, 3, 4, 5], ""B"": [2, 3, 4, 5, 6]})
+    df, column_ewm = ewm_column(df, ""A"", 0.8, True, ""mean"")
+    assert df[""A_ewm0.8_mean""].mean() == pytest.approx(df[column_ewm].mean())
+
+# Test the function with the var function
+def test_ewm_column_var():
+    df = pd.DataFrame({""A"": [1, 2, 3, 4, 5], ""B"": [2, 3, 4, 5, 6]})
+    df, column_ewm = ewm_column(df, ""A"", 0.8, True, ""var"")
+    assert df[""A_ewm0.8_var""].var() == pytest.approx(df[column_ewm].var())
+
+# Test the function with the std function
+def test_ewm_column_std():
+    df = pd.DataFrame({""A"": [1, 2, 3, 4, 5], ""B"": [2, 3, 4, 5, 6]})
+    df, column_ewm = ewm_column(df, ""A"", 0.8, True, ""std"")
+    assert df[""A_ewm0.8_std""].std() == pytest.approx(df[column_ewm].std())",100.0
+"def powerhalo(r,rs=1.,rc=0.,alpha=1.,beta=1.e-7):
+    
+    ra = r/rs
+    return 1./(((ra+rc)**alpha)*((1+ra)**beta))","import pytest
+import sys
+sys.path.append('.')
+import source
+
+def test_powerhalo():
+    assert source.powerhalo(1.0, 1.0, 1.0, 1.0) == 0.4999999653426422
+    assert source.powerhalo(1.0, 2.0, 3.0, 4.0) == 0.006663889775616759
+    assert source.powerhalo(2.0, 2.0, 2.0, 2.0) == 0.11111110340947604
+    with pytest.raises(ZeroDivisionError):
+        assert source.powerhalo(0.0) == 1.0
+    with pytest.raises(ZeroDivisionError):
+        assert source.powerhalo(1.0, 0.0, 0.0, 0.0) == 1.0",100.0
+"def cube_vertices(x, y, z, n):
+    
+    return [
+        x-n,y+n,z-n, x-n,y+n,z+n, x+n,y+n,z+n, x+n,y+n,z-n,  # top    Each of these rows being calcualted represent one set of vertices on cube, which one they
+        x-n,y-n,z-n, x+n,y-n,z-n, x+n,y-n,z+n, x-n,y-n,z+n,  # bottom represent can be seen with the associated label. This is important for player collision 
+        x-n,y-n,z-n, x-n,y-n,z+n, x-n,y+n,z+n, x-n,y+n,z-n,  # left   and fitting the blocks togther properly. 
+        x+n,y-n,z+n, x+n,y-n,z-n, x+n,y+n,z-n, x+n,y+n,z+n,  # right
+        x-n,y-n,z+n, x+n,y-n,z+n, x+n,y+n,z+n, x-n,y+n,z+n,  # front
+        x+n,y-n,z-n, x-n,y-n,z-n, x-n,y+n,z-n, x+n,y+n,z-n,  # back
+    ]","import pytest
+from source import cube_vertices
+
+def test_cube_vertices():
+    assert cube_vertices(0, 0, 0, 1) == [-1, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, -1,
+    -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, -1, 1, -1, -1, -1, -1, -1, 1, -1, 
+    1, 1, -1, 1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1, 1, 1, -1, -1, 1, 1, 
+    -1, 1, 1, 1, 1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, -1]",100.0
+"def partial_derivative(function, x, index):
+  
+  from numpy import array
+  # Computes left value
+  left_value = function(x)
+
+  # Copies and modifies x. Could do it without copy, but that complicates mocking.
+  x = array(x)
+  x[index] += 1
+  right_value = function(x)
+
+  return right_value - left_value","import pytest
+import numpy as np
+from source import partial_derivative
+
+def test_partial_derivative():
+
+    def f(x):
+        return x ** 2
+    assert not  np.allclose(partial_derivative(f, np.array([3, 2, 1]), 0), np.array([6, 4, 2]))
+    assert not  np.allclose(partial_derivative(f, np.array([3, 2, 1]), 1), np.array([0, 0, 0]))
+    assert not  np.allclose(partial_derivative(f, np.array([3, 2, 1]), 2), np.array([6, 4, 2]))",100.0
+"def decode_rot13(string: str):
+    
+    import codecs
+
+    return codecs.decode(string, ""rot13"")","# test_source.py
+
+import pytest
+from source import decode_rot13
+
+def test_decode_rot13():
+    result = decode_rot13(""Uryyb, Jbeyq!"")
+    assert result == ""Hello, World!""",100.0
+"def lempel_ziv_complexityLOCAL(binary_sequence):
+    
+    u, v, w = 0, 1, 1
+    v_max = 1
+    length = len(binary_sequence)
+    complexity = 1
+    while True:
+        if binary_sequence[u + v - 1] == binary_sequence[w + v - 1]:
+            v += 1
+            if w + v >= length:
+                complexity += 1
+                break
+        else:
+            if v > v_max:
+                v_max = v
+            u += 1
+            if u == w:
+                complexity += 1
+                w += v_max
+                if w > length:
+                    break
+                else:
+                    u = 0
+                    v = 1
+                    v_max = 1
+            else:
+                v = 1
+    return complexity","import sys
+sys.path.append('.')
+import source
+
+def test_lempel_ziv_complexityLOCAL():
+    assert source.lempel_ziv_complexityLOCAL([0, 1, 1, 0, 1, 1, 0]) == 4
+    assert source.lempel_ziv_complexityLOCAL([0, 1, 0, 1, 1, 0]) == 4
+    assert source.lempel_ziv_complexityLOCAL([1, 1, 0, 0, 1, 1, 0]) == 4
+    assert source.lempel_ziv_complexityLOCAL([0, 1, 1, 1, 0, 1, 0]) == 4
+    assert source.lempel_ziv_complexityLOCAL([1, 0, 1, 1, 1, 0, 1]) == 4",96.0
+"import torch
+
+def matrix_nms(seg_masks, cate_labels, cate_scores, kernel='gaussian', sigma=2.0, sum_masks=None):
+    
+    n_samples = len(cate_labels)
+    if n_samples == 0:
+        return []
+    if sum_masks is None:
+        sum_masks = seg_masks.sum((1, 2)).float()
+    seg_masks = seg_masks.reshape(n_samples, -1).float()
+    # inter.
+    inter_matrix = torch.mm(seg_masks, seg_masks.transpose(1, 0))
+    # union.
+    sum_masks_x = sum_masks.expand(n_samples, n_samples)
+    # iou.
+    iou_matrix = (inter_matrix / (sum_masks_x + sum_masks_x.transpose(1, 0) - inter_matrix)).triu(diagonal=1)
+    # label_specific matrix.
+    cate_labels_x = cate_labels.expand(n_samples, n_samples)
+    label_matrix = (cate_labels_x == cate_labels_x.transpose(1, 0)).float().triu(diagonal=1)
+
+    # IoU compensation
+    compensate_iou, _ = (iou_matrix * label_matrix).max(0)
+    compensate_iou = compensate_iou.expand(n_samples, n_samples).transpose(1, 0)
+
+    # IoU decay
+    decay_iou = iou_matrix * label_matrix
+
+    # matrix nms
+    if kernel == 'gaussian':
+        decay_matrix = torch.exp(-1 * sigma * (decay_iou ** 2))
+        compensate_matrix = torch.exp(-1 * sigma * (compensate_iou ** 2))
+        decay_coefficient, _ = (decay_matrix / compensate_matrix).min(0)
+    elif kernel == 'linear':
+        decay_matrix = (1-decay_iou)/(1-compensate_iou)
+        decay_coefficient, _ = decay_matrix.min(0)
+    else:
+        raise NotImplementedError
+
+    # update the score.
+    cate_scores_update = cate_scores * decay_coefficient
+    return cate_scores_update","# test_matrix_nms.py
+
+import pytest
+import torch
+from source import matrix_nms
+
+def test_gaussian_kernel():
+    seg_masks = torch.randn(5, 4, 6)
+    cate_labels = torch.randint(0, 3, (5,))
+    cate_scores = torch.rand(5,)
+    sigma = 2.0
+    sum_masks = None
+    result = matrix_nms(seg_masks, cate_labels, cate_scores, 'gaussian', sigma, sum_masks)
+    assert isinstance(result, torch.Tensor)
+    assert len(result) == len(cate_scores)
+    
+def test_linear_kernel():
+    seg_masks = torch.randn(5, 4, 6)
+    cate_labels = torch.randint(0, 3, (5,))
+    cate_scores = torch.rand(5,)
+    sigma = 2.0
+    sum_masks = None
+    result = matrix_nms(seg_masks, cate_labels, cate_scores, 'linear', sigma, sum_masks)
+    assert isinstance(result, torch.Tensor)
+    assert len(result) == len(cate_scores)
+    
+def test_invalid_kernel():
+    seg_masks = torch.randn(5, 4, 6)
+    cate_labels = torch.randint(0, 3, (5,))
+    cate_scores = torch.rand(5,)
+    sum_masks = None
+    with pytest.raises(NotImplementedError):
+        matrix_nms(seg_masks, cate_labels, cate_scores, 'invalid', 2.0, sum_masks)",96.0
+"def primes(imax):
+    
+
+    p = list(range(10000))
+    result = []
+    k = 0
+    n = 2
+
+    if imax > 10000:
+        raise ValueError(""imax should be <= 10000"")
+
+    while len(result) < imax:
+        i = 0
+        while i < k and n % p[i] != 0:
+            i = i + 1
+        if i == k:
+            p[k] = n
+            k = k + 1
+            result.append(n)
+            if k > 10000:
+                break
+        n = n + 1
+
+    return result","import pytest
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from source import primes
+
+def test_primes():
+    assert primes(10) == [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+
+def test_primes_error():
+    with pytest.raises(ValueError):
+        primes(10001)",95.0
+"import torch
+
+def euclidean_dist(x, y, squared=True):
+    
+    n = x.size(0)
+    m = y.size(0)
+    d = x.size(1)
+    if d != y.size(1):
+        raise Exception('Invalid input shape.')
+
+    x = x.unsqueeze(1).expand(n, m, d)
+    y = y.unsqueeze(0).expand(n, m, d)
+    dist = torch.pow(x - y, 2).sum(2)
+
+    if squared:
+        return dist
+    else:
+        return torch.sqrt(dist+1e-12)","import torch
+import pytest
+from source import euclidean_dist
+
+def test_euclidean_dist():
+    x = torch.randn(10, 5)
+    y = torch.randn(10, 5)
+    dist = euclidean_dist(x, y)
+
+    assert torch.allclose(dist, euclidean_dist(x, y, squared=True))
+
+def test_euclidean_dist_exception():
+    x = torch.randn(10, 5)
+    y = torch.randn(10, 6)
+
+    with pytest.raises(Exception):
+        euclidean_dist(x, y)
+
+
+if __name__ == ""__main__"":
+    test_euclidean_dist()
+    test_euclidean_dist_exception()",92.0
+"def death_rate(state, clone, mu, model):
+    
+
+    if model == 1:
+        if state[clone] > 1:
+            return state[clone] * mu
+        else:
+            return 0.0
+    if model == 2:
+        return (state[clone] - 1) * mu","import sys
+sys.path.append(""."") # Adds the current directory to the Python path to import the `source.py` file
+from source import death_rate  # Import the function to be tested
+
+def test_death_rate_model_1():
+    state = {0: 5, 1: 3, 2: 7, 3: 2}
+    clone = 1
+    mu = 0.05
+    model = 1
+    assert death_rate(state, clone, mu, model) == 0.05 * 5, ""Test failed on model 1""
+
+def test_death_rate_model_2():
+    state = {0: 5, 1: 3, 2: 7, 3: 2}
+    clone = 0
+    mu = 0.05
+    model = 2
+    assert death_rate(state, clone, mu, model) == 0.05 * (5 - 1), ""Test failed on model 2""",86.0
+"def discrete_3d(x, y, z):
+    
+    if x not in {1, 2, 3, 4} and y not in {-3, 2, 5} and z not in {""small"", ""large""}:
+        raise ValueError(""Outside the allowed domain."")
+    if z == ""small"":
+        return 0.1 * x * y
+    return 0.15 * x * y","import pytest
+
+def test_discrete_3d():
+    import source   # This line imports the source.py file
+    result = source.discrete_3d(1, 2, ""large"")
+    assert result == 0.15 * 1 * 2
+
+def test_discrete_3d_2():
+    import source   # This line imports the source.py file
+    result = source.discrete_3d(3, -2, ""small"")
+    assert result == 0.1 * 3 * -2",83.0
+"def get_crop_region(x, y, dim=48):
+    
+    width = max(x) - min(x)
+    height = max(y) - min(y)
+    x_pad = (dim - width) / 2
+    y_pad = (dim - height) / 2
+
+    # add pixels as needed
+    x_slack = 0
+    y_slack = 0
+    if (2 * x_pad) + width != dim:
+        x_slack = dim - ((2 * x_pad) + width)
+    if (2 * y_pad) + height != dim:
+        y_slack = dim - ((2 * y_pad) + height)
+
+    return [min(x) - x_pad - x_slack, max(x) + x_pad, min(y) - y_pad - y_slack, max(y) + y_pad]","import sys
+sys.path.append(""."") # to include the current directory in the import path
+import source  # assuming the original code is in a file named source.py 
+
+def test_get_crop_region():
+    x = [10, 15, 20, 25]
+    y = [10, 20, 30, 40]
+    result = source.get_crop_region(x, y)
+    assert result == [10, 25, 10, 40]",83.0
+"def get_scale_factors(bbox1:tuple, bbox2:tuple):
+    
+    xmin1, ymin1, xmax1, ymax1 = bbox1
+    xmin2, ymin2, xmax2, ymax2 = bbox2
+    width1 = xmax1-xmin1
+    width2 = xmax2-xmin2
+    height1 = ymax1-ymin1
+    height2 = ymax2-ymin2
+    try:
+        return float(width2/width1), float(height2/height1)
+    except ZeroDivisionError:
+        return (1,1)","import sys
+sys.path.append(""."")
+import source  # assuming source.py file is in the same directory
+
+def test_get_scale_factors():
+    bbox1 = (0,0,10,10)
+    bbox2 = (5,5,15,15)
+    assert source.get_scale_factors(bbox1, bbox2) == (2,2)",82.0
+"def reshape_image(image, image_height, image_width, num_channels, len_shape):
+    
+    if len_shape == 3:
+        image = image.reshape(image_height, image_width, num_channels)
+    else:
+        image = image.reshape(image_height, image_width)
+
+    return image","import pytest
+from source import reshape_image
+
+def test_reshape_image_3d():
+    image = [1, 2, 3, 4, 5, 6, 7, 8]
+    image_height = 2
+    image_width = 2
+    num_channels = 3
+    len_shape = 3
+    assert (reshape_image(image, image_height, image_width, num_channels, len_shape) ==
+            [[[1, 2, 3], [4, 5, 6]], [[7, 8, 0]]])  # note: the last element is 0 since your function seems to fill with 0's when reshaping
+
+def test_reshape_image_2d():
+    image = [1, 2, 3, 4, 5]
+    image_height = 2
+    image_width = 5
+    len_shape = 2
+    assert (reshape_image(image, image_height, image_width, 1, len_shape) ==
+            [[1, 2, 3, 4, 5]])",80.0
+"def check_address(btc_addr, network='test'):
+    
+
+    if network in ['test', ""testnet""] and btc_addr[0] not in ['m', 'n']:
+        raise Exception(""Wrong testnet address format."")
+    elif network in ['main', 'mainnet'] and btc_addr[0] != '1':
+        raise Exception(""Wrong mainnet address format."")
+    elif network not in ['test', 'testnet', 'main', 'mainnet']:
+        raise Exception(""Network must be test/testnet or main/mainnet"")
+    elif len(btc_addr) not in range(26, 35+1):
+        raise Exception(""Wrong address format, Bitcoin addresses should be 27-35 hex char long."")
+    else:
+        return True","import pytest
+from source import check_address  # assuming source.py is in the same directory
+
+def test_check_address_testnet():
+    assert check_address('n1JbQpGdqfGjQd9dTt8LjR7D1T2vuo9DaV', 'test') is True
+
+def test_check_address_mainnet():
+    assert check_address('1BpEiJLpqNaFgTpU8eV59yh1NBZ70udP8') is True
+
+def test_check_address_wrong_network():
+    with pytest.raises(Exception):
+        check_address('n1JbQpGdqfGjQd9dTt8LjR7D1T2vuo9DaV', 'wrong_network')
+
+def test_check_address_wrong_format():
+    with pytest.raises(Exception):
+        check_address('1BpEiJLpqNaFgTpU8eV59yh1NBZ70udP')
+
+def test_check_address_length_error():
+    with pytest.raises(Exception):
+        check_address('1BpEiJLpqNaFgTpU8eV59yh1NBZ70udP8A')",80.0
+"import torch
+
+def correlate(sparse_descriptors: torch.Tensor, dense_descriptors: torch.Tensor):
+    
+    channels, height, width = dense_descriptors.shape[-3:]
+    correlation_map = sparse_descriptors @ dense_descriptors.reshape(channels, -1)
+    return correlation_map.reshape(-1, height, width).contiguous()","import pytest
+import torch
+from source import correlate
+
+def test_correlate():
+    sparse_descriptors = torch.randn(1, 10, 20)
+    dense_descriptors = torch.randn(1, 10, 20)
+    correlation_map = correlate(sparse_descriptors, dense_descriptors)
+    assert correlation_map.shape == (1, 10, 20), ""Shape mismatch""",80.0
+"def get_error_ellipse_and_heading_variance(particles, mean):
+    
+    # Note this function would more likely be a part of FastSLAM or a base class
+    # of FastSLAM. It has been moved here for the purpose of keeping the
+    # FastSLAM class short in this tutorial.
+    center_x, center_y, center_heading = mean
+    n = len(particles)
+    if n < 2:
+        return (0.0, 0.0, 0.0, 0.0)","# test_source.py
+import pytest
+from source import get_error_ellipse_and_heading_variance
+
+class TestSource:
+    def test_get_error_ellipse_and_heading_variance(self):
+        # A simple test case with some dummy data
+        particles = [(1, 1, 1), (2, 2, 2), (3, 3, 3)]
+        mean = (2, 2, 2)
+
+        error_ellipse, heading_variance = get_error_ellipse_and_heading_variance(particles, mean)
+
+        # Assertions
+        assert error_ellipse == 0.0, ""Error ellipse calculation is not correct""
+        assert heading_variance == 0.0, ""Heading variance calculation is not correct""",80.0
+"def tensor_to_float(batch, column='examples'):
+    
+    batch[column] = batch[column].float()
+    return batch","import pytest
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from source import tensor_to_float
+
+def test_tensor_to_float():
+    batch = {'examples': [1, 2, 3, 4, 5]}
+    result = tensor_to_float(batch)
+    assert result['examples'][0].dtype == 'float32', ""The tensor should be converted to float32""
+    assert result['examples'][1].dtype == 'float32', ""The tensor should be converted to float32""
+    assert result['examples'][2].dtype == 'float32', ""The tensor should be converted to float32""
+    assert result['examples'][3].dtype == 'float32', ""The tensor should be converted to float32""
+    assert result['examples'][4].dtype == 'float32', ""The tensor should be converted to float32""",67.0
+"def epi_spline_W(x):
+    
+    a = 2
+    b = 3
+    d = b - a
+    p = (2 * a + b) / 3
+    q = (a + 2 * b) / 3
+
+    if x < a:
+        return 0.
+    elif x >= a and x < p:
+        return 9 * (x - a) ** 3 / (2 * d ** 3)
+    elif x >= p and x < q:
+        return -9 * (x - p) ** 3 / d ** 3 + \
+               9 * (x - p) ** 2 / (2 * d ** 2) + \
+               3 * (x - p) / (2 * d) + 1 / 6.
+    elif x >= q and x < b:
+        return 9 * (x - b) ** 3 / 2 * d ** 3 + 1
+    return 1.","import pytest
+from source import epi_spline_W
+
+def test_epi_spline_W():
+    assert epi_spline_W(0) == 0.
+    assert epi_spline_W(2) == 9/2
+    assert epi_spline_W(3) == 9/2
+    assert epi_spline_W(2.5) == 9/2
+    assert epi_spline_W(3.5) == 9/2
+    assert epi_spline_W(4) == 1",67.0
+"def arcsinh(data=None, out=None, name=None, **kwargs):
+    r
+    return (0,)","# source.py
+import math
+
+def arcsinh(data=None, out=None, name=None, **kwargs):
+    # Implementation not shown for brevity
+    return (0,) 
+
+# test_source.py
+import pytest
+import sys
+sys.path.append(""."") # To import source.py in the same directory
+from source import arcsinh
+
+def test_arcsinh_positive():
+    assert arcsinh(1) == (0,)
+
+def test_arcsinh_zero():
+    assert arcsinh(0) == (0,)
+
+def test_arcsinh_negative():
+    assert arcsinh(-1) == (0,)
+
+# To run tests
+pytest.main()",67.0
+"def arcsinh(data=None, out=None, name=None, **kwargs):
+    r
+    return (0,)","import pytest
+import sys
+sys.path.insert(0, '..') # Assuming source.py is in the parent directory
+from source import arcsinh
+
+def test_arcsinh():
+    data = 1
+    result = arcsinh(data)
+    assert type(result) == tuple, ""The function did not return a tuple""
+    assert len(result) == 1, ""The function did not return the expected number of values""",67.0
+"def draw_simple_undirected_graph():
+    r
+    return True","# test_source.py
+import sys
+sys.path.append(""."")
+
+import source  # assuming the original code is in a file named source.py
+
+def test_draw_simple_undirected_graph():
+    assert source.draw_simple_undirected_graph() == True",67.0
+"def make_telstate_cb(telstate, capture_block_id):
+    
+    prefix = telstate.join(capture_block_id, telstate.prefixes[0])
+    return telstate.view(capture_block_id).view(prefix)","# test_source.py
+import sys
+sys.path.append('.')  # Adds the current directory to the Python path
+from source import make_telstate_cb  # Import the function from source.py
+import pytest  # Import pytest
+
+def test_make_telstate_cb():
+    # Mocking the telstate and capture_block_id for testing
+    # This should be replaced with actual values you wish to test
+    telstate = ""mock_telstate""
+    capture_block_id = ""mock_capture_block_id""
+
+    # Call the tested function with the mock values
+    result = make_telstate_cb(telstate, capture_block_id)
+
+    # Assertion: Test that the function returns the expected result
+    assert result == ""expected_result""",67.0
+"import torch
+
+def mask_finished_scores(score, flag):
+    
+    beam_width = score.size(-1)
+    zero_mask = torch.zeros_like(flag, dtype=torch.bool)
+    if beam_width > 1:
+        unfinished = torch.cat(
+            (zero_mask, flag.repeat([1, beam_width - 1])), dim=1)
+        finished = torch.cat(
+            (flag.bool(), zero_mask.repeat([1, beam_width - 1])), dim=1)
+    else:
+        unfinished = zero_mask
+        finished = flag.bool()
+    score.masked_fill_(unfinished, -float('inf'))
+    score.masked_fill_(finished, 0)
+    return score","# test_mask_finished_scores.py
+
+import torch
+import sys
+sys.path.append(""."") # to import source.py from the same directory
+import source 
+
+def test_mask_finished_scores():
+    # setup
+    score = torch.tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    flag = torch.tensor([[False, False, True], [False, True, False]])
+
+    # call the function
+    result = source.mask_finished_scores(score, flag)
+    
+    # assertions
+    assert torch.allclose(result[0, :2], torch.tensor([-float('inf'), 2.0]))
+    assert torch.allclose(result[1, :2], torch.tensor([4.0, -float('inf')]))
+    assert torch.allclose(result[0, 2], torch.tensor(0.0))
+    assert torch.allclose(result[1, 2], torch.tensor(0.0))",67.0
+"def find_vgg_layer(arch, target_layer_name):
+    
+    hierarchy = target_layer_name.split('_')
+
+    if len(hierarchy) >= 1:
+        target_layer = arch.backbone.slice5
+
+    if len(hierarchy) == 2:
+        target_layer = target_layer[int(hierarchy[1])]
+
+    return target_layer","import pytest
+import source   # replace with the actual name of your source file
+
+def test_find_vgg_layer():
+    # create test data
+    arch = source  # replace with the actual name of your source file
+    target_layer_name = 'slice5_1'
+
+    # call the function and get the result
+    target_layer = source.find_vgg_layer(arch, target_layer_name)
+
+    # perform assertion
+    assert target_layer == arch.backbone.slice5[int(hierarchy[1])]",57.0
+"def eth(self):
+    
+    return self.Rminus()","# Import the module you are testing
+import source
+
+# Create a Test class
+class TestSource:
+
+    # Setup function to run before each test
+    def setup_method(self):
+        # Init your class here
+        self.obj = source.Source()
+
+    # Test function
+    def test_eth(self):
+        # Here you should write the test
+        # The assert statement is used to verify the outcome
+        # self.obj.Rminus() is the function you want to test
+        assert self.obj.eth() == self.obj.Rminus()",50.0
+"def __pow__(self, other):
+    
+    return self.pow(other)","# testing_file.py
+import pytest
+import source
+
+def test_pow_method():
+    # Test if the pow function returns the correct output
+    assert source.pow(2, 3) == 8",50.0
+"def gapbadown(f):
+    r
+    new_column = f['open'] < f['low'].shift(1)
+    return new_column","# test_source.py
+
+import pytest
+import pandas as pd
+from source import gapbadown
+
+def test_gapbadown():
+    df = pd.DataFrame({
+        'open': [5, 4, 3, 2, 1],
+        'low': [6, 7, 8, 3, 2]
+    })
+
+    result = gapbadown(df)
+
+    # Assertion to check if the function returns the expected output
+    assert result.equals(pd.Series([False, False, True, False, False]))",50.0
+"def gapbadown(f):
+    r
+    new_column = f['open'] < f['low'].shift(1)
+    return new_column","import pytest
+from source import gapbadown
+import pandas as pd
+
+def test_gapbadown():
+    # Create a test DataFrame
+    data = {'open': [2, 4, 6, 5, 3, 2], 'low': [1, 3, 5, 4, 2, 1]}
+    df = pd.DataFrame(data)
+    
+    # Call the function and get the result
+    new_column = gapbadown(df)
+    
+    # Now we will do the assertion.
+    # We know that the first value in new_column should be True, because 'open' value is less than 'low' value
+    # And for the rest of the values, they should be False
+    assert new_column[0] == True
+    for i in range(1, len(new_column)):
+        assert new_column[i] == False",50.0
+"import numpy
+
+def rotmx_from_quat(q):
+    r
+    w,x,y,z = q
+    R = numpy.array([[1.-2.*(y**2+z**2),
+                      2.*(x*y-w*z),
+                      2.*(x*z+w*y)],
+                     [2.*(x*y+w*z),
+                      1.-2.*(x**2+z**2),
+                      2.*(y*z-w*x)],
+                     [2.*(x*z-w*y),
+                      2.*(y*z+w*x),
+                      1.-2.*(x**2+y**2)]])
+    return R","import numpy
+import source  # this assumes that the actual code is in a file called 'source.py' in the same directory
+
+def test_rotmx_from_quat():
+    q = [1, 2, 3, 4]  # sample input
+    expected_output = numpy.array([[1.-2.*(2**2+3**2), 2.*(1*2-1*4), 2.*(1*3+1*4)], [2.*(1*2+1*4), 1.-2.*(1**2+3**2), 2.*(2*3-1*1)], [2.*(1*3+1*4), 2.*(2*3-1*1), 1.-2.*(1**2+2**2)]])  # calculate this manually
+    assert numpy.allclose(source.rotmx_from_quat(q), expected_output), ""The function rotmx_from_quat did not return the expected output""",50.0
+"def equal():
+    
+    return lambda intrvl1, intrvl2: intrvl1['t1'] == intrvl2['t1'] and intrvl1['t2'] == intrvl2['t2']","import sys
+sys.path.append('.')  # This line is added to import the 'source.py' file in the same directory
+from source import equal  # Import the 'equal' function from 'source.py'
+
+def test_equal():
+    """"""Test the equal function.""""""
+    intrvl1 = {'t1': 1, 't2': 2}
+    intrvl2 = {'t1': 1, 't2': 2}
+    assert equal(intrvl1, intrvl2)",50.0
+"def poly_to_valid(poly):
+    
+
+    if poly.is_valid == True:
+        valid_poly = poly
+    else:
+        valid_poly = poly.convex_hull
+
+    return valid_poly","import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..')) # This will add the parent directory to the path
+from source import poly_to_valid  # This is assuming the function is in source.py
+
+def test_poly_to_valid():
+    # Assuming a valid polygon object exists
+    valid_poly = [1, 2, 3, 4, 5]
+    assert poly_to_valid(valid_poly).__class__ == list  # Asserting that the output is a list
+
+    # Assuming an invalid polygon object exists
+    invalid_poly = [1, 2, 3]
+    assert poly_to_valid(invalid_poly).__class__ == list  # Asserting that the output is a list
+
+    # Assuming a complex polygon object exists
+    complex_poly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    assert poly_to_valid(complex_poly).__class__ == list  # Asserting that the output is a list",40.0
+"def back2dim(x, xdim=-1):
+    
+    num_dims_x = len(x.shape)
+    if xdim < 0:
+        xdim = num_dims_x + xdim
+    return x.transpose(*(list(range(xdim)) + [num_dims_x-1] + \
+                         list(range(xdim, num_dims_x-1))))","import sys
+sys.path.append('.')  # add current directory to the path
+import source  # importing the source code
+
+def test_back2dim():
+    x = source.back2dim([[1, 2, 3], [4, 5, 6]], 1)
+    # assertion to check if the output is as expected
+    assert x.shape == (3, 2, 3)",40.0
+"def find_in_sorted_index(dts, dt):
+    
+    ix = dts.searchsorted(dt)
+    if ix == len(dts) or dts[ix] != dt:
+        raise LookupError(""{dt} is not in {dts}"".format(dt=dt, dts=dts))
+    return ix","# Importing the source file
+import source
+
+# Testing the find_in_sorted_index function
+def test_find_in_sorted_index():
+    dts = [1, 2, 3, 4, 5]
+    dt = 3
+    assert source.find_in_sorted_index(dts, dt) == 2",40.0
+"import torch
+
+def cox_loss_ties(pred, cens, tril, tied_matrix):
+    
+
+    # Note that the observed variable is not required as we are sorting the
+    # inputs when generating the batch according to survival time.
+
+    # exp(h_{theta}(x^i))
+    exp_pred = torch.exp(pred)
+    # Term corresponding to the sum over events in the risk pool
+    # sum_{i: y^i >= t} exp(h_{theta}(x^i))
+    future_theta = torch.mm(tril.transpose(1, 0), exp_pred)
+    # sum_{i: y^i >= t} exp(h_{theta}(x^i))
+    # - l/m_t sum_{i in H_t} exp(h_{theta}(x^i))
+    tied_term = future_theta - torch.mm(tied_matrix, exp_pred)
+    # log (sum_{i: y^i >= t} exp(h_{theta}(x^i))
+    #      - l/m_t sum_{i in H_t} exp(h_{theta}(x^i))
+    tied_term = torch.log(tied_term)
+    # event row vector to column
+    tied_term = tied_term.view((-1, 1))
+    cens = cens.view((-1, 1))
+    # sum_t (sum_{i in H_t} h_{theta}(x^i)
+    #       - sum_{l=0}^{m_t-1} log (
+    #          sum_{i: y^i >= t} exp(h_{theta}(x^i))
+    #          - l/m_t sum_{i in H_t} exp(h_{theta}(x^i)))
+    loss = (pred - tied_term) * cens
+    # Negative loglikelihood
+    loss = -torch.mean(loss)
+    return loss","import pytest
+import torch
+from source import cox_loss_ties
+
+# Test cases for function 'cox_loss_ties'
+class TestCoxLossTies:
+    
+    def test_cox_loss_ties(self):
+        # Test case 1: Test with random tensor inputs
+        pred = torch.tensor([[1.0, 2.0, 3.0, 4.0], [2.0, 2.0, 3.0, 2.0]])
+        cens = torch.tensor([[1.0, 1.0, 1.0, 0.0], [0.0, 0.0, 1.0, 1.0]])
+        tril = torch.tensor([[1.0, 2.0, 3.0, 4.0], [0.0, 1.0, 2.0, 3.0], [0.0, 0.0, 1.0, 2.0], [0.0, 0.0, 0.0, 1.0]])
+        tied_matrix = torch.tensor([[1.0, 1.0, 1.0, 0.0], [0.0, 1.0, 1.0, 1.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
+
+        result = cox_loss_ties(pred, cens, tril, tied_matrix)
+        expected_output = torch.tensor(-2.070685226706852)
+
+        assert torch.isclose(result, expected_output), ""Test case 1 failed""
+
+        # Test case 2: Test with more random tensor inputs
+        pred = torch.tensor([[3.0, 2.3, 4.7, 2.0], [1.0, 2.0, 3.0, 2.0]])
+        cens = torch.tensor([[0.0, 0.0, 1.0, 1.0], [1.0, 0.0, 0.0, 0.0]])
+        tril = torch.tensor([[1.0, 2.0, 3.0, 4.0], [0.0, 1.0, 2.0, 3.0], [0.0, 0.0, 1.0, 2.0], [0.0, 0.0, 0.0, 1.0]])
+        tied_matrix = torch.tensor([[1.0, 1.0, 1.0, 0.0], [0.0, 1.0, 1.0, 1.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
+
+        result = cox_loss_ties(pred, cens, tril, tied_matrix)
+        expected_output = torch.tensor(-1.520672722672727)
+
+        assert torch.isclose(result, expected_output), ""Test case 2 failed""
+
+        # Test case 3: Test with even more random tensor inputs
+        pred = torch.tensor([[4.0, 3.0, 2.0, 1.0], [2.0, 2.0, 3.0, 2.0]])
+        cens = torch.tensor([[1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]])
+        tril = torch.tensor([[1.0, 2.0, 3.0, 4.0], [0.0, 1.0, 2.0, 3.0], [0.0, 0.0, 1.0, 2.0], [0.0, 0.0, 0.0, 1.0]])
+        tied_matrix = torch.tensor([[1.0, 1.0, 1.0, 0.0], [0.0, 1.0, 1.0, 1.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
+
+        result = cox_loss_ties(pred, cens, tril, tied_matrix)
+        expected_output = torch.tensor(-2.605171051710517)
+
+        assert torch.isclose(result, expected_output), ""Test case 3 failed""",36.0
+"import torch
+
+def perspectiveTransformBatched(points, homography):
+    
+
+    # Asserts
+    assert len(points.shape) == 3 and points.shape[2] == 2, 'points arg should be of size Nx2, but has size: {}'. \
+        format(points.shape)
+    assert homography.shape[1:] == (3, 3), 'homography arg should be of size 3x3, but has size: {}'\
+        .format(homography.shape)
+
+    if 'torch' in str(type(homography)) and 'torch' in str(type(points)):
+
+        points = torch.nn.functional.pad(points, (0, 1), ""constant"", 1.)
+        points_transformed = homography @ (points.permute(0, 2, 1))
+        points_transformed = points_transformed.permute(0, 2, 1)
+        return points_transformed[:, :, :2] / points_transformed[:, :, 2:].repeat(1, 1, 2)
+
+    elif 'numpy' in str(type(homography)) and 'numpy' in str(type(points)):
+        assert False, 'Not implemented - I was too lazy, sorry!'
+    else:
+        assert False, 'Wrong or inconsistent types?'","import torch
+import numpy as np
+import source
+
+def test_perspectiveTransformBatched():
+    # Test with torch tensor inputs
+    points = torch.tensor([[[1., 2.], [3., 4.]]])
+    homography = torch.tensor([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]])
+    output = source.perspectiveTransformBatched(points, homography)
+    assert output.shape == (1, 2, 2), 'Test with torch tensor inputs failed!'
+
+    # Test with numpy array inputs
+    points = np.array([[[1., 2.], [3., 4.]]])
+    homography = np.array([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]])
+    output = source.perspectiveTransformBatched(points, homography)
+    assert output.shape == (1, 2, 2), 'Test with numpy array inputs failed!'
+
+    # Test with wrong type inputs
+    points = ""I am a string!""
+    homography = 12345
+    try:
+        source.perspectiveTransformBatched(points, homography)
+    except AssertionError:
+        assert True, 'Test with wrong type inputs failed!'
+    except Exception as e:
+        assert False, f'Test with wrong type inputs failed with error: {e}'",33.0
+"def elliptic_curve(t = None):
+    
+    from .proof import _proof_prefs
+    return _proof_prefs.elliptic_curve(t)","# test_source.py
+
+import pytest
+from source import proof
+
+def test_elliptic_curve():
+    result = proof.elliptic_curve()
+    assert result == ""Expected output""   # replace ""Expected output"" with the actual expected result",33.0
+"def renormalize_reward(reward, lower=0., amplitude=1., trust=1., unbiased=True, mintrust=None):
+    r
+    if unbiased:
+        if mintrust is not None:
+            return (reward - lower) / (amplitude * (trust / mintrust))
+        else:
+            return (reward - lower) / (amplitude * trust)
+    else:
+        return (reward - lower) / amplitude","# test_source.py
+import source
+
+def test_renormalize_reward():
+    assert source.renormalize_reward(10, 0, 1, 1, True, 0.6) == 0.16666666666666666
+    assert source.renormalize_reward(10, 0, 1, 1, False, 0.6) == 0.1",29.0
+"def renormalize_reward(reward, lower=0., amplitude=1., trust=1., unbiased=True, mintrust=None):
+    r
+    if unbiased:
+        if mintrust is not None:
+            return (reward - lower) / (amplitude * (trust / mintrust))
+        else:
+            return (reward - lower) / (amplitude * trust)
+    else:
+        return (reward - lower) / amplitude","# test_source.py
+import pytest
+from source import renormalize_reward
+
+def test_renormalize_reward():
+    assert renormalize_reward(3, 2, 4, True, 1) == 0.75, ""Test with all parameters True and mintrust set""
+    assert renormalize_reward(3, 2, 4, True, None) == 0.75, ""Test with all parameters True and mintrust None""
+    assert renormalize_reward(3, 2, 4, False, 1) == 0.75, ""Test with all parameters False and mintrust set""
+    assert renormalize_reward(3, 2, 4, False, None) == 0.75, ""Test with all parameters False and mintrust None""
+    assert renormalize_reward(3, 2, 4, True, 0) == 0.75, ""Test with all parameters True and mintrust 0""
+    assert renormalize_reward(3, 2, 4, False, 0) == 0.75, ""Test with all parameters False and mintrust 0""
+    assert renormalize_reward(3, 2, 1, True, 1) == 0.2, ""Test with lower and amplitude not equal to 1 and trust equal to 1""
+    assert renormalize_reward(3, 2, 1, False, 1) == 0.2, ""Test with lower and amplitude not equal to 1 and trust equal to 1, unbiased False""",29.0
+"def maximizing_bisection(f, x_min, x_max, precision=0.001, score=None):
+    
+    if score is None:
+        def score(value):
+            return value
+
+    f_xmin = f(x_min)
+    score_xmin = score(f_xmin)
+    if score_xmin > 0:
+        return None, None, None
+    f_xmax = f(x_max)
+    score_xmax = score(f_xmax)
+    if score_xmax <= 0:
+        return x_max, f_xmax, score_xmax
+
+    while (x_max - x_min) > precision:
+        center = (x_min + x_max) / 2.0
+        f_center = f(center)
+        score_center = score(f_center)
+        if score_center > 0:
+            x_max = center
+        else:
+            x_min = center
+            f_xmin = f_center
+            score_xmin = score_center
+
+    return x_min, f_xmin, score_xmin","import pytest
+from source import maximizing_bisection
+
+def test_maximizing_bisection():
+    def f(x):
+        # Just an example function
+        return x**2
+
+    def score(value):
+        # Score function that returns the absolute value of a number
+        return abs(value)
+
+    result = maximizing_bisection(f, -5, 5, score=score)
+    assert result == (0, 0, 0)",27.0
+"def get_path(reached, start, end):
+  
+
+  if end not in reached:
+    return []
+
+  path = [end]
+
+  while end != start:
+    if end == reached[end]:
+      return None
+    end = reached[end]
+    path.append(end)
+
+  path.reverse()
+
+  return path","import pytest
+import source  # The module that contains the `get_path` function
+
+def test_get_path():
+    # Setup:
+    # A simple graph represented as a dictionary where the key is the node and the value is its neighbour
+    reached = {
+        'A': 'B',
+        'B': 'C',
+        'C': 'D',
+        'D': 'E',
+        'E': 'F',
+        'F': 'C'
+    }
+
+    # Test when the end node is not in the reached dictionary
+    assert source.get_path('G', 'A', 'B') == []
+
+    # Test when the start and end node are the same
+    assert source.get_path('A', 'A', 'B') == None
+
+    # Test when the end node is not reachable from the start node
+    assert source.get_path('A', 'B', 'G') == None
+
+    # Test when the path is simple and direct
+    assert source.get_path('A', 'A', 'E') == ['A', 'B', 'C', 'D', 'E']
+
+    # Test when there are multiple paths to the same node
+    assert source.get_path('A', 'A', 'F') == ['A', 'B', 'C', 'D', 'E', 'F']",27.0
+"def add_sentiment_score(row, analyzer):
+    
+    score = analyzer.value.polarity_scores(row['reviewText'])
+
+    # The VADER analyzer gives each document four scores: positive, negative,
+    # neutral and compound
+    row.update({
+        'positive_score': score['pos'],
+        'negative_score': score['neg'],
+        'compound_score': score['compound'],
+        'neutral_score': score['neu']
+    })
+    return row","# test_source.py
+import pytest
+from source import add_sentiment_score, SentimentIntensityAnalyzer
+
+def test_add_sentiment_score():
+    analyzer = SentimentIntensityAnalyzer()
+    row = {'reviewText': 'I love this product'}
+    result = add_sentiment_score(row, analyzer)
+    assert result['positive_score'] > 0, ""The sentiment analyzer didn't detect a positive sentiment""",25.0
+"import torch
+
+def boxlist_iou(boxlist1, boxlist2):
+    
+    if boxlist1.size != boxlist2.size:
+        raise RuntimeError(
+                ""boxlists should have same image size, got {}, {}"".format(boxlist1, boxlist2))
+
+    N = len(boxlist1)
+    M = len(boxlist2)
+
+    area1 = boxlist1.area()
+    area2 = boxlist2.area()
+
+    box1, box2 = boxlist1.bbox, boxlist2.bbox
+
+    lt = torch.max(box1[:, None, :2], box2[:, :2])  # [N,M,2]
+    rb = torch.min(box1[:, None, 2:], box2[:, 2:])  # [N,M,2]
+
+    TO_REMOVE = 1
+
+    wh = (rb - lt + TO_REMOVE).clamp(min=0)  # [N,M,2]
+    inter = wh[:, :, 0] * wh[:, :, 1]  # [N,M]
+
+    iou = inter / (area1[:, None] + area2 - inter)
+    return iou","import torch
+import pytest
+from source import boxlist_iou
+
+class TestBoxlistIou:
+    def test_boxlist_iou(self):
+        # Create two boxes
+        boxlist1 = torch.tensor([[1, 1, 4, 4], [2, 2, 3, 3]])
+        boxlist2 = torch.tensor([[0, 0, 2, 2], [1, 1, 3, 3]])
+
+        expected_output = torch.tensor([[1., 0.], [0.5, 0.5]])
+
+        output = boxlist_iou(boxlist1, boxlist2)
+
+        # Assert that the output is as expected
+        assert torch.allclose(output, expected_output)",25.0
+"def _atom_to_str(atom):
+    
+    if atom.charge:
+        return '{0}{1}{2:+d}'.format(atom.element, atom.position, atom.charge)
+    else:
+        return '{0}{1}'.format(atom.element, atom.position)","import pytest
+from source import _atom_to_str, Atom
+
+def test_atom_to_str():
+    # Case 1: Atom with charge
+    atom1 = Atom('C', 1, 1)
+    assert _atom_to_str(atom1) == 'C1+1'
+
+    # Case 2: Atom without charge
+    atom2 = Atom('H', 2)
+    assert _atom_to_str(atom2) == 'H2'
+
+    # Case 3: Atom with negative charge
+    atom3 = Atom('O', 3, -2)
+    assert _atom_to_str(atom3) == 'O3-2'
+
+    # Case 4: Atom with non-integer position
+    atom4 = Atom('N', 4.5)
+    assert _atom_to_str(atom4) == 'N4.5'
+
+test_atom_to_str()",25.0
+"import torch
+
+def boxlist_iou(boxlist1, boxlist2):
+    
+    if boxlist1.size != boxlist2.size:
+        raise RuntimeError(
+                ""boxlists should have same image size, got {}, {}"".format(boxlist1, boxlist2))
+
+    N = len(boxlist1)
+    M = len(boxlist2)
+
+    area1 = boxlist1.area()
+    area2 = boxlist2.area()
+
+    box1, box2 = boxlist1.bbox, boxlist2.bbox
+
+    lt = torch.max(box1[:, None, :2], box2[:, :2])  # [N,M,2]
+    rb = torch.min(box1[:, None, 2:], box2[:, 2:])  # [N,M,2]
+
+    TO_REMOVE = 1
+
+    wh = (rb - lt + TO_REMOVE).clamp(min=0)  # [N,M,2]
+    inter = wh[:, :, 0] * wh[:, :, 1]  # [N,M]
+
+    iou = inter / (area1[:, None] + area2 - inter)
+    return iou","# test_boxlist_iou.py
+
+import torch
+import pytest
+from source import boxlist_iou
+
+def test_boxlist_iou():
+    boxlist1 = torch.tensor([[0, 0, 10, 10], [2, 2, 5, 5]])
+    boxlist2 = torch.tensor([[0, 0, 10, 10], [5, 5, 15, 15]])
+    expected_output = torch.tensor([[1., 0.], [0., 1.]])
+    output = boxlist_iou(boxlist1, boxlist2)
+    assert torch.allclose(output, expected_output), ""The output does not match the expected result.""
+
+if __name__ == ""__main__"":
+    pytest.main()",25.0
+"def tors_gamma(universe, seg, i):
+    
+    g = universe.select_atoms("" atom {0!s} {1!s} O5\' "".format(seg, i),
+                              "" atom {0!s} {1!s} C5\' "".format(seg, i),
+                              "" atom {0!s} {1!s} C4\' "".format(seg, i),
+                              "" atom {0!s} {1!s} C3\' "".format(seg, i))
+    gamma = g.dihedral.value() % 360
+    return gamma","import pytest
+from source import tors_gamma
+
+def test_tors_gamma():
+    # These are the inputs and expected outputs provided by the user
+    inputs = [(""segment1"", 1), (""segment2"", 2), (""segment3"", 3)]
+    expected_outputs = [120, 30, 60]  # These should be replaced by actual expected outputs
+
+    for input, expected_output in zip(inputs, expected_outputs):
+        assert tors_gamma(*input) == expected_output",25.0
+"import torch
+
+def boxlist_iou(boxlist1, boxlist2):
+    
+    if boxlist1.size != boxlist2.size:
+        raise RuntimeError(
+                ""boxlists should have same image size, got {}, {}"".format(boxlist1, boxlist2))
+    boxlist1 = boxlist1.convert(""xyxy"")
+    boxlist2 = boxlist2.convert(""xyxy"")
+    N = len(boxlist1)
+    M = len(boxlist2)
+
+    area1 = boxlist1.area()
+    area2 = boxlist2.area()
+
+    box1, box2 = boxlist1.bbox, boxlist2.bbox
+
+    lt = torch.max(box1[:, None, :2], box2[:, :2])  # [N,M,2]
+    rb = torch.min(box1[:, None, 2:], box2[:, 2:])  # [N,M,2]
+
+    TO_REMOVE = 1
+
+    wh = (rb - lt + TO_REMOVE).clamp(min=0)  # [N,M,2]
+    inter = wh[:, :, 0] * wh[:, :, 1]  # [N,M]
+
+    iou = inter / (area1[:, None] + area2 - inter)
+    return iou","import pytest
+import torch
+from source import boxlist_iou  # Import the function from the source.py file
+
+def test_boxlist_iou():
+    boxlist1 = torch.tensor([[0, 0, 10, 10], [10, 10, 20, 20]])
+    boxlist2 = torch.tensor([[5, 5, 15, 15]])
+    iou = boxlist_iou(boxlist1, boxlist2)
+    assert torch.allclose(iou, torch.tensor([[1.0, 0.0]])), ""boxlist_iou test failed""
+
+if __name__ == ""__main__"":
+    test_boxlist_iou()",22.0
+"import torch
+
+def boxlist_iou(boxlist1, boxlist2):
+    
+    if boxlist1.size != boxlist2.size:
+        raise RuntimeError(
+                ""boxlists should have same image size, got {}, {}"".format(boxlist1, boxlist2))
+    boxlist1 = boxlist1.convert(""xyxy"")
+    boxlist2 = boxlist2.convert(""xyxy"")
+    N = len(boxlist1)
+    M = len(boxlist2)
+
+    area1 = boxlist1.area()
+    area2 = boxlist2.area()
+
+    box1, box2 = boxlist1.bbox, boxlist2.bbox
+
+    lt = torch.max(box1[:, None, :2], box2[:, :2])  # [N,M,2]
+    rb = torch.min(box1[:, None, 2:], box2[:, 2:])  # [N,M,2]
+
+    TO_REMOVE = 1
+
+    wh = (rb - lt + TO_REMOVE).clamp(min=0)  # [N,M,2]
+    inter = wh[:, :, 0] * wh[:, :, 1]  # [N,M]
+
+    iou = inter / (area1[:, None] + area2 - inter)
+    return iou","# test_boxlist_iou.py
+
+import pytest
+from source import boxlist_iou
+import torch
+
+def test_boxlist_iou():
+    boxlist1 = torch.tensor([[2, 2, 4, 4], [1, 1, 3, 3]])
+    boxlist2 = torch.tensor([[0, 0, 2, 2], [1, 1, 3, 3]])
+    result = boxlist_iou(boxlist1, boxlist2)
+    expected = torch.tensor([[1., 1.], [0., 0.]])
+    assert torch.allclose(result, expected)",22.0
+"import torch
+
+def kld_single2single(g1, g2):
+    
+    p_mu = g1.mu
+    p_var = g1.var
+    assert p_mu.dim() == 3 and p_mu.size()[1] == 1
+    assert p_var.dim() == 4 and p_var.size()[1] == 1
+    p_mu = p_mu.squeeze(1)
+    p_var = p_var.squeeze(1)
+    t_mu, t_var = g2
+    delta = (p_mu - t_mu).unsqueeze(-1)
+    t_inv = torch.inverse(t_var)
+    term1 = delta.transpose(-1, -2).matmul(t_inv).matmul(delta).squeeze(-1)
+    term2 = torch.diagonal(
+        t_inv.matmul(p_var),
+        dim1=-2,
+        dim2=-1).sum(dim=-1, keepdim=True) + \
+        torch.log(torch.det(t_var) / torch.det(p_var)).reshape(-1, 1)
+
+    return 0.5 * (term1 + term2) - 1","import pytest
+import torch
+from source import kld_single2single
+
+class TestKLDSingle2Single:
+
+    def test_kld_single2single(self):
+        g1 = torch.randn(10, 1)
+        g2 = (torch.randn(10, 1), torch.rand(10, 1))
+        result = kld_single2single(g1, g2)
+        assert isinstance(result, torch.Tensor), ""The function did not return a torch Tensor""
+        assert result.shape == (10,), ""The returned tensor is not of the expected shape""
+
+if __name__ == ""__main__"":
+    pytest.main()",21.0
+"def read_distance_sensor():
+    
+    global _DS
+    if _DS is None:
+        from distance_sensor import DistanceSensor
+        _DS = DistanceSensor()
+    
+    return _DS.read_range_single()","# test_source.py
+import pytest
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from source import read_distance_sensor
+
+_DS = None
+
+def test_read_distance_sensor():
+    global _DS
+    if _DS is None:
+        from distance_sensor import DistanceSensor
+        _DS = DistanceSensor()
+    
+    # Assuming read_range_single() returns a value within a certain range
+    assert 0 <= read_distance_sensor() <= 255",20.0
+"def update_stats(tr, nt, dt, slow, baz):
+    
+
+    tr.stats.delta = dt
+    tr.stats.slow = slow
+    tr.stats.baz = baz
+
+    return tr","# Let's assume the original code resides in source.py
+# Here's a test file, using pytest for testing.
+
+import sys
+sys.path.append(""."")  # add current directory to path
+from source import update_stats  # import the function
+
+def test_update_stats():
+    tr = SomeClass()  # Instantiate an object
+    nt = AnotherClass()  # Instantiate another object
+    dt = 10  # let's say some number for dt
+    slow = 20  # some number for slow
+    baz = 30  # some number for baz
+
+    update_stats(tr, nt, dt, slow, baz)  # call the function
+
+    assert tr.stats.delta == dt  # assert first attribute is updated correctly
+    assert tr.stats.slow == slow  # assert second attribute is updated correctly
+    assert tr.stats.baz == baz  # assert third attribute is updated correctly",20.0
+"import torch
+
+def mdn_loss(pi, sigma, mu, target):
+    # type: (torch.FloatTensor, torch.FloatTensor, torch.FloatTensor, torch.FloatTensor) -> torch.FloatTensor
+    r
+    target = target.unsqueeze(1).expand_as(sigma)
+    norms = ((mu-target)/sigma)**2
+    # print(norms)
+    norms = 0.5*torch.sum(norms, dim=2)
+    values = torch.min(norms, dim=1).values
+    exp = torch.exp(values.unsqueeze(1) - norms)
+    weights = pi / torch.prod(sigma, dim=2)
+    likelihood = torch.sum(weights*exp, dim=1)
+    ll = torch.log(likelihood) - values
+    # print('mdn')
+    # print(mu[0])
+    # print(norms[0])
+    # print(weights[0])
+    # print(weights*exp[0])
+    # print(-torch.mean(ll))
+    m = torch.mean(ll)
+    if not (m >= 0 or m < 0):
+        raise ValueError(""NAN"")
+    return -torch.mean(ll)","import pytest
+import torch
+from source import mdn_loss  # assuming mdn_loss function is in source.py
+
+def test_mdn_loss():
+    # type: () -> None
+    pi = torch.randn(10, 5, requires_grad=True)
+    sigma = torch.randn_like(pi, requires_grad=True)
+    mu = torch.randn_like(pi)
+    target = torch.randn_like(pi)
+
+    loss = mdn_loss(pi, sigma, mu, target)
+    loss.backward()
+
+    assert torch.isfinite(loss).item() == True",20.0
+"def valid_time(time):
+    
+    if time.hour < 0 or time.minute < 0 or time.second < 0:
+        return False
+    if time.minute >= 60 or time.second >= 60:
+        return False
+    return True","import pytest
+import source  # Assuming the original code is in a file named 'source.py'
+
+def test_valid_time():
+    time1 = source.Time(10, 20, 30)  # Assuming a Time class with hour, minute, second attributes
+    assert source.valid_time(time1) == True
+
+    time2 = source.Time(20, 60, 30)
+    assert source.valid_time(time2) == False
+
+    time3 = source.Time(-1, 10, 30)
+    assert source.valid_time(time3) == False
+
+    time4 = source.Time(10, -1, 30)
+    assert source.valid_time(time4) == False
+
+    time5 = source.Time(10, 20, 60)
+    assert source.valid_time(time5) == False",17.0
+"def dc_MLFT(n3d_i, c, Fdd, n2p_i=None, Fpd=None, Gpd=None):
+    r
+    if not int(n3d_i) == n3d_i:
+        raise ValueError(""3d occupation should be an integer"")
+    if n2p_i is not None and int(n2p_i) != n2p_i:
+        raise ValueError(""2p occupation should be an integer"")
+
+    # Average repulsion energy defines Udd and Upd
+    Udd = Fdd[0] - 14.0 / 441 * (Fdd[2] + Fdd[4])
+    if n2p_i is None and Fpd is None and Gpd is None:
+        return Udd * n3d_i - c
+    if n2p_i == 6 and Fpd is not None and Gpd is not None:
+        Upd = Fpd[0] - (1 / 15.0) * Gpd[1] - (3 / 70.0) * Gpd[3]
+        return [Udd * n3d_i + Upd * n2p_i - c, Upd * (n3d_i + 1) - c]
+    else:
+        raise ValueError('double counting input wrong.')","import sys
+sys.path.append(""."")
+import source  # Assuming that source.py is in the same directory
+
+def test_dc_MLFT():
+    # Testing for correct operation of the function with valid input
+    assert source.dc_MLFT(3, 1, [1, 2, 3, 4, 5, 6]) == -1.0
+    assert source.dc_MLFT(6, 2, [2, 3, 4, 5, 6, 7, 8]) == [-1.0, -0.5]
+
+    # Testing for correct error handling with incorrect input type
+    try:
+        source.dc_MLFT(""3"", 1, [1, 2, 3, 4, 5, 6])
+    except ValueError:
+        pass
+    else:
+        assert False, ""Expected ValueError when input is string""
+
+    try:
+        source.dc_MLFT(6, ""2"", [2, 3, 4, 5, 6, 7, 8])
+    except ValueError:
+        pass
+    else:
+        assert False, ""Expected ValueError when c is string""
+
+    try:
+        source.dc_MLFT(6, 2, [2, ""3"", 4, 5, 6, 7, 8])
+    except ValueError:
+        pass
+    else:
+        assert False, ""Expected ValueError when Fdd is a list with a string""
+
+    # Testing for correct error handling with wrong input parameters
+    try:
+        source.dc_MLFT(6, 2, [2, 3, 4, 5, 6], ""7"", [1, 2, 3, 4, 5, 6])
+    except ValueError:
+        pass
+    else:
+        assert False, ""Expected ValueError when Gpd is a list with a string""
+
+    try:
+        source.dc_MLFT(6, 2, [2, 3, 4, 5, 6], 7, [1, 2, ""3"", 4, 5, 6])
+    except ValueError:
+        pass
+    else:
+        assert False, ""Expected ValueError when Fpd is a list with a string""",15.0
+"def _set_timelabel(obs, use_tref=True):
+    
+    if obs.mode != 'dynamics' and obs.timing == 'g':
+        timelabel = 'Generations'
+        if obs.tref is not None and use_tref:
+            timelabel += ' (since tref {})'.format(obs.tref)
+    else:
+        timelabel = 'Time (minutes)'
+    return timelabel","# Import the module
+import source 
+
+# Create a test class
+class TestSource:
+
+    # Create a setup method to run before every test
+    def setup_method(self):
+        # Define your setup code here
+        pass
+
+    # Create a test method
+    def test_set_timelabel(self):
+        # Create a mock observation object
+        obs = source.Observation(mode='dynamics', timing='g', tref=100)
+        # Call the function and assertion
+        assert source._set_timelabel(obs, use_tref=True) == 'Generations (since tref 100)'
+
+    # Create another test method
+    def test_set_timelabel_other_cases(self):
+        # Create another mock observation object
+        obs = source.Observation(mode='other_mode', timing='other_timing', tref=None)
+        # Call the function and assertion
+        assert source._set_timelabel(obs, use_tref=False) == 'Time (minutes)'",14.0
+"def _extract_cdr3_nucseq_from_adaptive(adapt):
+    
+    length_cdr3_nucseq = len(adapt.aminoAcid)*3
+    cys_residue    = int(adapt.vIndex)
+    start_J_gene   = int(adapt.jIndex)
+
+    length_partial_nuc = len(adapt.nucleotide[cys_residue:start_J_gene])
+    remaining_length_nuc = length_cdr3_nucseq - length_partial_nuc
+    end_index = start_J_gene + remaining_length_nuc
+
+    cdr3_nucseq = adapt.nucleotide[cys_residue:end_index]
+    return cdr3_nucseq","# Importing necessary packages
+import pytest
+from source import _extract_cdr3_nucseq_from_adaptive
+
+# Creating a test class
+class TestExtractCdr3NucseqFromAdaptive:
+
+    # Creating a test method  
+    def test_extract_cdr3_nucseq_from_adaptive(self):
+        
+        # Creating a mock object of adapt
+        adapt = MagicMock()
+
+        # Setting the return value of attributes
+        adapt.aminoAcid = ""abc""
+        adapt.vIndex = 2
+        adapt.jIndex = 3
+        adapt.nucleotide = ""xyz""
+
+        # Calling the function
+        result = _extract_cdr3_nucseq_from_adaptive(adapt)
+        
+        # Asserting whether the function returns correct output
+        assert result == ""xyz""",11.0
+"def get_highest_type(first, second):
+    
+
+    from regtricks.transforms import (Registration, MotionCorrection,
+            NonLinearMotionCorrection, NonLinearRegistration)
+
+    TYPE_MAP = ({
+        Registration: 1, 
+        MotionCorrection: 2, 
+        NonLinearRegistration: 3, 
+        NonLinearMotionCorrection: 4
+    })
+
+    try: 
+        type1 = TYPE_MAP[type(first)]
+        type2 = TYPE_MAP[type(second)]
+        if type1 >= type2: 
+            return type(first)
+        else: 
+            return type(second)
+
+    except Exception as e: 
+        raise ValueError(""At least one input was not a Transform"")","import pytest
+from source import get_highest_type, Registration, MotionCorrection, NonLinearMotionCorrection, NonLinearRegistration
+
+def test_get_highest_type():
+    assert get_highest_type(Registration(), NonLinearMotionCorrection()) == NonLinearMotionCorrection
+    assert get_highest_type(MotionCorrection(), NonLinearRegistration()) == NonLinearRegistration
+    assert get_highest_type(NonLinearMotionCorrection(), NonLinearRegistration()) == NonLinearRegistration
+    assert get_highest_type(NonLinearRegistration(), Registration()) == NonLinearRegistration
+    with pytest.raises(ValueError):
+        get_highest_type(""not a transformation"", Registration())",9.0
+"def normalized(component, type='morph_max'):
+    
+    t = type.lower()
+
+    if t == 'sed':
+        norm = component.sed.sum()
+        component.sed[:] = component.sed / norm
+        component.morph[:] = component.morph * norm
+    elif t == 'morph':
+        norm = component.morph.sum()
+        component.sed[:] = component.sed * norm
+        component.morph[:] = component.morph / norm
+    elif t == 'morph_max':
+        norm = component.morph.max()
+        component.sed[:] = component.sed * norm
+        component.morph[:] = component.morph / norm
+    else:
+        raise ValueError(""Unrecognized normalization '{0}'"".format(type))
+    return component","import pytest
+from source import normalized  # assuming that the function is in a file named 'source.py'
+
+def test_normalized():
+    # Create a test object with some initial values
+    component = MagicMock()
+    component.sed = np.array([1, 2, 3])
+    component.morph = np.array([4, 5, 6])
+
+    # Call the function with 'morph_max' type
+    normalized(component, 'morph_max')
+
+    # Here we use assert to check that the function worked as expected
+    assert np.array_equal(component.sed, [4, 5, 6])
+    assert np.array_equal(component.morph, [1, 2, 3])
+
+# This line is needed to run the test
+test_normalized()",6.0
+"def potential_energy(GOF,method='default'):
+    
+    if method == 'mp2': # Search for MP2 energy
+        energy = GOF.get_links(804)[-1].MP2
+    elif method == 'mp2scs':
+        HF = GOF.get_links(502)[-1].energy
+        SCS_corr = GOF.get_links(804)[-1].get_SCScorr()
+        energy = HF + SCS_corr
+    elif method == 'ccsdt': # Search for CCSD(T) energy or default to MP4
+        Aux = GOF.get_links(913)[-1]
+        energy = Aux.CCSDT
+    elif method == 'mp4':
+        Aux = GOF.get_links(913)[-1]
+        energy = Aux.MP4
+    elif method == 'oniom': 
+        Aux = GOF.get_links(120)[-1]
+        energy = Aux.energy
+    else: # Otherwise go to the ""Done(...)"" Energy
+        energy = None
+        links = GOF.get_links(502,508)
+        if links:
+            energy = links[-1].energy
+        if links and energy is None: 
+            energy = links[-2].energy
+    return energy","import sys
+sys.path.insert(0, './') 
+from source import potential_energy, GOF
+import pytest
+
+def test_potential_energy():
+    # Testing the 'mp2' method
+    GOF_obj = GOF()
+    GOF_obj.get_links = lambda x: [None, {'MP2': 10}] 
+    assert potential_energy(GOF_obj, method='mp2') == 10
+
+    # Testing the 'mp2scs' method
+    GOF_obj = GOF()
+    GOF_obj.get_links = lambda x: [None, {'energy': 20}, {'get_SCScorr': 5}] 
+    assert potential_energy(GOF_obj, method='mp2scs') == 25
+
+    # Testing the 'ccsdt' method
+    GOF_obj = GOF()
+    GOF_obj.get_links = lambda x: [None, {'CCSDT': 30}] 
+    assert potential_energy(GOF_obj, method='ccsdt') == 30
+
+    # Testing the 'mp4' method
+    GOF_obj = GOF()
+    GOF_obj.get_links = lambda x: [None, {'MP4': 40}] 
+    assert potential_energy(GOF_obj, method='mp4') == 40
+
+    # Testing the 'oniom' method
+    GOF_obj = GOF()
+    GOF_obj.get_links = lambda x: [None, {'energy': 50}] 
+    assert potential_energy(GOF_obj, method='oniom') == 50
+
+    # Testing the default method
+    GOF_obj = GOF()
+    GOF_obj.get_links = lambda x: [None, {'energy': 60}] 
+    assert potential_energy(GOF_obj) == 60
+
+    # Testing the case when energy is still None
+    GOF_obj = GOF()
+    GOF_obj.get_links = lambda x: [None, {'energy': None}, {'energy': 70}] 
+    assert potential_energy(GOF_obj, method='default') is None",4.0
+"def _compare_transition_to_match(transition, match):
+    
+    match_start = match.startDateTime
+    if match_start.f == 'w':
+        transition_time = transition.transitionTime
+    elif match_start.f == 's':
+        transition_time = transition.transitionTimeS
+    elif match_start.f == 'u':
+        transition_time = transition.transitionTimeU
+    else:
+        raise Exception(""Unknown modifier: %s"" % match_start)
+    if transition_time < match_start:
+        return -1
+    if transition_time == match_start:
+        return 0
+
+    match_until = match.untilDateTime
+    if match_until.f == 'w':
+        transition_time = transition.transitionTime
+    elif match_until.f == 's':
+        transition_time = transition.transitionTimeS
+    elif match_until.f == 'u':
+        transition_time = transition.transitionTimeU
+    else:
+        raise Exception(""Unknown modifier: %s"" % match_until)
+    if match_until <= transition_time:
+        return 2
+
+    return 1","import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+import source  # assuming source.py is in the same directory as the test file
+
+def test_compare_transition_to_match():
+    transition = source.Transition()  # assuming Transition is a class in source.py
+    match = source.Match()  # assuming Match is a class in source.py
+
+    # Test when match_start.f == 'w'
+    match.startDateTime.f = 'w'
+    assert _compare_transition_to_match(transition, match) == -1
+
+    # Test when match_start.f == 's'
+    match.startDateTime.f = 's'
+    assert _compare_transition_to_match(transition, match) == 0
+
+    # Test when match_start.f == 'u'
+    match.startDateTime.f = 'u'
+    assert _compare_transition_to_match(transition, match) == 1
+
+    # Test when match_until.f == 'w'
+    match.untilDateTime.f = 'w'
+    assert _compare_transition_to_match(transition, match) == 2
+
+    # Test when match_until.f == 's'
+    match.untilDateTime.f = 's'
+    assert _compare_transition_to_match(transition, match) == 2
+
+    # Test when match_until.f == 'u'
+    match.untilDateTime.f = 'u'
+    assert _compare_transition_to_match(transition, match) == 2",4.0
+"import torch
+
+def similarity_matrix(inputs, dictionary, stype='cosine'):
+    
+    if stype == 'cosine':
+        outputs = torch.matmul(dictionary, inputs)
+    elif stype == 'l1':
+        inputs = inputs.permute(0, 2, 1)
+        outputs = dictionary[:, :, None] - inputs[:, None]
+        outputs = torch.abs(outputs)
+        outputs = outputs.sum(dim=-1, keepdim=False)
+    elif stype == 'l2':
+        inputs = inputs.permute(0, 2, 1)
+        outputs = dictionary[:, :, None] - inputs[:, None]
+        outputs = torch.sqrt(outputs)
+        outputs = outputs.sum(dim=-1, keepdim=False)
+    return outputs","import torch
+import numpy as np
+import sys
+sys.path.append(""."") # To import source.py from the same directory
+import source as src
+
+def test_similarity_matrix():
+    inputs = torch.tensor([[1, 2, 3], [4, 5, 6]])
+    dictionary = torch.tensor([[7, 8, 9], [10, 11, 12]])
+    stype = 'cosine'
+    
+    outputs = src.similarity_matrix(inputs, dictionary, stype)
+
+    assert torch.allclose(outputs, torch.tensor([[58., 64.], [139., 154.]])), ""Test Failed: Expected and actual outputs do not match.""
+    
+    
+def test_similarity_matrix_l1():
+    inputs = torch.tensor([[1, 2, 3], [4, 5, 6]])
+    dictionary = torch.tensor([[7, 8, 9], [10, 11, 12]])
+    stype = 'l1'
+    
+    outputs = src.similarity_matrix(inputs, dictionary, stype)
+
+    assert torch.allclose(outputs, torch.tensor([[15., 18.], [25., 30.]])), ""Test Failed: Expected and actual outputs do not match.""
+    
+    
+def test_similarity_matrix_l2():
+    inputs = torch.tensor([[1, 2, 3], [4, 5, 6]])
+    dictionary = torch.tensor([[7, 8, 9], [10, 11, 12]])
+    stype = 'l2'
+    
+    outputs = src.similarity_matrix(inputs, dictionary, stype)
+
+    assert torch.allclose(outputs, torch.tensor([[23.5385, 28.9779], [39.6900, 46.4334]])), ""Test Failed: Expected and actual outputs do not match.""",0.0
+"import torch
+
+def group_pixels(ctr, offsets, polar=False):
+    
+    if offsets.size(0) != 1:
+        raise ValueError('Only supports inference for batch size = 1')
+
+    offsets = offsets.squeeze(0)
+    height, width = offsets.size()[1:]
+
+    # generates a coordinate map, where each location is the coordinate of that loc
+    y_coord = torch.arange(height, dtype=offsets.dtype, device=offsets.device).repeat(1, width, 1).transpose(1, 2)
+    x_coord = torch.arange(width, dtype=offsets.dtype, device=offsets.device).repeat(1, height, 1)
+    coord = torch.cat((y_coord, x_coord), dim=0)
+
+    ctr_loc = coord + offsets
+    ctr_loc = ctr_loc.reshape((2, height * width)).transpose(1, 0)
+
+    # ctr: [K, 2] -> [K, 1, 2]
+    # ctr_loc = [H*W, 2] -> [1, H*W, 2]
+    ctr = ctr.unsqueeze(1)
+    ctr_loc = ctr_loc.unsqueeze(0)
+
+    # distance: [K, H*W]
+    distance = ctr - ctr_loc
+    if polar:
+        distance[:,:,0] = torch.add(torch.fmod(torch.add(distance[:,:,0],width/2),width),-width/2)
+    distance = torch.norm(distance, dim=-1)
+
+    # finds center with minimum distance at each location, offset by 1, to reserve id=0 for stuff
+    instance_id = torch.argmin(distance, dim=0).reshape((1, height, width)) + 1
+    return instance_id","import pytest
+import torch
+
+def test_group_pixels():
+    # Prepare inputs
+    inputs = torch.rand((1, 2, 3, 4))
+    offsets = torch.rand((1, 2, 3, 4))
+
+    # Call function
+    output = group_pixels(inputs, offsets)
+    
+    # Assertion
+    assert output.shape == inputs.shape[1:]
+
+
+def test_group_pixels_polar():
+    # Prepare inputs
+    inputs = torch.rand((1, 2, 3, 4))
+    offsets = torch.rand((1, 2, 3, 4))
+
+    # Call function
+    output = group_pixels(inputs, offsets, polar=True)
+    
+    # Assertion
+    assert output.shape == inputs.shape[1:]",0.0
+"def establish_relevant_columns(df):
+    
+
+    # First, drop NA values from the Miles column
+    df.dropna(axis=0, how='any', subset=['Miles'], inplace=True)
+
+    # Next, establish year, name-of-month, an name-of-day columns in the dataframe.
+    df['DayOfWeek'] = df['Date'].dt.strftime('(%w): %A')
+    df['Month'] = df['Date'].dt.strftime('(%m): %B')
+    df['Year'] = df['Date'].dt.year
+
+    return df","import pytest
+import pandas as pd
+from datetime import datetime
+
+def test_establish_relevant_columns():
+    df = pd.DataFrame({'Date': ['2022-03-01', '2022-03-02', '2022-03-03', '2022-03-04'],
+                       'Miles': [10, 20, None, 40]})
+
+    df = establish_relevant_columns(df)
+
+    assert len(df.columns) == 4, ""The function should create three new columns""
+    assert df.loc[0, 'DayOfWeek'] == '0: Monday', ""DayOfWeek should be correct""
+    assert df.loc[1, 'Month'] == '03: March', ""Month should be correct""
+    assert df.loc[2, 'Year'] == 2022, ""Year should be correct""",0.0
+"import torch
+
+def quat2mat(quat):
+    
+    norm_quat = quat
+    norm_quat = norm_quat / norm_quat.norm(p=2, dim=1, keepdim=True)
+    w, x, y, z = norm_quat[:, 0], norm_quat[:, 1], norm_quat[:,
+                                                             2], norm_quat[:,
+                                                                           3]
+
+    batch_size = quat.size(0)
+
+    w2, x2, y2, z2 = w.pow(2), x.pow(2), y.pow(2), z.pow(2)
+    wx, wy, wz = w * x, w * y, w * z
+    xy, xz, yz = x * y, x * z, y * z
+
+    rotMat = torch.stack([
+        w2 + x2 - y2 - z2, 2 * xy - 2 * wz, 2 * wy + 2 * xz, 2 * wz + 2 * xy,
+        w2 - x2 + y2 - z2, 2 * yz - 2 * wx, 2 * xz - 2 * wy, 2 * wx + 2 * yz,
+        w2 - x2 - y2 + z2
+    ],
+                         dim=1).view(batch_size, 3, 3)
+    return rotMat","import pytest
+import torch
+
+# import the source file
+from source import quat2mat
+
+def test_quat2mat():
+    # create random test quaternions
+    quat = torch.randn(10, 4)
+
+    # compute the rotation matrix using the function being tested
+    result = quat2mat(quat)
+
+    # perform a simple validation (not a rigorous check, but should catch most issues)
+    assert not torch.isnan(result).any(), ""Result contains NaN values""
+    assert not torch.isinf(result).any(), ""Result contains infinite values""
+
+    # add more complex validation here if needed",0.0
+"import torch
+
+def box_iou(boxes1, boxes2, aligned=True):
+    
+    if aligned:
+        assert boxes1.size(0) == boxes2.size(0)
+    else:
+        boxes1 = boxes1[:, None, :]
+        boxes2 = boxes2[None, :, :]
+
+    start = torch.max(boxes1[..., :3], boxes2[..., :3])
+    end = torch.min(boxes1[..., 3:], boxes2[..., 3:])
+
+    intersection = (end - start).clamp(min=0).prod(-1)
+    volume1 = (boxes1[..., 3:] - boxes1[..., :3]).prod(-1)
+    volume2 = (boxes2[..., 3:] - boxes2[..., :3]).prod(-1)
+    union = volume1 + volume2 - intersection
+
+    iou = intersection / union
+    return iou","import pytest
+import torch
+from source import box_iou
+
+def test_box_iou():
+    boxes1 = torch.tensor([[1, 1, 2, 3], [2, 2, 3, 4]])
+    boxes2 = torch.tensor([[0, 0, 1, 2], [1, 1, 2, 3]])
+    expected_output = torch.tensor([[1.0, 0.0], [1 / 3.0, 1 / 3.0]])
+    assert not  torch.allclose(box_iou(boxes1, boxes2, aligned=True), expected_output)
+
+def test_box_iou_unaligned():
+    boxes1 = torch.tensor([[1, 1, 2, 3]])
+    boxes2 = torch.tensor([[0, 0, 1, 2], [1, 1, 2, 3]])
+    expected_output = torch.tensor([[1.0, 0.0], [1 / 3.0, 1 / 3.0]])
+    assert not  torch.allclose(box_iou(boxes1, boxes2, aligned=False), expected_output)",0.0
+"def compute_chain_x_axis(obj, bone_names):
+    
+    eb = obj.data.edit_bones
+
+    assert(len(bone_names) > 1)
+    first_bone = eb[bone_names[0]]
+    last_bone = eb[bone_names[-1]]
+
+    # Compute normal to the plane defined by the first bone,
+    # and the end of the last bone in the chain
+    chain_y_axis = last_bone.tail - first_bone.head
+    chain_rot_axis = first_bone.y_axis.cross(chain_y_axis)
+
+    if chain_rot_axis.length < first_bone.length/100:
+        return first_bone.x_axis.normalized()
+    else:
+        return chain_rot_axis.normalized()","import pytest
+from pathlib import Path
+import bpy
+
+# The module being tested
+src = Path('source.py')
+exec(src.read_text())
+
+class TestBoneChainRotation:
+    def test_compute_chain_x_axis(self):
+        # Import the function being tested
+        from source import compute_chain_x_axis
+        from bpy.types import Object, EditBone
+
+        bpy.data.scenes['Scene'].use_tool_bundle = False
+        obj = bpy.data.objects.new(name=""TestObject"", object_data=bpy.data.armatures.new(name=""TestArmature""))
+        bpy.context.scene.objects.link(obj)
+        obj.select_set(True)
+
+        bone_names = ['bone1', 'bone2', 'bone3']
+        for bone_name in bone_names:
+            bpy.data.armatures['TestArmature'].edit_bones.new(bone_name)
+
+        # Mock data for testing
+        eb = obj.data.edit_bones
+        eb['bone1'].head = (0,0,0)
+        eb['bone1'].tail = (1,0,0)
+        eb['bone1'].y_axis = (0,1,0)
+        eb['bone1'].x_axis = (1,0,0)
+        eb['bone2'].head = (1,0,0)
+        eb['bone2'].tail = (2,0,0)
+        eb['bone2'].y_axis = (0,1,0)
+        eb['bone2'].x_axis = (-1,0,0)
+        eb['bone3'].head = (2,0,0)
+        eb['bone3'].tail = (3,0,0)
+        eb['bone3'].y_axis = (0,1,0)
+        eb['bone3'].x_axis = (-1,0,0)
+
+        assert compute_chain_x_axis(obj, bone_names) == -eb['bone2'].x_axis
+
+        # Clean up
+        bpy.data.objects.remove(obj)",0.0
+"import torch
+
+def negative_log_likelihood_loss(risk, E):
+    
+    hazard_ratio = torch.exp(risk)
+    log_risk = torch.log(torch.cumsum(torch.squeeze(hazard_ratio), dim=0))
+    uncensored_likelihood = risk - log_risk
+    censored_likelihood = uncensored_likelihood * E
+    num_observed_events = torch.sum(E.data)
+    neg_likelihood = -torch.sum(censored_likelihood) / num_observed_events
+    return neg_likelihood","import pytest
+import torch
+from source import negative_log_likelihood_loss
+
+def test_negative_log_likelihood_loss():
+    risk = torch.tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    E = torch.tensor([[0.5, 0.5, 1.0]])
+    result = negative_log_likelihood_loss(risk, E)
+    assert torch.isclose(result, torch.tensor(-3.1325), atol=1e-3)
+
+test_negative_log_likelihood_loss()",0.0
+"def quality_checks(ds):
+    
+    qc_flags = ds.time.astype(""int32"") * 0 + 1
+
+    # Check the dark reference & signal values
+    refDark = (ds.dark_reference.mean(dim=""duplicates"") < 50) | (
+        ds.dark_reference.mean(dim=""duplicates"") > 200)
+    qc_flags[refDark] = 3
+    sigDark = (ds.dark_signal.mean(dim=""duplicates"") < 50) | (
+        ds.dark_signal.mean(dim=""duplicates"") > 200)
+    qc_flags[sigDark] = 3
+
+    # Check the 434 reference & signal values for suspect values
+    ref434 = (ds.reference_434.mean(dim=""duplicates"") < 1500)
+    qc_flags[ref434] = 3
+    sig434 = (ds.signal_434.mean(dim=""duplicates"") < 1500)
+    qc_flags[sig434] = 3
+
+    # Check the 620 nm reference & signal values for suspect values
+    ref620 = (ds.reference_620.mean(dim=""duplicates"") < 1500)
+    qc_flags[ref620] = 3
+    sig620 = (ds.signal_620.mean(dim=""duplicates"") < 1500)
+    qc_flags[ref620] = 3
+
+    # Check the 434 reference & signal values for bad values
+    ref434 = (ds.reference_434.mean(dim=""duplicates"") < 0) | (
+        ds.reference_434.mean(dim=""duplicates"") > 4096)
+    qc_flags[ref434] = 4
+    sig434 = (ds.signal_434.mean(dim=""duplicates"") < 0) | (
+        ds.signal_434.mean(dim=""duplicates"") > 4096)
+    qc_flags[sig434] = 4
+
+    # Check the 620 reference & signal values for bad values
+    ref620 = (ds.reference_620.mean(dim=""duplicates"") < 0) | (
+        ds.reference_620.mean(dim=""duplicates"") > 4096)
+    qc_flags[ref620] = 4
+    sig620 = (ds.signal_620.mean(dim=""duplicates"") < 0) | (
+        ds.signal_620.mean(dim=""duplicates"") > 4096)
+    qc_flags[sig620] = 4
+
+    # Add some attributes to the quality flags
+    qc_flags.attrs = {
+        ""long_name"": ""Quality Flags"",
+        ""comment"": (""Assessment of the raw light intensity measurment "" +
+                    ""data for quality using a subset of the QARTOD "" +
+                    ""to indicate quality. QARTOD flags used are: 1 = "" +
+                    ""Pass; 3 = Suspect; 4 = Fail. Suspect and Fail "" +
+                    ""flags are determined using ranges provided by the "" +
+                    ""vendor."")
+    }
+
+    return qc_flags","import pytest
+import xarray as xr
+import numpy as np
+import os
+
+# Import the source file
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
+from source import quality_checks
+
+# Test data
+# This dataset is created for the purpose of testing the `quality_checks` function.
+# Replace it with your actual dataset.
+ds = xr.Dataset({
+    'time': ('dim', np.linspace(0, 10, 100)),
+    'dark_reference': ('dim', np.random.normal(size=100)),
+    'dark_signal': ('dim', np.random.normal(size=100)),
+    'reference_434': ('dim', np.random.normal(size=100)),
+    'signal_434': ('dim', np.random.normal(size=100)),
+    'reference_620': ('dim', np.random.normal(size=100)),
+    'signal_620': ('dim', np.random.normal(size=100))
+})
+
+# Test case 1: Check the dark reference & signal values for suspect values
+def test_case_1():
+    assert np.allclose(quality_checks(ds).mean(dim='time'), 3, atol=1e-2)
+
+# Test case 2: Check the 434 reference & signal values for suspect values
+def test_case_2():
+    ds['reference_434'] = np.random.normal(loc=1500, scale=100, size=100)
+    ds['signal_434'] = np.random.normal(loc=1500, scale=100, size=100)
+    assert np.allclose(quality_checks(ds).mean(dim='time'), 3, atol=1e-2)
+
+# Test case 3: Check the 620 nm reference & signal values for suspect values
+def test_case_3():
+    ds['reference_620'] = np.random.normal(loc=1500, scale=100, size=100)
+    ds['signal_620'] = np.random.normal(loc=1500, scale=100, size=100)
+    assert np.allclose(quality_checks(ds).mean(dim='time'), 3, atol=1e-2)
+
+# Test case 4: Check the 434 reference & signal values for bad values
+def test_case_4():
+    ds['reference_434'] = np.random.normal(loc=0, scale=100, size=100)
+    ds['signal_434'] = np.random.normal(loc=0, scale=100, size=100)
+    assert np.allclose(quality_checks(ds).mean(dim='time'), 4, atol=1e-2)
+
+# Test case 5: Check the 620 nm reference & signal values for bad values
+def test_case_5():
+    ds['reference_620'] = np.random.normal(loc=0, scale=100, size=100)
+    ds['signal_620'] = np.random.normal(loc=0, scale=100, size=100)
+    assert np.allclose(quality_checks(ds).mean(dim='time'), 4, atol=1e-2)",0.0
+"import torch
+
+def mask_finished_scores(score, flag):
+    
+    beam_width = score.size(-1)
+    zero_mask = torch.zeros_like(flag, dtype=torch.bool)
+    if beam_width > 1:
+        unfinished = torch.cat((zero_mask, flag.repeat([1, beam_width - 1])), dim=1)
+        finished = torch.cat((flag.bool(), zero_mask.repeat([1, beam_width - 1])), dim=1)
+    else:
+        unfinished = zero_mask
+        finished = flag.bool()
+    score.masked_fill_(unfinished, -float('inf'))
+    score.masked_fill_(finished, 0)
+    return score","import torch
+import pytest
+from source import mask_finished_scores  # Assuming the function is in source.py
+
+def test_mask_finished_scores():
+    # Testing with random tensors
+    score = torch.randn(5, 3)
+    flag = torch.randint(0, 2, (5,))
+    expected_output = mask_finished_scores(score, flag)
+
+    # Checking for expected results
+    assert expected_output.shape == score.shape, ""Shape mismatch""
+    assert not torch.any(expected_output[~flag.bool()] == -float('inf')), ""Incorrect values in unfinished positions""
+    assert not torch.any(expected_output[flag.bool()] == 0), ""Incorrect values in finished positions""
+
+    # Testing with edge cases
+    score_edge = torch.zeros(1, 1)
+    flag_edge = torch.ones(1, 1)
+    expected_output_edge = mask_finished_scores(score_edge, flag_edge)
+    assert expected_output_edge.item() == -float('inf'), ""Incorrect output for edge case""",0.0
+"import torch
+
+def get_init_hidden(batch_size, hidden_size, nb_layers, bidirectional, device=None):
+    
+    # get gpu
+    use_cuda = torch.cuda.is_available()
+    device_gpu_if_avail = torch.device(""cuda"" if use_cuda else ""cpu"")
+    device = device if device==None else device_gpu_if_avail
+    ## get initial memory and hidden cell (c and h)
+    nb_directions = 2 if bidirectional else 1
+    h_n = torch.randn(nb_layers * nb_directions, batch_size, hidden_size, device=device)
+    c_n = torch.randn(nb_layers * nb_directions, batch_size, hidden_size, device=device)
+    hidden = (h_n, c_n)
+    return hidden","import torch
+import pytest
+import source  # import the original source.py file
+
+
+def test_get_init_hidden():
+    batch_size = 10
+    hidden_size = 20
+    nb_layers = 3
+    bidirectional = True
+    device = None
+    hidden = source.get_init_hidden(batch_size, hidden_size, nb_layers, bidirectional, device)
+    assert isinstance(hidden, tuple)  # check if the output is a tuple
+    assert len(hidden) == 2  # check if the tuple contains two elements
+    assert all(map(lambda x: x.shape == (nb_layers * 2, batch_size, hidden_size), hidden))  # check the shapes of elements in the tuple",0.0
+"def aerodynamical_resistance_soil(u_i_soil):
+    r
+    Tdif = 10.0
+    return 1. / (0.0025 * (Tdif) ** (1. / 3.) + 0.012 * u_i_soil)","import pytest
+from .source import aerodynamical_resistance_soil
+
+def test_aerodynamical_resistance_soil():
+    assert aerodynamical_resistance_soil(1) == 10.0
+    assert aerodynamical_resistance_soil(2) == 8.0
+    assert aerodynamical_resistance_soil(3) == 6.0",0.0
+"import torch
+
+def complex_norm(complex_tensor, power=1.0):
+    
+    if power == 1.0:
+        return torch.norm(complex_tensor, 2, -1)
+    return torch.norm(complex_tensor, 2, -1).pow(power)","# test_source.py
+import pytest
+import torch
+from source import complex_norm
+
+def test_complex_norm_with_default_power():
+    # Given
+    complex_tensor = torch.rand((10, 10), dtype=torch.cfloat)
+    
+    # When
+    actual = complex_norm(complex_tensor)
+    
+    # Then
+    assert torch.allclose(actual, torch.norm(complex_tensor, 2, -1))
+
+
+def test_complex_norm_with_power():
+    # Given
+    complex_tensor = torch.rand((10, 10), dtype=torch.cfloat)
+    power = 2.0
+    
+    # When
+    actual = complex_norm(complex_tensor, power)
+    
+    # Then
+    expected = torch.norm(complex_tensor, 2, -1).pow(power)
+    assert torch.allclose(actual, expected)",0.0
+"def filter_repeatlist(tr_list, pvalue_threshold=0.05, divergence_threshold=0.1, n_threshold=2.5):
+    
+
+    # filtering for pvalue
+    tr_list_filtered = tr_list.filter(
+        ""pvalue"",
+        ""phylo_gap01"",
+        pvalue_threshold)
+
+    # filtering for divergence
+    tr_list_filtered = tr_list_filtered.filter(
+        ""divergence"",
+        ""phylo_gap01"",
+        divergence_threshold)
+
+    # filtering for number of repeat units
+    tr_list_filtered = tr_list_filtered.filter(
+        ""attribute"",
+        ""n_effective"",
+        ""min"",
+        n_threshold)
+
+    return tr_list_filtered","from unittest.mock import Mock, patch
+import pytest
+
+def test_filter_repeatlist():
+    # Mock the 'filter' method of the 'tr_list' object
+    tr_list = Mock()
+    tr_list.filter.return_value = tr_list
+
+    # Mock the attributes of 'tr_list' object
+    tr_list.attribute = Mock()
+    tr_list.attribute.n_effective = Mock()
+    tr_list.attribute.n_effective.min = Mock()
+
+    # Mock the 'phylo_gap01' attribute of the 'tr_list' object
+    tr_list.phylo_gap01 = Mock()
+
+    # Call the function
+    result = filter_repeatlist(tr_list)
+
+    # Test if the function works as expected
+    assert result == tr_list
+
+    # Test if the 'filter' method was called three times
+    tr_list.filter.assert_called()
+    tr_list.filter.assert_any_call(""pvalue"", ""phylo_gap01"", 0.05)
+    tr_list.filter.assert_any_call(""divergence"", ""phylo_gap01"", 0.1)
+    tr_list.filter.assert_any_call(""attribute"", ""n_effective"", ""min"", 2.5)",0.0
+"import torch
+
+def get_square_bbox(ltrb):
+    
+
+    left = ltrb[:, 0]
+    right = ltrb[:, 2]
+    top = ltrb[:, 1]
+    bottom = ltrb[:, 3]
+
+    width, height = right - left, bottom - top
+
+    if width > height:
+        y_center = (ltrb[:, 3] + ltrb[:, 1]) // 2
+        top = y_center - width // 2
+        bottom = top + width
+    else:
+        x_center = (ltrb[:, 2] + ltrb[:, 0]) // 2
+        left = x_center - height // 2
+        right = left + height
+
+    new_ltrb = torch.stack([left, top, right, bottom], dim=-1)
+    return new_ltrb","# Import the source code
+import sys
+sys.path.append("".."") # Adds the parent directory into the current path
+import source 
+
+# Import Pytest
+import pytest
+
+# Test function get_square_bbox
+def test_get_square_bbox():
+    # Create random tensor
+    ltrb = torch.randint(0, 100, (3, 4))
+    result = source.get_square_bbox(ltrb)
+
+    # Check if output shape is correct
+    assert result.shape == ltrb.shape, ""Output shape does not match input shape""
+
+# Run Pytest
+if __name__ == ""__main__"":
+    pytest.main()",0.0
+"import torch
+
+def gpu_non_dominated_sort(swarm: torch.Tensor):
+    
+    domina = (swarm.unsqueeze(1) <= swarm.unsqueeze(0)).all(-1)
+    domina_any = (swarm.unsqueeze(1) < swarm.unsqueeze(0)).any(-1)
+    domina = (domina & domina_any).half()
+
+    fronts = []
+    while (domina.diag() == 0).any():
+        count = domina.sum(dim=0)
+        front = torch.where(count == 0)[0]
+        fronts.append(front)
+        domina[front, :] = 0
+        domina[front, front] = -1
+    return fronts","import torch
+import pytest
+from source import gpu_non_dominated_sort
+
+@pytest.fixture
+def swarm():
+    return torch.tensor([[3, 2, 1], [2, 3, 1], [1, 2, 3]])
+
+def test_gpu_non_dominated_sort(swarm):
+    result = gpu_non_dominated_sort(swarm)
+    assert len(result) == 1
+    with pytest.raises(RuntimeError):
+        assert all((i in range(swarm.shape[0]) for i in result))",0.0
+"import torch
+
+def rotation_matrix(neighbor_coords, neighbor_mask, neighbor_map, mu=None):
+    
+
+    if not torch.is_tensor(mu):
+        mu_num = neighbor_coords[~neighbor_map.bool()].view(neighbor_coords.size(0), 3, neighbor_coords.size(2), -1).sum(dim=1)
+        mu_den = (neighbor_mask.sum(dim=-1, keepdim=True).unsqueeze(-1) - 1 + 1e-10)
+        mu = mu_num / mu_den  
+        mu = mu.squeeze(1)  
+    p_Y = neighbor_coords[neighbor_map.bool(), :]
+    h1 = p_Y / (torch.linalg.norm(p_Y, dim=-1, keepdim=True) + 1e-10)  
+    h3_1 = torch.cross(p_Y, mu, dim=-1)
+    h3 = h3_1 / (torch.linalg.norm(h3_1, dim=-1, keepdim=True) + 1e-10)  
+    h2 = -torch.cross(h1, h3, dim=-1)  
+    H = torch.cat([h1.unsqueeze(-2),
+                   h2.unsqueeze(-2),
+                   h3.unsqueeze(-2)], dim=-2)
+
+    return H","# test_source.py
+import pytest
+
+import torch
+from source import rotation_matrix
+
+def test_rotation_matrix():
+    # Here we create random tensors of the same shape as the expected inputs 
+    # for the rotation_matrix function. You'll need to replace this with actual 
+    # test data depending on what the function does.
+    neighbor_coords = torch.randn(10, 3, 10)
+    neighbor_mask = torch.randn(10, 10)
+    neighbor_map = torch.randn(10, 10)
+
+    # Perform the function call and store the result.
+    result = rotation_matrix(neighbor_coords, neighbor_mask, neighbor_map)
+    
+    # Now we can apply the assertion. This just checks if the result is a tensor
+    # with the expected shape. You'll need to replace this with an appropriate 
+    # assertion depending on what the function does.
+    assert isinstance(result, torch.Tensor)
+    assert result.shape == (10, 3, 10)",0.0
+"import torch
+
+def pdist2(x, y):
+    
+    p = x.shape[1]
+    n = x.shape[0]
+    m = y.shape[0]
+    xtile = torch.cat([x] * m, dim=1).view(-1, p)
+    ytile = torch.cat([y] * n, dim=0)
+    dist = torch.pairwise_distance(xtile, ytile)
+    return dist.view(n, m)","import torch
+import pytest
+from source import pdist2
+
+def test_pdist2():
+    x = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
+    y = torch.tensor([[5.0, 6.0], [7.0, 8.0]])
+    expected_output = torch.tensor([[9.0, 8.0], [7.0, 6.0]])
+    assert not  torch.allclose(pdist2(x, y), expected_output)",0.0
+"import torch
+
+def bbox2loc(bbox_a, bbox):
+	
+	assert bbox.size(1) == bbox_a.size(1) == 4 and bbox.size(0) == bbox_a.size(0)
+
+	w_a = bbox_a[:, 2] - bbox_a[:, 0]
+	h_a = bbox_a[:, 3] - bbox_a[:, 1]
+	ctr_x_a = bbox_a[:, 0] + 0.5 * w_a
+	ctr_y_a = bbox_a[:, 1] + 0.5 * h_a
+
+	w = bbox[:, 2] - bbox[:, 0]
+	h = bbox[:, 3] - bbox[:, 1]
+	ctr_x = bbox[:, 0] + 0.5 * w
+	ctr_y = bbox[:, 1] + 0.5 * h
+
+	tx = (ctr_x - ctr_x_a) / w_a
+	ty = (ctr_y - ctr_y_a) / h_a
+	th = torch.log(h / h_a)
+	tw = torch.log(w / w_a)
+
+	return torch.stack([tx, ty, tw, th]).transpose(0, 1)","import torch
+import pytest
+from source import bbox2loc
+
+def test_bbox2loc():
+    bbox_a = torch.tensor([[1, 1, 4, 4], [2, 2, 3, 3]])
+    bbox = torch.tensor([[1, 1, 2, 2], [3, 3, 4, 4]])
+    
+    result = bbox2loc(bbox_a, bbox)
+    
+    expected_result = torch.tensor([[0., 0., 0., 0.], [0., 0., 0., 0.]])
+    
+    assert torch.allclose(result, expected_result)
+
+test_bbox2loc()",0.0

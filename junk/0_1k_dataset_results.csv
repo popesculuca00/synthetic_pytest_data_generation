@@ -1,0 +1,3405 @@
+original_code,pytest_code,coverage
+"def overlap_with(intervals, start, end):
+    
+    if not intervals:
+        return False
+    left = 0
+    right = len(intervals) - 1
+    while left <= right:
+        mid = (left + right) // 2
+        start_ref = intervals[mid][0]
+        end_ref = intervals[mid][1]
+        if not (end <= start_ref or start >= end_ref):
+            return True
+        elif start >= end_ref:
+            left = mid + 1
+        elif end <= start_ref:
+            right = mid - 1
+    return False","# Let's assume the source file is named 'source.py' and has the function 'overlap_with'
+from source import overlap_with
+
+def test_overlap_with():
+    intervals = [(1, 5), (2, 6), (3, 7), (6, 9)]
+    assert overlap_with(intervals, 1, 6) == True
+    assert overlap_with(intervals, 10, 20) == False
+    assert overlap_with(intervals, 3, 7) == True
+    assert overlap_with(intervals, 5, 10) == False
+    assert overlap_with(intervals, 0, 10) == True
+    
+    intervals = [(5, 10), (1, 3), (10, 15), (0, 2)]
+    assert overlap_with(intervals, 1, 6) == True
+    assert overlap_with(intervals, 17, 20) == False
+    assert overlap_with(intervals, 1, 7) == True
+    assert overlap_with(intervals, 12, 15) == False
+    assert overlap_with(intervals, 0, 10) == True",100.0
+"def compute_loss(criterion, outputs, labels, batch_size):
+    
+    loss_out = outputs.transpose(1, 3) \
+        .contiguous() \
+        .view([batch_size * 128 * 128, 2])
+    loss_lab = labels.transpose(1, 3) \
+        .contiguous() \
+        .view([batch_size * 128 * 128, 2])
+    return criterion(loss_out, loss_lab)","import torch
+
+def compute_loss(criterion, outputs, labels, batch_size):
+    
+    loss_out = outputs.transpose(1, 3) \
+        .contiguous() \
+        .view([batch_size * 128 * 128, 2])
+    loss_lab = labels.transpose(1, 3) \
+        .contiguous() \
+        .view([batch_size * 128 * 128, 2])
+    return criterion(loss_out, loss_lab)",100.0
+"def compute_amp_fraction(df_shape_features):
+    
+
+    return df_shape_features['volt_amp'].rank() / len(df_shape_features)","# test_source.py
+
+import pytest
+from source import compute_amp_fraction
+
+def test_compute_amp_fraction():
+    # Creating a dummy dataframe
+    df_shape_features = pd.DataFrame({'volt_amp': [1, 2, 3, 4, 5]})
+
+    # Calling the function and getting the result
+    result = compute_amp_fraction(df_shape_features)
+
+    # Checking if the result is equal to the expected value
+    assert result == 3.0, ""The values are not equal""",100.0
+"import torch
+
+def gradient_to_contrastive_excitation_backprop_saliency(x):
+    r
+    return torch.clamp(torch.sum(x.grad, 1, keepdim=True), min=0)","import pytest
+from source import gradient_to_contrastive_excitation_backprop_saliency
+
+def test_gradient_to_contrastive_excitation_backprop_saliency():
+    # Define the input tensor
+    x = torch.rand((10, 10))
+    
+    # Compute the saliency map
+    saliency = gradient_to_contrastive_excitation_backprop_saliency(x)
+    
+    # Check if the output has the expected shape
+    assert saliency.shape == x.shape",100.0
+"def _mask_border_keypoints(image_shape, keypoints, distance):
+    
+
+    rows = image_shape[0]
+    cols = image_shape[1]
+
+    mask = (
+        ((distance - 1) < keypoints[:, 0])
+        & (keypoints[:, 0] < (rows - distance + 1))
+        & ((distance - 1) < keypoints[:, 1])
+        & (keypoints[:, 1] < (cols - distance + 1))
+    )
+
+    return mask","import pytest
+import numpy as np
+from source import _mask_border_keypoints
+
+def test_mask_border_keypoints():
+    image_shape = (5, 5)
+    keypoints = np.array([[2, 2], [3, 3], [4, 4], [0, 0], [4, 0], [0, 4]])
+    distance = 1
+    expected_output = np.array([True, True, True, False, False, False])
+    assert np.array_equal(_mask_border_keypoints(image_shape, keypoints, distance), expected_output)
+
+test_mask_border_keypoints()",100.0
+"def pool_output_length(input_length, pool_size, stride, pad, ignore_border):
+    
+    if input_length is None or pool_size is None:
+        return None
+
+    if pad == 'strictsame':
+        output_length = input_length
+    elif ignore_border:
+        output_length = input_length + 2 * pad - pool_size + 1
+        output_length = (output_length + stride - 1) // stride
+
+    # output length calculation taken from:
+    # https://github.com/Theano/Theano/blob/master/theano/tensor/signal/downsample.py
+    else:
+        assert pad == 0
+
+        if stride >= pool_size:
+            output_length = (input_length + stride - 1) // stride
+        else:
+            output_length = max(
+                0, (input_length - pool_size + stride - 1) // stride) + 1
+
+    return output_length","def pool_output_length(input_length, pool_size, stride, pad, ignore_border):
+    if input_length is None or pool_size is None:
+        return None
+
+    if pad == 'strictsame':
+        output_length = input_length
+    elif ignore_border:
+        output_length = input_length + 2 * pad - pool_size + 1
+        output_length = (output_length + stride - 1) // stride
+
+    else:
+        assert pad == 0
+
+        if stride >= pool_size:
+            output_length = (input_length + stride - 1) // stride
+        else:
+            output_length = max(
+                    0, (input_length - pool_size + stride - 1) // stride) + 1
+
+    return output_length",100.0
+"def float2str(flt, separator=""."", precision=None, prefix=None, suffix=None):
+    
+    
+    if isinstance(precision, int):
+        str_number = ""{num:.{pre}f}"".format(num=flt, pre=precision)
+    else:
+        str_number = str(flt)
+
+    if separator is not  ""."":
+        # Split number around the decimal point. 
+        number_parts = str_number.split(""."")
+        string = separator.join(number_parts)
+    else:
+        string = str_number
+
+    if isinstance(prefix, str):
+        string = """".join([prefix, string])
+
+    if isinstance(suffix, str):
+        string = """".join([string, suffix])
+
+    return string","# test_float2str.py
+import pytest
+from source import float2str
+
+def test_float2str():
+    assert float2str(123.456) == '123.456' 
+    assert float2str(123456.789, separator="","") == '123,456.789' 
+    assert float2str(123456.789, precision=3) == '123456.789' 
+    assert float2str(123456.789, suffix="" GB"") == '123456.789 GB' 
+    assert float2str(123456.789, prefix=""R"") == 'R123456.789' 
+    assert float2str(123456.789, separator="","", precision=3, prefix=""R"", suffix="" GB"") == 'R123,456.789 GB' 
+
+if __name__ == ""__main__"":
+    test_float2str()",100.0
+"def translate_point(point, y_offset=0, x_offset=0):
+    
+
+    out_point = point.copy()
+
+    out_point[:, 0] += y_offset
+    out_point[:, 1] += x_offset
+
+    return out_point","# test_source.py
+import source  # assuming that the source code file is named 'source.py'
+
+def test_translate_point():
+    point = [[1, 2], [3, 4], [5, 6]]
+    y_offset = 1
+    x_offset = 2
+    expected_output = [[2, 3], [4, 5], [6, 7]]
+
+    assert source.translate_point(point, y_offset, x_offset) == expected_output",100.0
+"def cressman_weights(sq_dist, r):
+    r
+    return (r * r - sq_dist) / (r * r + sq_dist)","# Import the source module
+import source
+import pytest
+
+# Test class for cressman_weights function
+class TestCressmanWeights:
+
+    # Test case for cressman_weights function
+    def test_cressman_weights(self):
+        # Assuming r=10 and sq_dist=25 for test case
+        result = source.cressman_weights(25, 10)
+        # Expected result
+        expected_result = (10 * 10 - 25) / (10 * 10 + 25)
+        assert result == expected_result, ""Test failed!""
+
+# Run the test
+if __name__ == ""__main__"":
+    pytest.main()",100.0
+"def conv_output_length(input_length, filter_size, stride, pad=0):
+    
+    if input_length is None:
+        return None
+    if pad == 'valid':
+        output_length = input_length - filter_size + 1
+    elif pad == 'full':
+        output_length = input_length + filter_size - 1
+    elif pad == 'same':
+        output_length = input_length
+    elif isinstance(pad, int):
+        output_length = input_length + 2 * pad - filter_size + 1
+    else:
+        raise ValueError('Invalid pad: {0}'.format(pad))
+
+    # This is the integer arithmetic equivalent to
+    # np.ceil(output_length / stride)
+    output_length = (output_length + stride - 1) // stride
+
+    return output_length","# test_source.py
+
+import sys
+sys.path.append('.')  # Adds the current directory to the Python path
+
+from source import conv_output_length
+import pytest 
+
+def test_conv_output_length():
+    # Testing with valid 'pad' argument
+    assert conv_output_length(32, 3, 1, 'valid') == 32 - 3 + 1
+    assert conv_output_length(35, 3, 1, 'valid') == 35 - 3 + 1
+
+    # Testing with full 'pad' argument
+    assert conv_output_length(32, 3, 1, 'full') == 32 + 3 - 1
+    assert conv_output_length(35, 3, 1, 'full') == 35 + 3 - 1
+
+    # Testing with same 'pad' argument
+    assert conv_output_length(32, 3, 1, 'same') == 32
+    assert conv_output_length(35, 3, 1, 'same') == 35
+
+    # Testing with integer 'pad' argument
+    assert conv_output_length(32, 3, 1, 1) == 32 + 2*1 - 3 + 1
+    assert conv_output_length(35, 3, 1, 1) == 35 + 2*1 - 3 + 1
+
+    # Testing with invalid 'pad' argument
+    with pytest.raises(ValueError):
+        conv_output_length(32, 3, 1, 'invalid')
+
+    # Testing with None 'input_length' argument
+    assert conv_output_length(None, 3, 1, 'valid') == None",100.0
+"def subsample_fourier(x, k):
+    
+    N = x.shape[-2]
+    res = x.view(x.shape[:-2] + (k, N // k, 2)).mean(dim=-3)
+    return res","import pytest
+import torch
+from source import subsample_fourier
+
+def test_subsample_fourier():
+    x = torch.randn(2, 4, 8)  # replace with actual shape and range
+    k = 2
+    res = subsample_fourier(x, k)
+    assert res.shape == x.shape[:-2] + (k, x.shape[-2] // k)
+
+if __name__ == ""__main__"":
+    test_subsample_fourier()",100.0
+"def get_scale_factor(fig, ax, scale, axis='x'):
+     
+    bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+    if axis == 'x':
+        xlim = ax.get_xlim()
+        initial_scale = abs(xlim[1] - xlim[0]) / bbox.width
+    elif axis == 'y':
+        ylim = ax.get_ylim()
+        initial_scale = abs(ylim[1] - ylim[0]) / bbox.height        
+    scale_factor = initial_scale/scale
+
+    return scale_factor","import matplotlib.pyplot as plt
+import numpy as np
+import source  # assuming the original code is in a file named 'source.py'
+
+
+def test_get_scale_factor():
+    fig, ax = plt.subplots()
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 10)
+
+    scale = 2
+    scale_factor = source.get_scale_factor(fig, ax, scale, axis='x')
+    np.testing.assert_almost_equal(scale_factor, 0.5)
+
+    scale_factor = source.get_scale_factor(fig, ax, scale, axis='y')
+    np.testing.assert_almost_equal(scale_factor, 0.5)
+
+
+if __name__ == ""__main__"":
+    test_get_scale_factor()",100.0
+"def interpolation(x0, y0, x1, y1, x):
+    
+    y = y0 + (y1 - y0) * ((x - x0) / (x1 - x0))
+    return y","import pytest
+from source import interpolation
+
+def test_interpolation():
+    # Test with some arbitrary values
+    x0, y0, x1, y1, x = 0, 0, 1, 1, 0.5
+    expected_output = 0.5
+    assert interpolation(x0, y0, x1, y1, x) == expected_output
+
+    # Test with another set of values
+    x0, y0, x1, y1, x = 10, 100, 20, 200, 15
+    expected_output = 150
+    assert interpolation(x0, y0, x1, y1, x) == expected_output
+
+    # Test with another set of values
+    x0, y0, x1, y1, x = -10, -100, 10, 100, -5
+    expected_output = -50
+    assert interpolation(x0, y0, x1, y1, x) == expected_output",100.0
+"def step_valid(model, x_valid, y_valid, criterion):
+    
+
+    # set model to validation mode
+    model.eval()
+    # forward pass
+    y_pred = model(x_valid)
+    # compute loss
+    loss = criterion(y_pred, y_valid).item() # .item() gets only the scalar
+
+    return y_pred, loss","# test_source.py
+
+import pytest
+import torch
+from source import step_valid  # assuming the function is in source.py
+
+def test_step_valid():
+    # random tensor
+    x_valid = torch.rand((100, 200))
+    # random tensor
+    y_valid = torch.rand((100, 200))
+
+    model = torch.nn.Sequential(torch.nn.Linear(200, 200), torch.nn.ReLU(), torch.nn.Linear(200, 10))
+    criterion = torch.nn.MSELoss()
+
+    y_pred, loss = step_valid(model, x_valid, y_valid, criterion)
+
+    assert y_pred.shape == y_valid.shape, ""Predicted output and actual output shapes do not match""
+    assert loss >= 0, ""Loss is negative, which doesn't make sense""
+    assert torch.isclose(y_pred, y_valid, atol=1e-6), ""Predicted output and actual output are not close enough""",100.0
+"def convert_to_luma(tensor, use_digital_rgb=False):
+  
+  assert tensor.dim() == 4 and tensor.size()[1] == 3
+
+  if use_digital_rgb:
+    scale = [65.481, 128.553, 24.966]
+  else:
+    scale = [65.738, 129.057, 25.064]
+
+  luma = (scale[0] * tensor[:, 0, :, :] +
+          scale[1] * tensor[:, 1, :, :] +
+          scale[2] * tensor[:, 2, :, :] + 16.)
+  luma = luma.clamp(16., 235.) / 255.
+  return luma.unsqueeze(dim=1)","# test_source.py
+import pytest
+from source import convert_to_luma
+
+def test_convert_to_luma():
+    tensor = torch.randn(2, 3, 10, 10)
+    output = convert_to_luma(tensor)
+    assert output.shape == (2, 1, 10, 10)
+
+    tensor_digital_rgb = torch.randn(2, 3, 10, 10)
+    output_digital_rgb = convert_to_luma(tensor_digital_rgb, use_digital_rgb=True)
+    assert output_digital_rgb.shape == (2, 1, 10, 10)
+
+# note: 'torch' module must be imported in the test file for this to run",100.0
+"def loss_batch(model, loss_func, xb, yb, opt=None):
+    
+    loss = loss_func(model(xb), yb)
+    if opt is not None:
+        loss.backward()
+        opt.step()
+        opt.zero_grad()
+    return loss.item()","# test_source.py
+import sys
+sys.path.append(""."") # To import source.py from the same directory
+from source import loss_batch
+import torch.nn as nn
+import torch.optim as optim
+
+def test_loss_batch():
+    # Some mock data
+    model = nn.Linear(1, 1) # Instantiating a mock model
+    loss_func = nn.MSELoss() # Instantiating the loss function
+    xb = torch.tensor([[1.], [2.]]) # Input
+    yb = torch.tensor([[3.], [4.]]) # Target
+    opt = optim.SGD(model.parameters(), lr=0.1) # Optimizer
+
+    # Call the function and assert the results
+    loss = loss_batch(model, loss_func, xb, yb, opt)
+    assert loss == 0.0, ""The loss is not zero as expected""",100.0
+"def compute_confidence_intervals(param_estimate, std_dev, critical_value):
+    
+    confidence_interval_dict = {}
+    confidence_interval_dict[""lower_bound""] = param_estimate - critical_value * std_dev
+    confidence_interval_dict[""upper_bound""] = param_estimate + critical_value * std_dev
+    return confidence_interval_dict","import pytest
+
+# import the source code
+from source import compute_confidence_intervals
+
+# create a test function
+def test_compute_confidence_intervals():
+    param_estimate = 50
+    std_dev = 10
+    critical_value = 1.96
+
+    confidence_interval_dict = compute_confidence_intervals(param_estimate, std_dev, critical_value)
+
+    assert confidence_interval_dict[""lower_bound""] == 46.08
+    assert confidence_interval_dict[""upper_bound""] == 63.92
+
+# run the test
+test_compute_confidence_intervals()",100.0
+"def _inverse_transform(pca, data):
+    
+    factors = pca.factors
+    pca.factors = data.reshape(-1, factors.shape[1])
+    projection = pca.project()
+    pca.factors = factors
+    return projection","# test_inverse_transform.py
+import pytest
+import numpy as np
+from source import _inverse_transform, project
+
+def test_inverse_transform():
+    # Initialize PCA object and data
+    pca = ...  # initialize PCA object
+    data = np.random.rand(10, 3)  # example data
+
+    # Save the original factors to compare with the result
+    original_factors = pca.factors
+
+    # Call the function and store the result
+    projection = _inverse_transform(pca, data)
+
+    # Check if the factors were correctly modified
+    np.testing.assert_array_equal(pca.factors, data.reshape(-1, original_factors.shape[1]))
+
+    # Call the project function and check if it returns the expected result
+    np.testing.assert_array_almost_equal(project(pca), np.dot(data, pca.factors.T))
+
+    # Restore the original factors
+    pca.factors = original_factors",100.0
+"def _get_spot_volume(image, spot_z, spot_y, spot_x, radius_z, radius_yx):
+    
+    # get boundaries of the volume surrounding the spot
+    z_spot_min = max(0, int(spot_z - radius_z))
+    z_spot_max = min(image.shape[0], int(spot_z + radius_z))
+    y_spot_min = max(0, int(spot_y - radius_yx))
+    y_spot_max = min(image.shape[1], int(spot_y + radius_yx))
+    x_spot_min = max(0, int(spot_x - radius_yx))
+    x_spot_max = min(image.shape[2], int(spot_x + radius_yx))
+
+    # get the volume of the spot
+    image_spot = image[z_spot_min:z_spot_max + 1,
+                       y_spot_min:y_spot_max + 1,
+                       x_spot_min:x_spot_max + 1]
+
+    return image_spot, (z_spot_min, y_spot_min, x_spot_min)","import pytest
+import numpy as np
+from source import _get_spot_volume
+
+def test_get_spot_volume():
+    # Here is a random binary image for testing purpose
+    image = np.random.randint(2, size=(10, 10, 10))
+    spot_z = 5
+    spot_y = 5
+    spot_x = 5
+    radius_z = 2
+    radius_yx = 2
+
+    # Call the function with given parameters
+    image_spot, origin = _get_spot_volume(image, spot_z, spot_y, spot_x, radius_z, radius_yx)
+
+    # Check if the correct volume is returned
+    assert image_spot.shape == (3, 3, 3)
+
+    # Check if the origin point is correct
+    assert origin == (2, 2, 2)",100.0
+"def intersection_line_line_xy(l1, l2):
+    
+    a, b = l1
+    c, d = l2
+
+    x1, y1 = a[0], a[1]
+    x2, y2 = b[0], b[1]
+    x3, y3 = c[0], c[1]
+    x4, y4 = d[0], d[1]
+
+    d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+
+    if d == 0.0:
+        return None
+
+    a = (x1 * y2 - y1 * x2)
+    b = (x3 * y4 - y3 * x4)
+    x = (a * (x3 - x4) - (x1 - x2) * b) / d
+    y = (a * (y3 - y4) - (y1 - y2) * b) / d
+
+    return x, y, 0.0","import pytest
+from source import intersection_line_line_xy
+
+def test_intersection_line_line_xy():
+    l1 = ((1,1), (2,3))
+    l2 = ((3,1), (4,5))
+    result = intersection_line_line_xy(l1, l2)
+    assert result == (2, 2, 0.0)
+    
+    l1 = ((1,1), (4,5))
+    l2 = ((3,1), (6,7))
+    result = intersection_line_line_xy(l1, l2)
+    assert result == (4.0, 4.0, 0.0)
+    
+    l1 = ((0,0), (1,1))
+    l2 = ((1,0), (0,1))
+    result = intersection_line_line_xy(l1, l2)
+    assert result == (0.5, 0.5, 0.0)
+    
+    l1 = ((0,0), (1,1))
+    l2 = ((0,1), (1,0))
+    result = intersection_line_line_xy(l1, l2)
+    assert result == (0, 0, 0.0)
+    
+    l1 = ((0,0), (1,1))
+    l2 = ((0,0), (1,1))
+    result = intersection_line_line_xy(l1, l2)
+    assert result is None
+
+if __name__ == ""__main__"":
+    pytest.main()",100.0
+"def axial_dispersion_coeff_sc(Dm, epsilon, Re, Sc):
+    
+    if (epsilon*Re*Sc > 0.3) and (3.9 < Sc < 665):
+        Dax = Dm/epsilon * 1.317 * (epsilon * Re * Sc)**1.392
+    else:
+        raise ValueError(
+            f'Correlation not applicable in the given conditions. \n'
+            f'epsilon*Re*Sc must be > 0.3. It is {epsilon*Re*Sc:.2f}. \n'
+            f'Sc must be in range 3.9 - 665. It is {Sc:.2f}. \n'
+        )
+    return Dax","import pytest
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from source import axial_dispersion_coeff_sc
+
+def test_axial_dispersion_coeff_sc():
+    with pytest.raises(ValueError):
+        axial_dispersion_coeff_sc(1, 0.01, 100, 400)
+    with pytest.raises(ValueError):
+        axial_dispersion_coeff_sc(1, 0.01, 100, 3.8)
+    with pytest.raises(ValueError):
+        axial_dispersion_coeff_sc(1, 0.01, 100, 666)
+
+def test_axial_dispersion_coeff_sc_valid():
+    result = axial_dispersion_coeff_sc(1, 0.01, 100, 400)
+    assert result == 0.01317 * (0.01 * 100 * 400) ** 1.392",100.0
+"def translate_bbox(bbox, y_offset=0, x_offset=0):
+    
+
+    out_bbox = bbox.copy()
+    out_bbox[:, :2] += (y_offset, x_offset)
+    out_bbox[:, 2:] += (y_offset, x_offset)
+
+    return out_bbox","# Import the module for testing
+import pytest
+
+# Import the source code that you want to test
+from source import translate_bbox
+
+# Test class
+class TestTranslateBbox:
+
+    def test_translate_bbox(self):
+        # Define a bbox for testing
+        bbox = [[1, 2, 3, 4], [5, 6, 7, 8]]
+        # Define offsets
+        y_offset = 10
+        x_offset = -2
+
+        # Call the function and assert the result
+        assert translate_bbox(bbox, y_offset, x_offset) == [[11, 2, 3, 4], [15, 6, 7, 8]]
+
+        # Test with no offset
+        assert translate_bbox(bbox) == bbox
+
+        # Test with negative offset
+        assert translate_bbox(bbox, -1, -1) == [[0, 1, 2, 3], [4, 5, 6, 7]]
+
+        # Test with offset out of range
+        assert translate_bbox(bbox, 100, 100) == [[100, 100, 3, 4], [100, 100, 7, 8]]
+
+        # Test with string input
+        assert translate_bbox(""abc"") == ""abc""
+
+# Run the tests
+if __name__ == ""__main__"":
+    pytest.main()",100.0
+"def compute_expected_scores_from_model(model, featureset, min_score, max_score):
+    
+    if hasattr(model.model, ""predict_proba""):
+        # Tell the model we want probabiltiies as output. This is likely already set
+        # to True but it might not be, e.g., when using rsmpredict.
+        model.probability = True
+        probability_distributions = model.predict(featureset)
+        # check to make sure that the number of labels in the probability
+        # distributions matches the number of score points we have
+        num_score_points_specified = max_score - min_score + 1
+        num_score_points_in_learner = probability_distributions.shape[1]
+        if num_score_points_specified != num_score_points_in_learner:
+            raise ValueError('The specified number of score points ({}) '
+                             'does not match that from the the learner '
+                             '({}).'.format(num_score_points_specified,
+                                            num_score_points_in_learner))
+        expected_scores = probability_distributions.dot(range(min_score, max_score + 1))
+    else:
+        if model.model_type.__name__ == 'SVC':
+            raise ValueError(""Expected scores cannot be computed since the SVC model was ""
+                             ""not originally trained to predict probabilities."")
+        else:
+            raise ValueError(""Expected scores cannot be computed since {} is not a ""
+                             ""probabilistic classifier."".format(model.model_type.__name__))
+
+    return expected_scores","# test_source.py
+import pytest
+from source import compute_expected_scores_from_model
+from sklearn.svm import SVC
+
+class Model:
+    def __init__(self, model_type):
+        self.model_type = model_type
+        self.probability = False
+        # For simplicity, we assume model has 'predict' method, 
+        # and 'predict_proba' method if its type is not SVC
+        if model_type != SVC:
+            self.model = lambda x: x
+            self.predict_proba = lambda x: None
+
+    def predict(self, featureset):
+        if self.probability:
+            return self.predict_proba(featureset)
+        else:
+            return self.model(featureset)
+    
+
+def test_compute_expected_scores_from_model():
+    # Model without predict_proba method
+    model1 = Model(SVC)
+    featureset = [[0], [1]]
+    min_score = 10
+    max_score = 20
+    with pytest.raises(ValueError) as e_info:
+        compute_expected_scores_from_model(model1, featureset, min_score, max_score)
+    assert str(e_info.value) == ""Expected scores cannot be computed since SVC model was not originally trained to predict probabilities.""
+
+    # Model with predict_proba method
+    model2 = Model(lambda x: x)  # Dummy model with predict_proba method
+    model2.predict_proba = lambda x: [[0.1, 0.9], [0.7, 0.3]]  # Dummy probabilities
+    assert compute_expected_scores_from_model(model2, featureset, min_score, max_score) == [10, 19]
+
+    # Model without predict_proba method and is not SVC
+    model3 = Model(lambda x: x)  # Dummy model without predict_proba method
+    with pytest.raises(ValueError) as e_info:
+        compute_expected_scores_from_model(model3, featureset, min_score, max_score)
+    assert str(e_info.value) == ""Expected scores cannot be computed since {} is not a probabilistic classifier."".format(model3.model_type.__name__)",100.0
+"import torch
+
+def transform_camera_xyz_to_table_xyz(xyz, surface_normals, tabletop_mask):
+    
+
+    # Compute average surface normal with weighted average pooling
+    nonzero_depth_mask = ~torch.isclose(xyz[2, ...], torch.tensor([0.], device=xyz.device)) # Shape: [H x W]
+    tabletop_mask = tabletop_mask & nonzero_depth_mask
+
+    # inflate tabletop_mask so that surface normal computation is correct. we do this because of how surface normal is computed
+    tabletop_mask = tabletop_mask & torch.roll(nonzero_depth_mask, -1, dims=0)
+    tabletop_mask = tabletop_mask & torch.roll(nonzero_depth_mask, 1,  dims=0)
+    tabletop_mask = tabletop_mask & torch.roll(nonzero_depth_mask, -1, dims=1)
+    tabletop_mask = tabletop_mask & torch.roll(nonzero_depth_mask, 1,  dims=1)
+
+    # Compute y direction of table
+    table_y = torch.mean(surface_normals[:, tabletop_mask], dim=1)
+    table_y = table_y / (torch.norm(table_y) + 1e-10)
+
+    # Project camera z-axis onto table plane. NOTE: this is differentiable w.r.t. table_y
+    camera_z = torch.tensor([0,0,1], dtype=torch.float, device=xyz.device)
+    table_z = camera_z - torch.dot(table_y, camera_z) * table_y
+    table_z = table_z / (torch.norm(table_z) + 1e-10)
+
+    # Get table x-axis. NOTE: this is differentiable w.r.t. table_y, table_z, since cross products are differentiable
+    # Another note: cross product adheres to the handedness of the coordinate system, which is a left-handed system
+    table_x = torch.cross(table_y, table_z)
+    table_x = table_x / (torch.norm(table_x) + 1e-10)
+
+    # Transform xyz depth map to table coordinates
+    table_mean = torch.mean(xyz[:, tabletop_mask], dim=1)
+
+    x_projected = torch.tensordot(table_x, xyz - table_mean.unsqueeze(1).unsqueeze(2), dims=1)
+    y_projected = torch.tensordot(table_y, xyz - table_mean.unsqueeze(1).unsqueeze(2), dims=1)
+    z_projected = torch.tensordot(table_z, xyz - table_mean.unsqueeze(1).unsqueeze(2), dims=1)
+
+    new_xyz = torch.stack([x_projected, y_projected, z_projected], dim=0)
+    return new_xyz","import torch
+import pytest
+from source import transform_camera_xyz_to_table_xyz  # import the function from source.py
+
+class TestTransformCameraXyzToTableXyz:
+    
+    def test_transform_camera_xyz_to_table_xyz(self):
+        xyz = torch.rand([2, 3, 4, 5])  # random tensor
+        surface_normals = torch.rand([2, 3, 4, 5])  # random tensor
+        tabletop_mask = torch.tensor([[True, False, True], [False, True, False]], dtype=torch.bool)  # random tensor
+
+        expected_output = transform_camera_xyz_to_table_xyz(xyz, surface_normals, tabletop_mask)
+
+        assert expected_output.shape == xyz.shape  # check if the shape is same as input
+
+if __name__ == ""__main__"":
+    pytest.main()",100.0
+"def crop_tensor_to_size_reference(x1, x2):
+    
+    x_off = (x1.size()[3] - x2.size()[3]) // 2
+    y_off = (x1.size()[2] - x2.size()[2]) // 2
+    xs = x2.size()[3]
+    ys = x2.size()[2]
+    x = x1[:, :, y_off:y_off + ys, x_off:x_off + xs]
+    return x","import sys
+sys.path.append(""."")  # Adds the current directory to Python's path
+import source  # Importing the source code
+import pytest  # Pytest framework
+import torch  # Torch framework for creating tensors
+
+def test_crop_tensor_to_size_reference():
+    # Create dummy tensors
+    x1 = torch.zeros((2, 3, 5, 5))
+    x2 = torch.zeros((2, 3, 3, 3))
+
+    # Call function with dummy tensors
+    result = source.crop_tensor_to_size_reference(x1, x2)
+
+    # Check if the output tensor has the right shape
+    assert result.shape == x2.shape",100.0
+"def normalize_leahy_poisson(unnorm_power, n_ph):
+    
+    return unnorm_power * 2. / n_ph","import pytest
+import sys
+sys.path.append(""."")
+from source import normalize_leahy_poisson
+
+def test_normalize_leahy_poisson():
+    assert normalize_leahy_poisson(2, 4) == 1.0
+    assert normalize_leahy_poisson(5, 10) == 0.5
+    assert normalize_leahy_poisson(10, 2) == 5.0",100.0
+"def calc_bounding_box_intersection(a, b, p, slope):
+    
+    new_points = []
+    offset = p[1][0] - (slope * p[0][0])
+
+    # calc left edge intersection
+    y1 = slope * a[0] + offset
+    if a[1] <= y1 <= b[1]:
+        new_points.append((int(a[0]), int(y1)))
+
+    # calc right edge intersection
+    y2 = slope * b[0] + offset
+    if a[1] <= y2 <= b[1]:
+        new_points.append((int(b[0]), int(y2)))
+
+    # calc top edge intersection
+    x1 = (a[1] - offset) / slope
+    if a[0] <= x1 <= b[0]:
+        new_points.append((int(x1), int(a[1])))
+
+    # calc bottom edge intersection
+    x2 = (b[1] - offset) / slope
+    if a[0] <= x2 <= b[0]:
+        new_points.append((int(x2), int(b[1])))
+
+    return new_points","import sys
+sys.path.append(""."")  # To import source.py file in the same directory
+from source import calc_bounding_box_intersection  # importing the function from source.py
+import pytest
+
+class TestCalcBoundingBoxIntersection:
+    def test_calc_bounding_box_intersection(self):
+        a = (1, 1)
+        b = (4, 5)
+        p = [(2, 2), (3, 4)]
+        slope = 1.5
+        assert calc_bounding_box_intersection(a, b, p, slope) == [(2.0, 2.0), (3.0, 4.0)]
+
+        a = (3, 5)
+        b = (6, 8)
+        p = [(5, 6), (7, 9)]
+        slope = 2.5
+        assert calc_bounding_box_intersection(a, b, p, slope) == [(5.0, 6.0), (7.0, 9.0)]
+
+        a = (1, 3)
+        b = (2, 4)
+        p = [(1, 1), (2, 2)]
+        slope = 1.0
+        assert calc_bounding_box_intersection(a, b, p, slope) == [(1.0, 1.0), (2.0, 2.0)]
+
+        a = (2, 4)
+        b = (5, 7)
+        p = [(3, 4), (4, 5)]
+        slope = 1.5
+        assert calc_bounding_box_intersection(a, b, p, slope) == [(3.0, 4.0), (4.0, 5.0)]
+
+    def test_calc_bounding_box_intersection_with_no_intersection(self):
+        a = (1, 1)
+        b = (4, 5)
+        p = [(0, 0), (2, 3)]
+        slope = 1.5
+        assert calc_bounding_box_intersection(a, b, p, slope) == []
+
+        a = (3, 5)
+        b = (6, 8)
+        p = [(1, 2), (4, 5)]
+        slope = 2.5
+        assert calc_bounding_box_intersection(a, b, p, slope) == []
+
+        a = (1, 3)
+        b = (2, 4)
+        p = [(0, 0), (1, 1)]
+        slope = 1.0
+        assert calc_bounding_box_intersection(a, b, p, slope) == []
+
+        a = (2, 4)
+        b = (5, 7)
+        p = [(0, 0), (1, 1)]
+        slope = 1.5
+        assert calc_bounding_box_intersection(a, b, p, slope) == []",100.0
+"def multivarate_normal_sin_covariance(mean, variance, covariance, output_scale, ops):
+    
+    # Based off of the file util/gSin.m in the PILCO source.
+    lq = -(variance[..., :, None] + variance[..., None, :]) / 2
+    q = ops.exp(lq)
+
+    V = (ops.exp(lq + covariance) - q) * ops.cos(
+        mean[..., :, None] - mean[..., None, :]
+    ) - (ops.exp(lq - covariance) - q) * ops.cos(
+        mean[..., :, None] + mean[..., None, :]
+    )
+    output_scale = ops.atleast_1d(output_scale)
+    return output_scale[:, None] * output_scale[None, :] * V / 2","#File: test_source.py
+
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + ""/.."") #add parent directory to import 'source.py'
+
+import pytest
+import numpy as np
+from source import multivarate_normal_sin_covariance
+
+@pytest.fixture
+def input_data():
+    mean = np.array([1, 2, 3])
+    variance = np.array([1, 2, 3])
+    covariance = np.array([1, 0, 0])
+    output_scale = np.array([1, 1, 1])
+    ops = np
+    return mean, variance, covariance, output_scale, ops
+
+def test_multivarate_normal_sin_covariance(input_data):
+    mean, variance, covariance, output_scale, ops = input_data
+    result = multivarate_normal_sin_covariance(mean, variance, covariance, output_scale, ops)
+    assert type(result) == np.ndarray, ""The function should return a numpy ndarray""
+    assert result.shape == (3,3), ""The function should return a 3x3 matrix""",100.0
+"def _batch_mean_variance_update(X, old_mean, old_variance, old_sample_count):
+    
+    new_sum = X.sum(axis=0)
+    new_variance = X.var(axis=0) * X.shape[0]
+    old_sum = old_mean * old_sample_count
+    n_samples = X.shape[0]
+    updated_sample_count = old_sample_count + n_samples
+    partial_variance = old_sample_count / (n_samples * updated_sample_count) * (
+        n_samples / old_sample_count * old_sum - new_sum) ** 2
+    unnormalized_variance = old_variance * old_sample_count + new_variance + \
+        partial_variance
+    return ((old_sum + new_sum) / updated_sample_count,
+            unnormalized_variance / updated_sample_count,
+            updated_sample_count)","import pytest
+import numpy as np
+import source  # Assuming source.py is in the same directory
+
+class TestSource:
+
+    def test_batch_mean_variance_update(self):
+        # Test with random data
+        X = np.random.rand(10, 10)
+        old_mean = np.random.rand(10)
+        old_variance = np.random.rand(10)
+        old_sample_count = np.random.randint(1, 100)
+        result = source._batch_mean_variance_update(X, old_mean, old_variance, old_sample_count)
+
+        assert len(result) == 3, ""The function should return a tuple with 3 values""
+        for v in result:
+            assert isinstance(v, (float, np.float64)), ""All values should be floats""
+
+    def test_batch_mean_variance_update_exceptions(self):
+        # Test with invalid input type
+        with pytest.raises(TypeError):
+            source._batch_mean_variance_update(1, 1, 1, 1)
+        # Test with invalid input shape
+        with pytest.raises(ValueError):
+            source._batch_mean_variance_update(np.ones((1, 2, 3)), np.ones((4,)), np.ones((5,)), 1)
+        # Test with old_sample_count less than 1
+        with pytest.raises(ValueError):
+            source._batch_mean_variance_update(np.ones((1, 2)), np.ones((2,)), np.ones((2,)), -1)",100.0
+"def transform_grad_batch_min_max(batch_grad):
+    
+    batch_size = batch_grad.shape[0]
+    return [
+        batch_size * batch_grad.data.min().item(),
+        batch_size * batch_grad.data.max().item(),
+    ]","import pytest
+from source import transform_grad_batch_min_max
+import torch
+
+def test_transform_grad_batch_min_max():
+    batch_grad = torch.randn(10, 5)
+    result = transform_grad_batch_min_max(batch_grad)
+    assert len(result) == 2
+    assert isinstance(result[0], float)
+    assert isinstance(result[1], float)",100.0
+"import torch
+
+def softmax_cross_entropy_with_logits(output, target, reduction='mean'):
+    
+
+    return torch.nn.CrossEntropyLoss(reduction=reduction)(output, target)","import pytest
+import torch
+from source import softmax_cross_entropy_with_logits
+
+def test_softmax_cross_entropy_with_logits():
+    # Create random tensor inputs
+    output = torch.randn(3, 5)
+    target = torch.randint(0, 5, (3,))
+
+    # Test with default reduction (mean)
+    loss = softmax_cross_entropy_with_logits(output, target)
+    assert isinstance(loss, torch.Tensor)
+
+    # Test with different reduction (sum)
+    loss = softmax_cross_entropy_with_logits(output, target, reduction='sum')
+    assert isinstance(loss, torch.Tensor)
+
+    # Test error when invalid reduction is used
+    with pytest.raises(ValueError):
+        softmax_cross_entropy_with_logits(output, target, reduction='invalid')
+
+if __name__ == ""__main__"":
+    test_softmax_cross_entropy_with_logits()",100.0
+"def labeledfeatures(eqdata, featurefunc, labelfunc):
+    
+    _size = len(eqdata.index)
+    _labels, _skipatend = labelfunc(eqdata)
+    _features, _skipatstart = featurefunc(eqdata.iloc[:(_size - _skipatend), :])
+    return _features, _labels.iloc[_skipatstart:, :]","import os
+import pytest
+import pandas as pd
+
+def test_labeledfeatures():
+    
+    # Assuming source.py and test file are in the same directory
+    # Import source.py
+    from source import labeledfeatures
+
+    # Let's create some dummy data for testing
+    eqdata = pd.DataFrame({
+        'feature1': [1, 2, 3, 4, 5],
+        'feature2': [6, 7, 8, 9, 10],
+        'label1': [1, 1, 1, 0, 0],
+        'label2': [0, 0, 0, 1, 1]
+    })
+
+    # Dummy function for feature and label
+    def featurefunc(data):
+        return data.iloc[:, :2], 0
+
+    def labelfunc(data):
+        return data.iloc[:, 2:], 1
+
+    # Call the function with dummy data
+    _features, _labels = labeledfeatures(eqdata, featurefunc, labelfunc)
+
+    # Check if the shape of the returned features is correct
+    assert _features.shape == (4, 2)
+
+    # Check if the shape of the returned labels is correct
+    assert _labels.shape == (4, 2)
+
+if __name__ == ""__main__"":
+    test_labeledfeatures()",100.0
+"def denormalize_bbox(bbox, rows, cols):
+    
+    (x_min, y_min, x_max, y_max), tail = bbox[:4], tuple(bbox[4:])
+
+    if rows <= 0:
+        raise ValueError(""Argument rows must be positive integer"")
+    if cols <= 0:
+        raise ValueError(""Argument cols must be positive integer"")
+
+    x_min, x_max = x_min * cols, x_max * cols
+    y_min, y_max = y_min * rows, y_max * rows
+
+    return (x_min, y_min, x_max, y_max) + tail","import pytest
+from source import denormalize_bbox
+
+def test_denormalize_bbox():
+    bbox = (0.1, 0.2, 0.3, 0.4, 10, 20)
+    rows, cols = 50, 100
+    expected_result = (5, 10, 30, 40, 10, 20)
+    assert denormalize_bbox(bbox, rows, cols) == expected_result
+
+def test_denormalize_bbox_error():
+    bbox = (0.1, 0.2, 0.3, 0.4)
+    with pytest.raises(ValueError):
+        denormalize_bbox(bbox, 0, 1)
+    with pytest.raises(ValueError):
+        denormalize_bbox(bbox, -1, 1)",100.0
+"def _quadratic_bezier(y_points, t):
+    
+    one_minus_t = 1 - t
+    output = (
+        y_points[0] * one_minus_t**2 + y_points[1] * 2 * one_minus_t * t + y_points[2] * t**2
+    )
+    return output","# test_source.py
+import pytest
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from source import _quadratic_bezier
+
+def test_quadratic_bezier():
+    y_points = [0, 1, 2]
+    assert _quadratic_bezier(y_points, 0) == 0
+    assert _quadratic_bezier(y_points, 1) == 2
+    assert _quadratic_bezier(y_points, 0.5) == 1",100.0
+"def RotCurve(vel, radius, C=0.3, p=1.35):
+    
+    C_ = C # kpc
+    p_ = p
+
+    return vel * radius / ((radius**2 + C_**2)**(p_/2.))","import pytest
+from source import RotCurve
+
+def test_RotCurve():
+    # Testing with random values
+    vel = 10.0
+    radius = 20.0
+    C = 0.3
+    p = 1.35
+
+    result = RotCurve(vel, radius, C, p)
+    expected_output = vel * radius / ((radius**2 + C**2)**(p/2.))
+
+    assert result == expected_output",100.0
+"def compute_scaling_dnu(numax, numax_threshold=300, numax_coeff_low=0.267, numax_coeff_high=0.22, numax_exponent_low=0.76, numax_exponent_high=0.797):
+    
+    
+    # nuMax has to be in microHz. Following scaling relations calibrated by
+    # Huber et al. 2011
+    if numax < numax_threshold:
+        dnu =  numax_coeff_low*numax** numax_exponent_low
+    else:
+        dnu =  numax_coeff_high*numax** numax_exponent_high
+    return dnu","import pytest
+from source import compute_scaling_dnu
+
+def test_compute_scaling_dnu():
+    # Test with a value lower than the threshold
+    assert abs(compute_scaling_dnu(100) - 0.267*100**0.76) < 1e-9
+
+    # Test with a value equal to the threshold
+    assert abs(compute_scaling_dnu(300) - 0.22*300**0.797) < 1e-9
+
+    # Test with a value higher than the threshold
+    assert abs(compute_scaling_dnu(400) - 0.22*400**0.797) < 1e-9",100.0
+"def error_in_flux(e_magnitude, flux):
+    
+    error_upper = flux * (10**(0.4 * e_magnitude) - 1.0)
+    error_lower = flux * (1 - 10**(-0.4 * e_magnitude))
+    error = 0.5 * (error_lower + error_upper)
+
+    return error",,100.0
+"def _mask_border_keypoints(image_shape, keypoints, distance):
+    
+
+    rows = image_shape[0]
+    cols = image_shape[1]
+
+    mask = (((distance - 1) < keypoints[:, 0])
+            & (keypoints[:, 0] < (rows - distance + 1))
+            & ((distance - 1) < keypoints[:, 1])
+            & (keypoints[:, 1] < (cols - distance + 1)))
+
+    return mask","# test_mask_border_keypoints.py
+import pytest
+from source import _mask_border_keypoints
+import numpy as np
+
+def test_mask_border_keypoints():
+    image_shape = (10, 10)
+    keypoints = np.array([[2, 2], [2, 8], [8, 2], [8, 8]])
+    distance = 1
+
+    result = _mask_border_keypoints(image_shape, keypoints, distance)
+    expected = np.array([[False, False, False, False, False],
+                          [False, False, False, True, False,],
+                          [False, False, True, False, False,],
+                          [False, True, False, False, False,],
+                          [False, False, False, False, False]])
+    assert np.array_equal(result, expected)
+    
+if __name__ == ""__main__"":
+    test_mask_border_keypoints()",100.0
+"def weighted_sum(tensor, weights, mask):
+    
+    weighted_sum = weights.bmm(tensor)
+
+    while mask.dim() < weighted_sum.dim():
+        mask = mask.unsqueeze(1)
+    mask = mask.transpose(-1, -2)
+    mask = mask.expand_as(weighted_sum).contiguous().float()
+
+    return weighted_sum * mask","import source  # import the python file
+import pytest
+import torch
+
+def test_weighted_sum():
+    tensor = torch.randn(4, 5)
+    weights = torch.randn(4, 3)
+    mask = torch.randn(4, 5) > 0.5
+
+    result = source.weighted_sum(tensor, weights, mask)
+
+    assert result.shape == torch.sum(mask).shape",100.0
+"def odds_to_probability(odds):
+    r
+    return odds / (1 + odds)","# Import the source.py module
+import source
+
+# Test class for the source module
+class TestSource:
+
+    # Test the odds_to_probability function
+    def test_odds_to_probability(self):
+        # Test with positive odds
+        assert source.odds_to_probability(1) == 0.5, ""Failed with positive odds""
+        # Test with negative odds
+        assert source.odds_to_probability(-1) == 0, ""Failed with negative odds""
+        # Test with zero odds
+        assert source.odds_to_probability(0) == 0, ""Failed with zero odds""
+        # Test with odds of 2
+        assert source.odds_to_probability(2) == 0.75, ""Failed with odds of 2""
+        # Test with odds of 0.5
+        assert source.odds_to_probability(0.5) == 0.6180339887498949, ""Failed with odds of 0.5""",100.0
+"def storage_change(x, s, prevstate, dt, fun=lambda x: x, S=1.0):
+    
+    return - S * (fun(s) - fun(prevstate(x))) / dt","import os
+import pytest
+import source  # assuming source.py is in the same directory
+
+def test_storage_change():
+    x = 100
+    s = 200
+    prevstate = lambda x: x/2
+    dt = 10
+    fun = lambda x: x/2
+    S = 1.0
+    
+    expected_result = - S * (fun(s) - fun(prevstate(x))) / dt
+    result = source.storage_change(x, s, prevstate, dt, fun, S)
+    
+    assert result == expected_result",100.0
+"def conv_output_length(input_length, filter_size, padding, stride, dilation=1):
+  
+  if input_length is None:
+    return None
+  assert padding in {'same', 'valid', 'full'}
+  dilated_filter_size = filter_size + (filter_size - 1) * (dilation - 1)
+  if padding == 'same':
+    output_length = input_length
+  elif padding == 'valid':
+    output_length = input_length - dilated_filter_size + 1
+  elif padding == 'full':
+    output_length = input_length + dilated_filter_size - 1
+  return (output_length + stride - 1) // stride","# test_source.py
+import pytest
+from source import conv_output_length
+
+def test_conv_output_length():
+    assert conv_output_length(None, 3, 'same', 1) == None
+    assert conv_output_length(10, 3, 'same', 1) == 10
+    assert conv_output_length(10, 3, 'valid', 1) == 6
+    assert conv_output_length(10, 3, 'full', 1) == 12
+    assert conv_output_length(10, 3, 'same', 2) == 10
+    assert conv_output_length(10, 3, 'valid', 2) == 5
+    assert conv_output_length(10, 3, 'full', 2) == 11
+    with pytest.raises(AssertionError):
+        conv_output_length(10, 3, 'invalid', 1)",100.0
+"import torch
+
+def get_proto_accuracy(prototypes, embeddings, targets):
+    
+    sq_distances = torch.sum((prototypes.unsqueeze(1)
+        - embeddings.unsqueeze(2)) ** 2, dim=-1)
+    _, predictions = torch.min(sq_distances, dim=-1)
+    return torch.mean(predictions.eq(targets).float())","# test_source.py
+import pytest
+from source import get_proto_accuracy
+
+def test_get_proto_accuracy():
+    # Here you can add your own test cases
+    prototypes = torch.randn(10, 20)
+    embeddings = torch.randn(100, 20)
+    targets = torch.randint(0, 2, (100,))
+
+    acc = get_proto_accuracy(prototypes, embeddings, targets)
+
+    assert acc > 0.5, ""The accuracy should be greater than 0.5""",100.0
+"def loss(y_pred, y_true, metric):
+    
+    sq_dist = metric.squared_dist(y_pred, y_true)
+    return sq_dist","# test_source.py
+import pytest
+from source import loss
+from scipy.spatial import distance
+
+def test_loss_function():
+    y_pred = [1, 2, 3]
+    y_true = [4, 5, 6]
+    metric = distance
+
+    result = loss(y_pred, y_true, metric)
+    assert result == 5, ""The loss function does not return the expected result.""",100.0
+"def sectRect(rect1, rect2):
+    
+    (xMin1, yMin1, xMax1, yMax1) = rect1
+    (xMin2, yMin2, xMax2, yMax2) = rect2
+    xMin, yMin, xMax, yMax = (max(xMin1, xMin2), max(yMin1, yMin2),
+                              min(xMax1, xMax2), min(yMax1, yMax2))
+    if xMin >= xMax or yMin >= yMax:
+        return False, (0, 0, 0, 0)
+    return True, (xMin, yMin, xMax, yMax)","import pytest
+from source import *
+
+def test_sectRect():
+    rect1 = (1, 1, 5, 5)
+    rect2 = (2, 2, 6, 6)
+    assert sectRect(rect1, rect2) == (True, (2, 2, 5, 5))
+
+    rect1 = (1, 1, 5, 5)
+    rect2 = (6, 6, 7, 7)
+    assert sectRect(rect1, rect2) == (False, (0, 0, 0, 0))
+
+    rect1 = (1, 1, 5, 5)
+    rect2 = (1, 1, 2, 2)
+    assert sectRect(rect1, rect2) == (True, (1, 1, 2, 2))",100.0
+"def linear_interpolation_extrapolation(df, target_height):
+    r
+    # find closest heights
+    heights_sorted = df.columns[
+        sorted(
+            range(len(df.columns)),
+            key=lambda i: abs(df.columns[i] - target_height),
+        )
+    ]
+    return (df[heights_sorted[1]] - df[heights_sorted[0]]) / (
+        heights_sorted[1] - heights_sorted[0]
+    ) * (target_height - heights_sorted[0]) + df[heights_sorted[0]]","import pytest
+import pandas as pd
+import os
+
+# import the source code
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(current_dir, '../'))
+from source import linear_interpolation_extrapolation
+
+def test_linear_interpolation_extrapolation():
+    # Create example dataframe for testing
+    data = {
+        10: [1, 2, 3],
+        20: [4, 5, 6],
+        30: [7, 8, 9]
+    }
+    df = pd.DataFrame(data)
+
+    # Test with a target height that is in the middle of the dataframe
+    assert linear_interpolation_extrapolation(df, 25) == 5
+
+    # Test with a target height that is at the lowest point in the dataframe
+    assert linear_interpolation_extrapolation(df, 10) == 1
+
+    # Test with a target height that is at the highest point in the dataframe
+    assert linear_interpolation_extrapolation(df, 30) == 9
+
+    # Test with a target height that is below the lowest point in the dataframe
+    assert linear_interpolation_extrapolation(df, 5) == 3
+
+    # Test with a target height that is above the highest point in the dataframe
+    assert linear_interpolation_extrapolation(df, 40) == 8",100.0
+"def linacre(tmean, elevation, lat, tdew=None, tmax=None, tmin=None):
+    
+    if tdew is None:
+        tdew = 0.52 * tmin + 0.6 * tmax - 0.009 * tmax ** 2 - 2
+    tm = tmean + 0.006 * elevation
+    et = (500 * tm / (100 - lat) + 15 * (tmean - tdew)) / (80 - tmean)
+    return et","import pytest
+from source import linacre
+
+def test_linacre():
+    assert linacre(20, 500, 30) == 100
+    assert linacre(30, 500, 30, tdew=25) == 150
+    assert linacre(40, 500, 30, tmax=35) == 200
+    assert linacre(50, 500, 30, tmin=40) == 250",100.0
+"def set_size(width=240, fraction=2):
+    
+    # Width of figure
+    fig_width_pt = width * fraction
+
+    # Convert from pt to inches
+    inches_per_pt = 1 / 72.27
+
+    # Golden ratio to set aesthetic figure height
+    golden_ratio = (5 ** 0.5 - 1) / 2
+
+    # Figure width in inches
+    fig_width_in = fig_width_pt * inches_per_pt
+
+    # Figure height in inches
+    fig_height_in = fig_width_in * golden_ratio
+
+    return  (fig_width_in, fig_height_in)","import pytest
+from source import set_size
+
+def test_set_size():
+    # Test default values
+    assert set_size() == (12.0, 6.0)
+
+    # Test custom values
+    assert set_size(width=100, fraction=1) == (100.0, 67.928571428571428)
+
+    # Test if it is raising an error when fraction is 0
+    with pytest.raises(ValueError):
+        set_size(fraction=0)",100.0
+"def stacked_bar(qty, dims=[""nl"", ""t"", ""ya""], units="""", title="""", cf=1.0, stacked=True):
+    
+    # - Multiply by the conversion factor
+    # - Convert to a pd.Series
+    # - Unstack one dimension
+    # - Convert to pd.DataFrame
+    df = (cf * qty).to_series().unstack(dims[1]).reset_index()
+
+    # Plot using matplotlib via pandas
+    ax = df.plot(
+        x=dims[2],
+        kind=""bar"",
+        stacked=stacked,
+        xlabel=""Year"",
+        ylabel=units,
+        title=f""{df.loc[0, dims[0]]} {title}"",
+    )
+    ax.legend(loc=""center left"", bbox_to_anchor=(1.0, 0.5))
+
+    return ax","import pytest
+import pandas as pd
+import matplotlib.pyplot as plt
+from source import stacked_bar
+
+# testing function stacked_bar with different parameters
+def test_stacked_bar():
+    qty = pd.DataFrame({
+        'nl': [10, 20, 30],
+        't': ['2020', '2021', '2022'],
+        'ya': ['A', 'B', 'C']
+    })
+
+    # Case 1: default parameters
+    stacked_bar(qty)
+    plt.title()
+    plt.ylabel()
+    plt.xlabel()
+    plt.legend()
+    plt.show()
+
+    # Case 2: parameter stacked=False
+    stacked_bar(qty, stacked=False)
+    plt.title()
+    plt.ylabel()
+    plt.xlabel()
+    plt.legend()
+    plt.show()
+
+    # Case 3: parameter cf=2
+    stacked_bar(qty*2, cf=2)
+    plt.title()
+    plt.ylabel()
+    plt.xlabel()
+    plt.legend()
+    plt.show()
+
+    # Case 4: parameter units=""kg""
+    stacked_bar(qty, units=""kg"")
+    plt.title()
+    plt.ylabel()
+    plt.xlabel()
+    plt.legend()
+    plt.show()
+
+    # Case 5: parameter title=""Test""
+    stacked_bar(qty, title=""Test"")
+    plt.title()
+    plt.ylabel()
+    plt.xlabel()
+    plt.legend()
+    plt.show()",100.0
+"def polynomial_redshift(d):
+    
+    
+    #input type checking
+    assert type(d) == float, 'd should be a float.'
+    
+    #sanity check: distance should not be negative
+    assert d >= 0, 'The distance should be a positive number.'
+    
+    #polynomial approximation of redshift conversion
+    z = 1.0832e-12*d**3 - 1.7022e-8*d**2 + 0.00021614*d
+    
+    return z","# test_source.py
+
+import pytest
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from source import polynomial_redshift
+
+def test_polynomial_redshift_with_valid_input():
+    assert polynomial_redshift(1) == pytest.approx(1.0832e-12*1**3 - 1.7022e-8*1**2 + 0.00021614*1, 0.0001)
+
+def test_polynomial_redshift_with_negative_input():
+    with pytest.raises(AssertionError):
+        polynomial_redshift(-1)
+
+def test_polynomial_redshift_with_non_float_input():
+    with pytest.raises(AssertionError):
+        polynomial_redshift('a')",100.0
+"def PSD_fitting_eqn2(A, OmegaTrap, Gamma, omega):
+    
+    return A * Gamma / ((OmegaTrap**2 - omega**2)**2 + omega**2 * (Gamma)**2)","# Import the function to test from source.py
+from source import PSD_fitting_eqn2
+import pytest
+
+class TestPSD_fitting_eqn2:
+    def test_PSD_fitting_eqn2(self):
+        # Define the input parameters
+        A = 1
+        OmegaTrap = 2
+        Gamma = 3
+        omega = 4
+        
+        # Call the function and assert the result
+        assert PSD_fitting_eqn2(A, OmegaTrap, Gamma, omega) == 2.5
+
+
+# You can add more test cases as needed",100.0
+"def euclidean_dist_vec(y1, x1, y2, x2):
+    
+    # euclid's formula
+    dist = ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+    return dist","# source.py
+def euclidean_dist_vec(y1, x1, y2, x2):
+    # euclid's formula
+    dist = ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+    return dist
+
+# test_source.py
+import pytest
+from .source import euclidean_dist_vec
+
+def test_euclidean_dist_vec():
+    # Test the function with some values
+    assert euclidean_dist_vec(3, 3, 1, 1) == 2.0
+    assert euclidean_dist_vec(1, 1, 2, 2) == 2.0
+    assert euclidean_dist_vec(5, 5, 7, 7) == 8.0
+    assert euclidean_dist_vec(0, 0, 0, 0) == 0.0
+    assert euclidean_dist_vec(1, 1, 1, 1) == 0.0",100.0
+"def geometricMean(values):
+    
+    print(values)
+    return float(43)","# file: test_source.py
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import source  # assuming the python file with functions is named 'source.py'
+
+def test_geometricMean():
+    values = [1,2,3,4,5]
+    assert source.geometricMean(values) == 43",100.0
+"def le_calibration_func(etr, kc, ts):
+    
+    return etr * kc * (2.501 - 2.361E-3 * (ts - 273)) * 2500 / 9","# test_source.py
+import pytest
+import sys
+sys.path.append("".."") # to include the parent directory in the import path
+from source import le_calibration_func
+
+def test_le_calibration_func():
+    # Define test data
+    etr = 1
+    kc = 2
+    ts = 293
+    expected_result = 1 * 2 * (2.501 - 2.361E-3 * (293 - 273)) * 2500 / 9
+    
+    # Call the function with the test data
+    result = le_calibration_func(etr, kc, ts)
+    
+    # Assert that the result is as expected
+    assert result == pytest.approx(expected_result, 0.001)",100.0
+"def set_size(width, fraction=1):
+    
+    # Width of figure (in pts)
+    fig_width_pt = width * fraction
+
+    # Convert from pt to inches
+    inches_per_pt = 1 / 72.27
+
+    # Golden ratio to set aesthetic figure height
+    # https://disq.us/p/2940ij3
+    golden_ratio = (5**.5 - 1) / 2
+
+    # Figure width in inches
+    fig_width_in = fig_width_pt * inches_per_pt
+    # Figure height in inches
+    fig_height_in = fig_width_in * golden_ratio
+
+    fig_dim = (fig_width_in, fig_height_in)
+
+    return fig_dim","# Import the function to test from source.py
+from source import set_size
+
+# Pytest library can be used to write tests
+import pytest
+
+def test_set_size():
+    # Test with known values
+    assert set_size(10) == (5.0, 3.543359549392153)
+
+    # Test with another value
+    assert set_size(20) == (10.0, 6.928203233753699)
+
+# Run the test
+if __name__ == ""__main__"":
+    test_set_size()",100.0
+"def convert_spot_coordinates(spots, resolution_z, resolution_yx):
+    
+    # convert spots coordinates in nanometer, for each dimension, according to
+    # the pixel size of the image
+    spots_nanometer = spots.copy()
+    spots_nanometer[:, 0] *= resolution_z
+    spots_nanometer[:, 1:] *= resolution_yx
+
+    return spots_nanometer","# test_source.py
+import pytest
+from source import convert_spot_coordinates
+
+def test_convert_spot_coordinates():
+    # Test with sample inputs
+    spots = [[1, 2, 3], [4, 5, 6]]  # suppose these are the input spots in pixels
+    resolution_z = 10  # suppose this is the resolution in z dimension in nanometer
+    resolution_yx = [0.5, 0.5]  # suppose this is the resolution in y and x dimensions in nanometer
+
+    expected_output = [[10, 2.5, 3], [4.5, 5.5, 6]]
+
+    # Call the function with the sample inputs
+    output = convert_spot_coordinates(spots, resolution_z, resolution_yx)
+
+    # Check if the output is as expected
+    assert output == expected_output",100.0
+"def quadratic_depth(x, point_1, point_2):
+    
+    x_1, z_1 = point_1[:]
+    x_2, z_2 = point_2[:]
+    a = (z_2 - z_1) / (x_2 ** 2 - x_1 ** 2)
+    b = z_1 - a * x_1 ** 2
+    return a * x ** 2 + b","import sys
+sys.path.append(""."") # To import source.py from the same directory
+from source import quadratic_depth  # import the function
+import pytest
+
+
+class TestQuadraticDepth:
+
+    @pytest.mark.parametrize(""x, point_1, point_2, expected"", [
+        (1, (2, 3), (4, 5), 11),
+        (2, (3, 4), (5, 6), 15),
+        (3, (4, 5), (6, 7), 20),
+    ])
+    def test_quadratic_depth(self, x, point_1, point_2, expected):
+        x_1, z_1 = point_1[:]
+        x_2, z_2 = point_2[:]
+        result = quadratic_depth(x, (x_1, z_1), (x_2, z_2))
+        assert result == expected, f""Expected {expected} but got {result}""
+
+
+if __name__ == ""__main__"":
+    pytest.main()",100.0
+"import torch
+
+def _axis_angle_rotation(axis: str, angle):
+    
+
+    cos = torch.cos(angle)
+    sin = torch.sin(angle)
+    one = torch.ones_like(angle)
+    zero = torch.zeros_like(angle)
+
+    if axis == ""X"":
+        R_flat = (one, zero, zero, zero, cos, -sin, zero, sin, cos)
+    if axis == ""Y"":
+        R_flat = (cos, zero, sin, zero, one, zero, -sin, zero, cos)
+    if axis == ""Z"":
+        R_flat = (cos, -sin, zero, sin, cos, zero, zero, zero, one)
+
+    return torch.stack(R_flat, -1).reshape(angle.shape + (3, 3))","import pytest
+import torch
+import source  # assuming the original code is in a file named source.py
+
+def test_axis_angle_rotation():
+    angle = torch.tensor([1, 2, 3])
+    axis = ""X""
+    expected_output = torch.tensor([
+        [1., 0., 0., 0., torch.cos(angle), -torch.sin(angle), 0., torch.sin(angle), torch.cos(angle)],
+        [0., 1., 0., 0., torch.cos(angle), 0., -torch.sin(angle), torch.sin(angle), torch.cos(angle)],
+        [0., 0., 1., 0., torch.cos(angle), torch.sin(angle), 0., -torch.sin(angle), torch.cos(angle)]
+    ])
+    assert torch.allclose(source._axis_angle_rotation(axis, angle), expected_output)
+
+    axis = ""Y""
+    expected_output = torch.tensor([
+        [torch.cos(angle), 0., torch.sin(angle), 0., 1., 0., -torch.sin(angle), 0., torch.cos(angle)],
+        [0., 1., 0., 0., torch.cos(angle), 0., -torch.sin(angle), torch.sin(angle), torch.cos(angle)],
+        [-torch.sin(angle), 0., torch.cos(angle), 0., torch.cos(angle), -torch.sin(angle), 0., torch.sin(angle), torch.cos(angle)]
+    ])
+    assert torch.allclose(source._axis_angle_rotation(axis, angle), expected_output)
+
+    axis = ""Z""
+    expected_output = torch.tensor([
+        [torch.cos(angle), -torch.sin(angle), 0., torch.sin(angle), torch.cos(angle), 0., 0., -torch.sin(angle), torch.cos(angle)],
+        [torch.sin(angle), torch.cos(angle), 0., -torch.sin(angle), torch.cos(angle), 0., 0., torch.sin(angle), torch.cos(angle)],
+        [0., 0., 1., 0., 0., 0., 0., 1., 0., torch.cos(angle)]
+    ])
+    assert torch.allclose(source._axis_angle_rotation(axis, angle), expected_output)",100.0
+"def dataset_mean_loss(trainer, data_loader, device):
+    
+    epoch_loss = 0.
+    for x_batch, y_batch in data_loader:
+        x_batch = x_batch.to(device)
+        y_batch = y_batch.to(device)
+        y_pred = trainer.model(x_batch)
+        loss = trainer._loss(y_pred, y_batch)
+        epoch_loss += loss.item()
+    return epoch_loss / len(data_loader)","# import the necessary package
+import pytest
+
+# import the trainer class from source.py
+from source import Trainer
+
+# define a mock dataset
+dataset = [('x_data1', 'y_data1'), ('x_data2', 'y_data2'), ...]
+
+# A fixture to provide the trainer object
+@pytest.fixture
+def trainer():
+    class MockTrainer(Trainer):
+        def __init__(self):
+            super().__init__()
+            # set model and loss function here if they are not set in Trainer
+            self.model = lambda x: x
+            self._loss = lambda y_pred, y_batch: sum([abs(y_pred - y_batch) for y_pred, y_batch in zip(y_pred, y_batch)]) / len(y_pred)
+    return MockTrainer()
+
+# A test function for dataset_mean_loss
+def test_dataset_mean_loss(trainer):
+    data_loader = iter(dataset)
+    device = 'cpu'
+    assert 0 <= trainer.dataset_mean_loss(data_loader, device) <= 1",100.0
+"def conv_output_length(input_length, filter_size, stride, pad=0):
+    
+    if input_length is None:
+        return None
+    if pad == 'valid':
+        output_length = input_length - filter_size + 1
+    elif pad == 'full':
+        output_length = input_length + filter_size - 1
+    elif pad == 'same':
+        output_length = input_length
+    elif isinstance(pad, int):
+        output_length = input_length + 2 * pad - filter_size + 1
+    else:
+        raise ValueError('Invalid pad: {0}'.format(pad))
+
+    # This is the integer arithmetic equivalent to
+    # np.ceil(output_length / stride)
+    output_length = (output_length + stride - 1) // stride
+
+    return output_length","# test_source.py
+
+import pytest
+import source  # assuming the source code is in a file named source.py in the same directory
+
+def test_conv_output_length():
+    assert source.conv_output_length(None, 3, 1) is None
+    assert source.conv_output_length(10, 3, 1, 'valid') == 8
+    assert source.conv_output_length(10, 3, 1, 'full') == 10
+    assert source.conv_output_length(10, 3, 1, 'same') == 10
+    assert source.conv_output_length(10, 3, 1, 1) == 12
+    with pytest.raises(ValueError):
+        source.conv_output_length(10, 3, 1, 'invalid')
+    with pytest.raises(ValueError):
+        source.conv_output_length(10, 3, 1, 2)
+    with pytest.raises(ValueError):
+        source.conv_output_length(10, 3, 0)",100.0
+"def pool_output_length(input_length, pool_size, stride, pad, ignore_border):
+    
+    if input_length is None or pool_size is None:
+        return None
+
+    if ignore_border:
+        output_length = input_length + 2 * pad - pool_size + 1
+        output_length = (output_length + stride - 1) // stride
+
+    # output length calculation taken from:
+    # https://github.com/Theano/Theano/blob/master/theano/tensor/signal/downsample.py
+    else:
+        assert pad == 0
+
+        if stride >= pool_size:
+            output_length = (input_length + stride - 1) // stride
+        else:
+            output_length = max(
+                0, (input_length - pool_size + stride - 1) // stride) + 1
+
+    return output_length","import pytest
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from source import pool_output_length  # Assuming the function is in source.py
+
+def test_pool_output_length():
+    assert pool_output_length(None, None, 1, 0, True) == None
+    assert pool_output_length(10, 3, 1, 0, True) == 7
+    assert pool_output_length(10, 3, 2, 0, True) == 5
+    assert pool_output_length(10, 3, 1, 1, True) == 8
+    assert pool_output_length(10, 3, 2, 1, True) == 6
+
+    assert pool_output_length(None, None, 1, 0, False) == None
+    assert pool_output_length(10, 3, 1, 0, False) == 7
+    assert pool_output_length(10, 3, 2, 0, False) == 5
+    assert pool_output_length(10, 3, 1, 1, False) == 8
+    assert pool_output_length(10, 3, 2, 1, False) == 6",100.0
+"def melt_curve(start=65, end=95, inc=0.5, rate=5):
+    
+    assert isinstance(start, (float, int))
+    assert isinstance(end, (float, int))
+    assert isinstance(inc, (float, int))
+    assert isinstance(rate, int)
+
+    melt_params = {""melting_start"": ""%.2f:celsius"" % start,
+                   ""melting_end"": ""%.2f:celsius"" % end,
+                   ""melting_increment"": ""%.2f:celsius"" % inc,
+                   ""melting_rate"": ""%.2f:second"" % rate}
+    return melt_params","# test_source.py
+import pytest
+from source import melt_curve
+
+def test_melt_curve():
+    melt_params = melt_curve()
+    assert isinstance(melt_params, dict)
+    assert len(melt_params) == 4
+    assert ""melting_start"" in melt_params
+    assert ""melting_end"" in melt_params
+    assert ""melting_increment"" in melt_params
+    assert ""melting_rate"" in melt_params
+
+def test_melt_curve_values():
+    melt_params = melt_curve(start=10, end=20, inc=1, rate=2)
+    assert melt_params[""melting_start""] == ""10.00:celsius""
+    assert melt_params[""melting_end""] == ""20.00:celsius""
+    assert melt_params[""melting_increment""] == ""1.00:celsius""
+    assert melt_params[""melting_rate""] == ""2.00:second""",100.0
+"def derivative_of_binary_cross_entropy_loss_function(y_predicted, y_true):
+    
+    numerator = (y_predicted - y_true)
+    denominator = (y_predicted * (1 - y_predicted))
+    y = numerator / denominator
+    return y","# Import the necessary package
+import pytest
+import numpy as np
+from source import derivative_of_binary_cross_entropy_loss_function
+
+# Define your test function
+def test_derivative_of_binary_cross_entropy_loss_function():
+    y_predicted = np.array([0.9, 0.5, 0.8, 0.6])
+    y_true = np.array([1, 0, 1, 0])
+    expected = np.array([-0.25, -0.1, -0.24, -0.15])
+    
+    # Using numpy allclose method to compare the arrays with a small tolerance to account for numerical precision issues
+    assert np.allclose(derivative_of_binary_cross_entropy_loss_function(y_predicted, y_true), expected, atol=1e-5)",100.0
+"def normalised_ellipse_mask(ellipse):
+    
+    # Don't overwrite the original, we'll return a new ellipse.
+    centre, extents, rotation = ellipse
+    centre = list(centre[:])
+    extents = list(extents[:])
+
+    # Get the rotation as close to zero as possible.
+    while rotation > 45:
+        extents[0], extents[1] = extents[1], extents[0]
+        rotation -= 90
+    while rotation < -45:
+        extents[0], extents[1] = extents[1], extents[0]
+        rotation += 90
+
+    return tuple(centre), tuple(extents), rotation","import pytest
+import numpy as np
+from source import normalised_ellipse_mask
+
+def test_normalised_ellipse_mask():
+    # Testing with random values
+    ellipse = ((100, 100), (50, 20), 45)
+    assert np.array_equal(normalised_ellipse_mask(ellipse), ((100, 100), (20, 50), 0))
+
+    # Testing with another random values
+    ellipse = ((200, 200), (70, 10), -45)
+    assert np.array_equal(normalised_ellipse_mask(ellipse), ((200, 200), (10, 70), 0))
+
+    # Testing with another random values
+    ellipse = ((300, 300), (100, 50), 0)
+    assert np.array_equal(normalised_ellipse_mask(ellipse), ((300, 300), (50, 100), 0))",100.0
+"def summation(a: int, b: int):
+    
+    return a+b","# test_source.py
+import pytest
+from source import summation
+
+def test_summation():
+    assert summation(2, 3) == 5
+    assert summation(-2, -3) == -5
+    assert summation(0, 0) == 0
+    assert summation(1, 1) == 2",100.0
+"def akaike_info_criterion(log_likelihood, n_params, n_samples):
+    r
+    # Correction in case of small number of observations
+    if n_samples/float(n_params) >= 40.0:
+        aic = 2.0 * (n_params - log_likelihood)
+    else:
+        aic = (2.0 * (n_params - log_likelihood) +
+               2.0 * n_params * (n_params + 1.0) /
+               (n_samples - n_params - 1.0))
+    return aic","import sys
+sys.path.append("".."") # To import source file from parent directory
+from source import akaike_info_criterion
+import pytest
+
+class TestAICCalculation:
+
+    def test_aic_calculation(self):
+        assert akaike_info_criterion(100, 10, 500) == 502.0
+        assert akaike_info_criterion(100, 20, 500) == 504.0
+        assert akaike_info_criterion(100, 5, 200) == 202.0
+        assert akaike_info_criterion(50, 20, 100) == 102.0
+
+
+if __name__ == '__main__':
+    pytest.main()",100.0
+"def center(coords, center_point):
+    
+
+    assert len(coords.shape) == 2, \
+        ""coordinates should be rank 2 array, ""\
+        ""this function operates on individual frames not trajectories.""
+    assert coords.shape[1] == 3, ""coordinates are not of 3 dimensions""
+    assert len(center_point) == 3, ""center point is not of 3 dimensions""
+
+    return coords - center_point","# Import the required modules for testing
+import pytest
+import numpy as np
+from source import center
+
+# Test function for center
+def test_center():
+    # Define coords and center_point
+    coords = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    center_point = [2, 2, 2]
+
+    # Call the function and get the result
+    result = center(coords, center_point)
+
+    # Assert that the result is as expected
+    assert np.array_equal(result, np.array([[0, 0, 0], [3, 3, 3], [6, 6, 6]])), \
+        ""The result does not match the expected output""
+
+# Run the test
+test_center()",100.0
+"def update_covs(covs, X, perm_out, Y=None):
+    r
+    X_perm = X[:, perm_out][perm_out, :]
+    if Y is not None:
+        Y = Y[:, perm_out][perm_out, :]
+    else:
+        Y = 0.0
+    return (X_perm @ covs @ X_perm.T) + Y","# test_source.py
+import pytest
+import os
+import numpy as np
+import source  # assuming source.py is in the same directory
+
+def test_update_covs():
+    # Test with random data
+    np.random.seed(0)
+    covs = np.random.rand(4, 4)
+    X = np.random.rand(4, 5)
+    perm_out = [0, 2, 1, 3]
+    Y = np.random.rand(4, 5)
+
+    res = source.update_covs(covs, X, perm_out, Y)
+    expected_res = (X[:, perm_out][perm_out, :] @ covs @ X[:, perm_out].T) + Y[:, perm_out][perm_out, :]
+    np.testing.assert_almost_equal(res, expected_res)
+
+if __name__ == ""__main__"":
+    pytest.main()",100.0
+"def conv_output_length(input_length, filter_size, stride, pad=0):
+    
+    if input_length is None:
+        return None
+    if pad == 'valid':
+        output_length = input_length - filter_size + 1
+    elif pad == 'full':
+        output_length = input_length + filter_size - 1
+    elif pad == 'same':
+        output_length = input_length
+    elif pad == 'strictsamex':
+        output_length = input_length
+    elif isinstance(pad, int):
+        output_length = input_length + 2 * pad - filter_size + 1
+    else:
+        raise ValueError('Invalid pad: {0}'.format(pad))
+
+    # This is the integer arithmetic equivalent to
+    # np.ceil(output_length / stride)
+    output_length = (output_length + stride - 1) // stride
+
+    return output_length","# test_source.py
+import sys
+sys.path.append(""."") # Adds the current directory to the Python path
+from source import conv_output_length  # Import function from source.py
+import pytest
+
+class TestConvOutputLength:
+
+    def test_valid_pad(self):
+        assert conv_output_length(10, 3, 1, 'valid') == 8
+        assert conv_output_length(10, 3, 1, 0) == 8
+
+    def test_full_pad(self):
+        assert conv_output_length(10, 3, 1, 'full') == 11
+        assert conv_output_length(10, 3, 1, 2) == 11
+
+    def test_same_pad(self):
+        assert conv_output_length(10, 3, 1, 'same') == 10
+
+    def test_strictsamex_pad(self):
+        assert conv_output_length(10, 3, 1, 'strictsamex') == 8
+        assert conv_output_length(10, 3, 1, 2) == 8
+
+    def test_integer_pad(self):
+        assert conv_output_length(10, 3, 1, 1) == 9
+        assert conv_output_length(10, 3, 1, 3) == 9
+
+    def test_invalid_pad(self):
+        with pytest.raises(ValueError):
+            conv_output_length(10, 3, 1, 'invalid')
+        with pytest.raises(ValueError):
+            conv_output_length(10, 3, 1, 3.4)
+        with pytest.raises(ValueError):
+            conv_output_length(10, 3, 1, [1,2,3])",100.0
+"def plotKernel2D(kernel, figAxis, title):
+    
+    figAxis.set_title(title, fontsize=15)
+    figAxis.set_xlabel('x')
+    figAxis.set_ylabel('y')
+    figAxis.set_xticks([])
+    figAxis.set_yticks([])
+    return figAxis.imshow(kernel.real, cmap='hot', interpolation='bicubic')","import pytest
+from source import plotKernel2D
+import matplotlib.pyplot as plt
+import numpy as np
+
+def test_plotKernel2D():
+    fig, ax = plt.subplots()
+    kernel = np.random.rand(10, 10)
+    ax = plotKernel2D(kernel, ax, 'Test Kernel')
+    plt.show()
+
+test_plotKernel2D()",100.0
+"def cl_velocity(r, v0, vinf, rstar, beta):
+    
+
+    return v0 + (vinf - v0) * (1 - rstar / r) ** beta","# test_source.py
+import sys
+sys.path.insert(0, '.')  # To import source.py from the same directory
+from source import cl_velocity
+import pytest
+
+class TestClVelocity:
+
+    def test_cl_velocity(self):
+        # check for equation (1-r/rstar)^beta * vinf - v0
+        assert cl_velocity(1, 1, 2, 3, 4) == 2.5
+        assert cl_velocity(2, 1, 2, 3, 4) == 3.5
+        assert cl_velocity(3, 1, 2, 3, 4) == 4.5
+
+    def test_cl_velocity_exception(self):
+        # Check if function raises error when invalid values are passed
+        with pytest.raises(ValueError):
+            cl_velocity(1, 1, -2, 3, 4)
+        with pytest.raises(ValueError):
+            cl_velocity(1, 1, 2, -3, 4)
+        with pytest.raises(ValueError):
+            cl_velocity(1, 1, 2, 3, 0)",100.0
+"def _calculate_degree_days(temperature_equivalent, base_temperature, cooling=False):
+    
+
+    if cooling:
+        ret = temperature_equivalent - base_temperature
+    else:
+        ret = base_temperature - temperature_equivalent
+
+    # degree days cannot be negative
+    ret[ret < 0] = 0
+
+    prefix = 'CDD' if cooling else 'HDD'
+    ret.name = '{}_{}'.format(prefix, base_temperature)
+
+    return ret","import pytest
+import numpy as np
+import os
+import source  # assuming the source code is in the same directory
+
+def test_calculate_degree_days():
+    # Assuming base_temperature as 20
+    # Assuming temperature_equivalent as 15
+    base_temperature = 20
+    temperature_equivalent = 15
+    
+    cooling = False
+    result = source._calculate_degree_days(temperature_equivalent, base_temperature, cooling)
+    
+    assert isinstance(result, np.ndarray), ""Return type is not numpy ndarray""
+    
+    # Since the function is supposed to return degree days, 
+    # it should be strictly positive for non-cooling
+    if not cooling:
+        np.testing.assert_array_equal(result, 5)
+    
+    # For cooling, it should be negative as it measures the difference
+    # between the environment temperature and the cooling device temperature
+    if cooling:
+        np.testing.assert_array_equal(result, -5)",100.0
+"def vector_transformation(V, Q):
+    
+    return V @ Q.T","import numpy as np
+from source import vector_transformation
+
+def test_vector_transformation():
+    V = np.array([[1, 2], [3, 4]])
+    Q = np.array([[5, 6], [7, 8]])
+    assert vector_transformation(V, Q).all() == np.array([[19, 22], [43, 50]]).all()",100.0
+"def convert_alpha_exponent(alpha):
+    
+
+    return -2. * alpha + 1","# test_source.py
+import pytest
+import sys
+sys.path.append(""."") 
+from source import convert_alpha_exponent
+
+def test_convert_alpha_exponent():
+    assert convert_alpha_exponent(1) == -1
+    assert convert_alpha_exponent(2) == -3
+    assert convert_alpha_exponent(3) == -5",100.0
+"def _mask_X_(X_, confidence_index):
+    
+    if confidence_index is not None:
+        if X_.shape[:-1] != confidence_index.shape:
+            raise RuntimeError('confidence_index does not match shape of X')
+        X_ = X_ * confidence_index[..., None]
+    return X_","import hypothesis.strategies as st
+import numpy as np
+import source  # replace with the actual name of your source file
+
+def test_mask_X():
+    @st.composite
+    def _strat_X(draw):
+        X_shape = draw(st.lists(min_size=2, max_size=5))
+        X = draw(st.np.arrays(dtype=np.float32, shape=X_shape))
+        confidence_index = draw(st.np.arrays(dtype=np.float32, shape=X_shape[:-1]))
+        return X, confidence_index
+
+    X, confidence_index = _strat_X()
+    if confidence_index is not None:
+        if X.shape[:-1] != confidence_index.shape:
+            # this assertion will always fail, but Hypothesis will ignore it
+            assert False, 'confidence_index does not match shape of X'
+            
+        X = source._mask_X_(X, confidence_index)
+
+        # Hypothesis will generate a value for X and confidence_index, then check
+        # whether the result of source._mask_X_(X, confidence_index) matches X
+        assert np.allclose(X, X)",100.0
+"import torch
+
+def homogenize_points(pts: torch.Tensor):
+    r
+    if not isinstance(pts, torch.Tensor):
+        raise TypeError(
+            ""Expected input type torch.Tensor. Got {} instead"".format(type(pts))
+        )
+    if pts.dim() < 2:
+        raise ValueError(
+            ""Input tensor must have at least 2 dimensions. Got {} instad."".format(
+                pts.dim()
+            )
+        )
+
+    return torch.nn.functional.pad(pts, (0, 1), ""constant"", 1.0)","# test_source.py
+
+import pytest
+import torch
+from source import homogenize_points
+
+def test_homogenize_points():
+    # Create a random tensor
+    pts = torch.randn(2, 3)
+    
+    # Call the homogenize_points function
+    result = homogenize_points(pts)
+    
+    # Check if the result has the expected shape
+    assert result.shape == pts.shape
+    
+    # Check if the result is a torch tensor
+    assert isinstance(result, torch.Tensor)
+    
+    # Check if all the elements in the result are equal to 1.0
+    assert torch.all(result == 1.0)
+
+if __name__ == ""__main__"":
+    test_homogenize_points()",100.0
+"def linear_model(data, a, b, c, d):
+    
+
+    return a + b * data[0] + c * data[1] + d * data[2]","# source.py
+def linear_model(data, a, b, c, d):
+    return a + b * data[0] + c * data[1] + d * data[2]
+
+# test_source.py
+import pytest
+import sys
+sys.path.insert(0, '../') # To import source.py file
+
+from source import linear_model
+
+def test_linear_model():
+    data = [1, 2, 3]
+    a, b, c, d = 1, 2, 3, 4
+    assert linear_model(data, a, b, c, d) == 10
+
+if __name__ == ""__main__"":
+    test_linear_model()",100.0
+"def convert_power_to_energy(power_col, sample_rate_min=""10T""):
+    
+    time_conversion = {""1T"": 1.0, ""5T"": 5.0, ""10T"": 10.0, ""30T"": 30.0, ""1H"": 60.0}
+    energy_kwh = power_col * time_conversion[sample_rate_min] / 60.0
+    return energy_kwh","import pytest
+import source
+
+def test_convert_power_to_energy():
+    assert source.convert_power_to_energy(100, ""10T"") == 10.0
+    assert source.convert_power_to_energy(50, ""5T"") == 5.0
+    assert source.convert_power_to_energy(150, ""1H"") == 150.0
+    assert source.convert_power_to_energy(75, ""30T"") == 75.0
+    assert source.convert_power_to_energy(200, ""10T"") == 20.0",100.0
+"def alpha_func(r, b_z, b_z_prime, b_theta, b_theta_prime, **kwargs):
+    r
+    mu = b_theta/(r*b_z)
+    mu_prime = (r*b_z*b_theta_prime - b_theta*(b_z + r*b_z_prime)) / (r*b_z)**2
+    return r*b_theta**2*b_z**2/(b_theta**2 + b_z**2)*(mu_prime / mu)**2","def alpha_func(r, b_z, b_z_prime, b_theta, b_theta_prime, **kwargs):
+    r
+    mu = b_theta/(r*b_z)
+    mu_prime = (r*b_z*b_theta_prime - b_theta*(b_z + r*b_z_prime)) / (r*b_z)**2
+    return r*b_theta**2*b_z**2/(b_theta**2 + b_z**2)*(mu_prime / mu)**2",100.0
+"def transform_aabb(transform_matrix, aabb):
+    
+    x1, y1, x2, y2 = aabb
+    # Transform all 4 corners of the AABB.
+    points = transform_matrix.dot([
+        [x1, x2, x1, x2],
+        [y1, y2, y2, y1],
+        [1, 1, 1, 1],
+    ])
+
+    # Extract the min and max corners again.
+    # (3, ) (min_x, min_y, 1)
+    min_corner = points.min(axis=1)
+    # (3, ) (max_x, max_y, 1)
+    max_corner = points.max(axis=1)
+
+    return [min_corner[0], min_corner[1], max_corner[0], max_corner[1]]","import pytest
+import numpy as np
+import source  # The file with the function to test
+
+class TestAABBTransform:
+
+    def test_transform(self):
+        # Define a transform matrix
+        transform_matrix = np.array([[2, 0, 1], [0, 2, 1], [0, 0, 1]])
+
+        # Define an AABB
+        aabb = [0, 0, 1, 1]  # (x1, y1, x2, y2)
+
+        # Call the function and check the result
+        result = source.transform_aabb(transform_matrix, aabb)
+        expected_result = [0, 0, 2, 2]  # (min_x, min_y, max_x, max_y)
+        np.testing.assert_array_equal(result, expected_result)",100.0
+"def fillgaps_depth(ds, method='cubic', max_gap=None):
+    
+    ds['vel'] = ds.vel.interpolate_na(dim='range', method=method,
+                                      use_coordinate=False,
+                                      max_gap=max_gap)
+    if hasattr(ds, 'vel_b5'):
+        ds['vel_b5'] = ds.vel.interpolate_na(dim='range', method=method,
+                                             use_coordinate=True,
+                                             max_gap=max_gap)
+    return ds","import pytest
+from source import fillgaps_depth
+
+def test_fillgaps_depth():
+    # Assuming 'ds' is a proper dataset with 'vel' and 'vel_b5' attributes
+    ds = fillgaps_depth({'vel': ..., 'vel_b5': ...})
+    
+    assert 'vel' in ds
+    assert 'vel_b5' in ds
+    assert isinstance(ds['vel'], interp_dataset)
+    assert isinstance(ds['vel_b5'], interp_dataset)
+
+if __name__ == ""__main__"":
+    test_fillgaps_depth()",100.0
+"def _get_min_window_ecc(model, units='pixels', scale=0):
+    
+    if not hasattr(model, 'PoolingWindows'):
+        raise Exception(""Model must have a PoolingWindows attribute!"")
+    if model.window_type != 'gaussian':
+        raise Exception(""Currently, only gaussian windows are supported!"")
+    if units == 'pixels':
+        full_idx = (model.window_approx_area_pixels[scale]['full'] < 1).argmin()
+        full_min_ecc = model.central_eccentricity_pixels[scale][full_idx]
+        half_min_ecc = model.calculated_min_eccentricity_pixels[scale]
+    elif units == 'degrees':
+        full_idx = (model.window_approx_area_degrees[scale]['full'] < 1).argmin()
+        full_min_ecc = model.central_eccentricity_degrees[scale][full_idx]
+        half_min_ecc = model.calculated_min_eccentricity_degrees[scale]
+    return full_min_ecc, half_min_ecc","import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+import pytest
+
+from source import _get_min_window_ecc
+from source import Model
+
+@pytest.fixture
+def model():
+    model = Model()
+    model.window_type = 'gaussian'
+    model.window_approx_area_pixels = {0: {'full': [1,2,3,4,5], 'half': [1,2,3,4]}}
+    model.central_eccentricity_pixels = {0: [1,2,3,4,5]}
+    model.calculated_min_eccentricity_pixels = {0: [2,3,4,5]}
+    return model
+
+def test_get_min_window_ecc_pixels(model):
+    ecc_pixels, ecc_half_pixels = _get_min_window_ecc(model, 'pixels', 0)
+    assert ecc_pixels == 1
+    assert ecc_half_pixels == 2
+
+def test_get_min_window_ecc_degrees(model):
+    model.window_approx_area_degrees = {0: {'full': [1,2,3,4,5], 'half': [1,2,3,4]}}
+    model.central_eccentricity_degrees = {0: [1,2,3,4,5]}
+    model.calculated_min_eccentricity_degrees = {0: [2,3,4,5]}
+    ecc_degrees, ecc_half_degrees = _get_min_window_ecc(model, 'degrees', 0)
+    assert ecc_degrees == 1
+    assert ecc_half_degrees == 2",100.0
+"def precomputeWeightedDmat(dmat, weights, squared=False):
+    
+    
+    if squared:
+        dmat = dmat**2
+
+    if weights is None:
+        return dmat
+    else:
+        assert weights.shape[0] == dmat.shape[0]
+        return dmat * weights[None,:].values","import numpy as np
+import pytest
+import os
+import source  # change this to the actual name of your file
+
+def test_precomputeWeightedDmat():
+    dmat = np.array([[1,2,3], [4,5,6], [7,8,9]])
+    weights = np.array([0.1, 0.2, 0.3])
+    expected_output = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]])
+    assert np.allclose(source.precomputeWeightedDmat(dmat, weights), expected_output)
+
+    dmat = np.array([[1,2,3], [4,5,6]])
+    weights = None
+    expected_output = dmat
+    assert np.allclose(source.precomputeWeightedDmat(dmat, weights), expected_output)
+
+    dmat = np.array([[1,2,3], [4,5,6]])
+    weights = np.array([0.1, 0.2])
+    expected_output = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
+    assert np.allclose(source.precomputeWeightedDmat(dmat, weights, squared=True), expected_output)
+
+    dmat = np.array([[1,2,3]])
+    weights = np.array([0.1])
+    expected_output = np.array([[0.1, 0.2, 0.3]])
+    assert np.allclose(source.precomputeWeightedDmat(dmat, weights, squared=True), expected_output)
+
+# Run the tests using pytest
+if __name__ == ""__main__"":
+    pytest.main()",100.0
+"def klucb(x, d, kl, upperbound, lowerbound=float('-inf'), precision=1e-6, max_iterations=50):
+    
+    value = max(x, lowerbound)
+    u = upperbound
+    _count_iteration = 0
+    while _count_iteration < max_iterations and u - value > precision:
+        _count_iteration += 1
+        m = (value + u) / 2.
+        if kl(x, m) > d:
+            u = m
+        else:
+            value = m
+    return (value + u) / 2.","import pytest
+from source import klucb
+
+def test_klucb():
+    # This is a test case where we assume that the input arguments to the function
+    # are 1, 2, 3, 4, 5 and we will check if the output matches the expected output.
+    assert klucb(1, 2, 3, 4, 5) == 3.75
+    # You can add more test cases as per your requirements.
+
+if __name__ == ""__main__"":
+    # This is to run the test
+    test_klucb()",100.0
+"def step_symmetry(autocorr_peak_values):
+    
+
+    peaks_half = autocorr_peak_values[autocorr_peak_values.size // 2 :]
+
+    assert len(peaks_half) >= 3, (
+        ""Not enough autocorrelation peaks detected. Plot the ""
+        ""autocorrelation signal to visually inspect peaks""
+    )
+
+    ac_d1 = peaks_half[1]  # first dominant period i.e. a step (left-right)
+    ac_d2 = peaks_half[2]  # second dominant period i.e. a stride (left-left)
+
+    # Always divide smaller peak by the larger peak
+    if abs(ac_d1) > abs(ac_d2):
+        step_sym = ac_d2 / ac_d1  # Preserve sign by not using abs()
+    else:
+        step_sym = ac_d1 / ac_d2  # Preserve sign by not using abs()
+
+    return step_sym","import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+import source  # assuming the actual code is in source.py
+
+def test_step_symmetry():
+    autocorr_peak_values = [10, 5, 30, 20, 15]  # example input
+    expected_output = source.step_symmetry(autocorr_peak_values)  # expected output
+    assert expected_output == 30/15  # or whatever your expected result is
+
+if __name__ == ""__main__"":
+    test_step_symmetry()",100.0
+"def connected_components(adjacency_matrix):
+    
+    node_idxs = set(range(adjacency_matrix.shape[0]))
+    components = []
+    while node_idxs:
+        idx = node_idxs.pop()
+        component = {idx}
+        component_follow = [idx]
+        while component_follow:
+            idx = component_follow.pop()
+            idxs = set(adjacency_matrix[idx].nonzero()[0]) - component
+            component |= idxs
+            component_follow += idxs
+        components.append(component)
+        node_idxs -= component
+    return components","# test_source.py
+
+import pytest
+import sys
+sys.path.append('.')  # to import source.py from the same directory
+from source import connected_components
+import numpy as np
+
+def test_connected_components():
+    adjacency_matrix = np.array([[0, 1, 1, 1],
+                                  [1, 0, 1, 0],
+                                  [1, 1, 0, 1],
+                                  [1, 0, 1, 0]])
+    expected_output = [set([0, 1, 2, 3]), set([0]), set([1]), set([2]), set([3])]
+    assert connected_components(adjacency_matrix) == expected_output
+
+def test_connected_components_with_disconnected_nodes():
+    adjacency_matrix = np.array([[0, 1, 1, 0],
+                                  [1, 0, 0, 1],
+                                  [1, 0, 0, 1],
+                                  [0, 1, 1, 0]])
+    expected_output = [set([0, 1, 2]), set([0]), set([2]), set([3])]
+    assert connected_components(adjacency_matrix) == expected_output
+
+def test_connected_components_with_no_connections():
+    adjacency_matrix = np.array([[0, 0, 0, 0],
+                                  [0, 0, 0, 0],
+                                  [0, 0, 0, 0],
+                                  [0, 0, 0, 0]])
+    expected_output = [set([0]), set([1]), set([2]), set([3])]
+    assert connected_components(adjacency_matrix) == expected_output
+
+def test_connected_components_with_one_node():
+    adjacency_matrix = np.array([[0],
+                                  [0],
+                                  [0],
+                                  [0]])
+    expected_output = [set([0]), set([1]), set([2]), set([3])]
+    assert connected_components(adjacency_matrix) == expected_output",100.0
+"def point_in_rectangle(point, rect_top_left, rect_sides):
+    
+    return rect_top_left[0] < point[0] < rect_top_left[0] + rect_sides[0] and \
+           rect_top_left[1] < point[1] < rect_top_left[1] + rect_sides[1]","# test_source.py
+
+import pytest
+import source  # assuming the source code is in a file named 'source.py'
+
+def test_point_in_rectangle():
+    point = (2, 3)
+    rect_top_left = (1, 2)
+    rect_sides = (4, 5)
+    
+    assert source.point_in_rectangle(point, rect_top_left, rect_sides)",100.0
+"def saturated_vapour_pressure_average(svp_24_max, svp_24_min):
+    
+    return (svp_24_max + svp_24_min)/2","import pytest
+import sys
+sys.path.insert(0, './')
+from source import saturated_vapour_pressure_average
+
+def test_saturated_vapour_pressure_average():
+    svp_24_max = 100
+    svp_24_min = 50
+    assert saturated_vapour_pressure_average(svp_24_max, svp_24_min) == 75
+
+def test_saturated_vapour_pressure_average_exception():
+    svp_24_max = ""a""
+    svp_24_min = 50
+    with pytest.raises(TypeError):
+        saturated_vapour_pressure_average(svp_24_max, svp_24_min)",100.0
+"def object_to_image_dist(efl, object_distance):
+    
+    ret = 1 / efl + 1 / object_distance
+    return 1 / ret","import pytest
+from source import object_to_image_dist  # Assuming the function is in source.py
+
+def test_object_to_image_dist():
+    assert object_to_image_dist(1, 2) is not None",100.0
+"def applyLagrangeCoeffs(r, v, f, g, f_dot, g_dot):
+    
+    r_new = f * r + g * v
+    v_new = f_dot * r + g_dot * v
+
+    return r_new, v_new","# test_source.py
+
+# Import the source file
+import source as sp
+
+# Define your test function
+def test_applyLagrangeCoeffs():
+    
+    # Define your input parameters
+    r = 1.0
+    v = 2.0
+    f = 3.0
+    g = 4.0
+    f_dot = 5.0
+    g_dot = 6.0
+
+    # Call the function and assert the results
+    assert sp.applyLagrangeCoeffs(r, v, f, g, f_dot, g_dot) == (f * r + g * v, f_dot * r + g_dot * v)",100.0
+"def rescale_rectangle(top_left, sides, ratio):
+    
+    rescaled_top_left = (top_left[0] + sides[0] / 2.0 - sides[0] / 2.0 * ratio,
+                         top_left[1] + sides[1] / 2.0 - sides[1] / 2.0 * ratio)
+    rescaled_sides = (sides[0] * ratio, sides[1] * ratio)
+    return rescaled_top_left, rescaled_sides","@pytest.mark.test
+def test_rescale_rectangle():
+    top_left = (0, 0)
+    sides = (5, 10)
+    ratio = 0.5
+    expected_result = ((2.5, 5.0), (2.5, 5.0))
+    assert rescale_rectangle(top_left, sides, ratio) == expected_result",100.0
+"def normalize_frac(unnorm_power, dt, n_bin, mean_flux, background_flux=0):
+    
+    #     (mean * n_bin) / (mean /dt) = n_bin * dt
+    #     It's Leahy / meanrate;
+    #     n_ph = mean * n_bin
+    #     meanrate = mean / dt
+    #     norm = 2 / (n_ph * meanrate) = 2 * dt / (mean**2 * n_bin)
+
+    if background_flux > 0:
+        power = unnorm_power * 2. * dt / ((mean_flux - background_flux) ** 2 * n_bin)
+    else:
+        # Note: this corresponds to eq. 3 in Uttley+14
+        power = unnorm_power * 2. * dt / (mean_flux ** 2 * n_bin)
+    return power","import pytest
+from source import normalize_frac
+
+def test_normalize_frac():
+    assert pytest.approx(normalize_frac(1, 1, 1, 1)) == 2.0
+    assert pytest.approx(normalize_frac(1, 2, 1, 1)) == 1.0
+    assert pytest.approx(normalize_frac(1, 1, 1, 1, background_flux=1)) == 0.5
+    assert pytest.approx(normalize_frac(1, 2, 1, 1, background_flux=1)) == 0.0",100.0
+"def _int2coord(x, y, dim):
+    
+    assert dim >= 1
+    assert x < dim
+    assert y < dim
+
+    lng = x / dim * 360 - 180
+    lat = y / dim * 180 - 90
+
+    return lng, lat","import pytest
+import sys
+sys.path.append(""."") # to import the source file
+from source import _int2coord
+
+def test_int2coord():
+    dim = 10
+    x, y = 5, 5
+    expected_result = (30, -20)  # Longitude and Latitude for the center of the given dimension
+    # Asserting it with the expected result
+    assert _int2coord(x, y, dim) == expected_result",100.0
+"def flip_bbox(bbox, size, y_flip=False, x_flip=False):
+    
+    H, W = size
+    bbox = bbox.copy()
+    if y_flip:
+        y_max = H - bbox[:, 0]
+        y_min = H - bbox[:, 2]
+        bbox[:, 0] = y_min
+        bbox[:, 2] = y_max
+    if x_flip:
+        x_max = W - bbox[:, 1]
+        x_min = W - bbox[:, 3]
+        bbox[:, 1] = x_min
+        bbox[:, 3] = x_max
+    return bbox","import sys
+sys.path.append(""."")
+from source import flip_bbox
+import pytest
+
+def test_flip_bbox():
+    # Test without any flipping
+    bbox = [[1, 2, 3, 4]]
+    size = (5, 5)
+    assert flip_bbox(bbox, size) == [[1, 2, 3, 4]]
+
+    # Test with y flipping
+    bbox = [[1, 2, 3, 4]]
+    size = (5, 5)
+    assert flip_bbox(bbox, size, y_flip=True) == [[4, 2, 3, 1]]
+
+    # Test with x flipping
+    bbox = [[1, 2, 3, 4]]
+    size = (5, 5)
+    assert flip_bbox(bbox, size, x_flip=True) == [[2, 3, 1, 4]]
+
+    # Test with both flipping
+    bbox = [[1, 2, 3, 4]]
+    size = (5, 5)
+    assert flip_bbox(bbox, size, y_flip=True, x_flip=True) == [[4, 3, 2, 1]]",100.0
+"def step_train(model, x, y, criterion, optimizer):
+    
+
+    # set model to training mode
+    model.train()
+    # forward pass
+    y_pred = model(x)
+    # compute loss
+    loss = criterion(y_pred, y)
+    # since the backward() method accumulates gradients and we
+    # do not want to mix up gradients between minibatches, we zero them
+    optimizer.zero_grad()
+    # backward pass
+    loss.backward()
+    # update model parameters
+    optimizer.step()
+
+    return y_pred, loss","# test_step_train.py
+
+import sys
+sys.path.append(""."")  # add current directory to import path
+from source import step_train
+import torch
+
+def test_step_train():
+    # create a random input and target tensor
+    x = torch.randn(1, 1)
+    y = torch.randn(1, 1)
+    
+    # mock model, criterion and optimizer
+    model = torch.nn.Linear(1, 1)
+    criterion = torch.nn.MSELoss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+    
+    # run the function and get y_pred and loss
+    y_pred, loss = step_train(model, x, y, criterion, optimizer)
+    
+    # check the shape of y_pred and loss
+    assert y_pred.shape == y.shape
+    assert loss.shape == ()
+    
+    # check if the loss is a numeric value (float)
+    assert isinstance(loss.item(), float)",100.0
+"def __get_cutoff_indices(flow, fhigh, df, N):
+    
+    if flow:
+        kmin = int(flow / df)
+    else:
+        kmin = 1
+    if fhigh:
+        kmax = int(fhigh / df)
+    else:
+        kmax = int((N + 1) / 2.)
+    return kmin, kmax","# test_source.py
+
+import pytest
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + ""/.."")
+from source import get_cutoff_indices
+
+def test_get_cutoff_indices():
+    # Test with flow and fhigh
+    assert get_cutoff_indices(20, 30, 2, 10) == (1, 2)
+    # Test with only flow
+    assert get_cutoff_indices(40, None, 5, 10) == (1, 5)
+    # Test with only fhigh
+    assert get_cutoff_indices(None, 80, 10, 10) == (5, 10)
+    # Test with no parameters
+    assert get_cutoff_indices(None, None, 1, 10) == (1, 5)
+    # Test with negative values
+    assert get_cutoff_indices(-20, -30, 2, 10) == (1, 2)",100.0
+"def smooth(prev, cur, weight):
+    r
+    return weight * prev + (1 - weight) * cur","# test_source.py
+
+from source import smooth  # assuming the function is in source.py
+
+def test_smooth():
+    prev = 5
+    cur = 10
+    weight = 0.5
+    expected_output = 7.5
+    assert abs(smooth(prev, cur, weight) - expected_output) < 1e-6  # using assertion to check if the output is close enough",100.0
+"import torch
+
+def affine_transformer_inverse(y, shift, log_scale):
+    r
+    x = (y - shift) * torch.exp(-log_scale)
+    log_det_J = -torch.sum(log_scale, dim=1)
+    return x, log_det_J","import torch
+import pytest
+from source import affine_transformer_inverse
+
+def test_affine_transformer_inverse():
+    y = torch.randn(5, 3)
+    shift = torch.randn(5, 3)
+    log_scale = torch.randn(5, 3)
+
+    x, log_det_J = affine_transformer_inverse(y, shift, log_scale)
+
+    assert x.shape == y.shape
+    assert log_det_J.shape == y.shape[:-1]",100.0
+"def squared_loss(y_true, y_pred):
+    
+    return ((y_true - y_pred) ** 2).sum() / (2 * y_true.shape[0])","import pytest
+from source import squared_loss
+import numpy as np
+
+def test_squared_loss():
+    y_true = np.array([1, 2, 3, 4])
+    y_pred = np.array([1, 2, 3, 5])
+    assert np.isclose(squared_loss(y_true, y_pred), 7.0, 1e-9)",100.0
+"def mie_potential_minimum(bead_dict):
+    r
+
+    return bead_dict[""sigma""] * (bead_dict[""lambdar""] / bead_dict[""lambdaa""])**(1 / (bead_dict[""lambdar""] - bead_dict[""lambdaa""]))","import pytest
+from source import mie_potential_minimum
+
+class TestMiePotentialMinimum:
+
+    def test_mie_potential_minimum(self):
+        bead_dict = {""sigma"": 1, ""lambdar"": 2, ""lambdaa"": 3}
+        result = mie_potential_minimum(bead_dict)
+        assert result == 2.0, ""The function mie_potential_minimum did not return the expected value""",100.0
+"def applymask(vol, mask):
+    
+    mask = mask.reshape(mask.shape + (vol.ndim - mask.ndim) * (1,))
+    return vol * mask","import pytest
+import numpy as np
+from source import applymask
+
+def test_applymask():
+    vol = np.array([[1,2,3],[4,5,6],[7,8,9]])
+    mask = np.array([[1,0,1],[1,0,1],[1,0,1]])
+    result = applymask(vol, mask)
+    expected_result = np.array([[1,2,3],[4,0,6],[7,0,9]])
+    np.testing.assert_array_equal(result, expected_result)",100.0
+"def get_product_extents(api, platform, product):
+    
+    # Get the extents of the cube
+    descriptor = api.get_query_metadata(platform=platform, product=product, measurements=[])
+    min_max_lat = descriptor['lat_extents']
+    min_max_lon = descriptor['lon_extents']
+    min_max_dates = descriptor['time_extents']
+    return min_max_lat, min_max_lon, min_max_dates","# test_source.py
+import pytest
+import api_module as api  # Replace with the actual name of your module
+from source import get_product_extents
+
+def test_get_product_extents():
+    platform = ""platform_example""
+    product = ""product_example""
+    api_instance = api.Api()  # Initialize your API instance here
+
+    result = get_product_extents(api_instance, platform, product)
+    assert result == (""expected_lat_extents"", ""expected_lon_extents"", ""expected_time_extents"")  # Replace with the expected results",100.0
+"def count_bad_pixels_per_block(x, y, bad_bins_x, bad_bins_y):
+    
+
+    # Calculate the resulting bad pixels in a rectangular block:
+    return (x * bad_bins_y) + (y * bad_bins_x) - (bad_bins_x * bad_bins_y)","# test_source.py
+from source import count_bad_pixels_per_block  # Import the function from source.py
+
+def test_count_bad_pixels_per_block():
+    x = 3
+    y = 4
+    bad_bins_x = 2
+    bad_bins_y = 3
+    expected_result = (x * bad_bins_y) + (y * bad_bins_x) - (bad_bins_x * bad_bins_y)
+    assert count_bad_pixels_per_block(x, y, bad_bins_x, bad_bins_y) == expected_result",100.0
+"def crop_boxes(boxes, x_offset, y_offset):
+    
+    cropped_boxes = boxes.copy()
+    cropped_boxes[:, [0, 2]] = boxes[:, [0, 2]] - x_offset
+    cropped_boxes[:, [1, 3]] = boxes[:, [1, 3]] - y_offset
+
+    return cropped_boxes","import os
+import pytest
+from source import crop_boxes
+
+def test_crop_boxes():
+    boxes = [[2, 3, 5, 7], [10, 15, 12, 17], [18, 22, 20, 27]]
+    x_offset = 1
+    y_offset = 2
+    expected_result = [[1, 2, 4, 6], [9, 14, 11, 16], [17, 21, 19, 26]]
+    
+    assert crop_boxes(boxes, x_offset, y_offset).tolist() == expected_result
+
+if __name__ == ""__main__"":
+    test_crop_boxes()",100.0
+"def adjust_displacement(n_trials, n_accept, max_displacement):
+    
+    acc_rate = float(n_accept) / float(n_trials)
+    if (acc_rate < 0.38):
+        max_displacement *= 0.8
+
+    elif (acc_rate > 0.42):
+        max_displacement *= 1.2
+
+    n_trials = 0
+    n_accept = 0
+
+    return max_displacement, n_trials, n_accept","import pytest
+import source  # assuming the file with the code is named source.py, and it's in the same directory
+
+def test_adjust_displacement():
+    max_displacement = 1.0
+    n_trials = 100
+    n_accept = 50
+    
+    # Call the function adjust_displacement with the defined parameters
+    new_max_displacement, new_n_trials, new_n_accept = source.adjust_displacement(n_trials, n_accept, max_displacement)
+    
+    # Check if the return values are as expected
+    assert new_max_displacement == 0.8, ""max_displacement not correctly adjusted""
+    assert new_n_trials == 0, ""n_trials not reset to 0""
+    assert new_n_accept == 0, ""n_accept not reset to 0""",100.0
+"def set_size(width=453, fraction=1, twoColumns=False, ratio=1):
+    
+    # Width of figure
+    fig_width_pt = width * fraction
+
+    # Convert from pt to inches
+    inches_per_pt = 1 / 72.27
+
+    # Golden ratio to set aesthetic figure height
+    if twoColumns:
+        golden_ratio = ratio*(5 ** 0.5 - 1) 
+    else:
+        golden_ratio = ratio*(5 ** 0.5 - 1) / 2
+
+    # Figure width in inches
+    fig_width_in = fig_width_pt * inches_per_pt
+    # Figure height in inches
+    fig_height_in = fig_width_in * golden_ratio
+
+    return fig_width_in, fig_height_in","import pytest
+from source import set_size
+
+def test_set_size():
+    # Test the default parameters
+    assert set_size() == (21.225, 16.2222222222222224)
+    
+    # Test with specific parameters
+    assert set_size(width=100, fraction=0.5, twoColumns=True, ratio=2) == (24.5, 24.5)
+    assert set_size(width=500, fraction=2, twoColumns=False, ratio=1.5) == (118.1, 68.066666666666666)
+
+    # Test with maximum values
+    assert set_size(width=10000, fraction=10, twoColumns=True, ratio=10) == (86.525, 86.525)
+    
+    # Test with minimum values
+    assert set_size(width=0.001, fraction=0.001, twoColumns=False, ratio=0.001) == (0.02700000000000001, 0.018666666666666668)",100.0
+"def _get_soft_predictions(estimator, X, predict_method):
+    r
+    if predict_method == ""auto"":
+        if hasattr(estimator, ""predict_proba""):
+            predict_method = ""predict_proba""
+        elif hasattr(estimator, ""decision_function""):
+            predict_method = ""decision_function""
+        else:
+            predict_method = ""predict""
+
+    output = getattr(estimator, predict_method)(X)
+    if predict_method == ""predict_proba"":
+        return output[:, 1]
+    return output","# test_source.py
+import pytest
+from source import _get_soft_predictions
+
+def test__get_soft_predictions():
+    # We will assume some parameters for the test
+    estimator = ""test_estimator""
+    X = ""test_data""
+    predict_method = ""auto""
+
+    # We call the function with the test parameters
+    result = _get_soft_predictions(estimator, X, predict_method)
+
+    # Here we make some assertions to test the output.
+    # Let's just test if the output is not None for this case.
+    assert result is not None",100.0
+"def imp_factor(b_curve):
+    # Docstring
+    
+    switcher = {
+        'a0': 0.13,
+        'a': 0.21,
+        'b': 0.34,
+        'c': 0.49,
+        'd': 0.76,
+    }
+    return switcher.get(b_curve, ""nothing"")","# -*- coding: utf-8 -*-
+
+import pytest
+
+from source import imp_factor   # Import the function from source.py
+
+def test_imp_factor():
+    assert imp_factor('a0') == 0.13
+    assert imp_factor('a') == 0.21
+    assert imp_factor('b') == 0.34
+    assert imp_factor('c') == 0.49
+    assert imp_factor('d') == 0.76
+    assert imp_factor('e') == ""nothing""",100.0
+"def compute_nonzero_mean_intensity(image_data):
+    
+
+    # take just the non-zero pixels
+    image_data_nonzero = image_data[image_data != 0]
+
+    # take the mean of the non-zero pixels and assign to (fov, channel) in array
+    # unless there are no non-zero pixels, in which case default to 0
+    if len(image_data_nonzero) > 0:
+        nonzero_mean_intensity = image_data_nonzero.mean()
+    else:
+        nonzero_mean_intensity = 0
+
+    return nonzero_mean_intensity","import pytest
+import numpy as np
+from source import compute_nonzero_mean_intensity
+
+def test_compute_nonzero_mean_intensity():
+    image_data = np.array([[0, 10, 0], [20, 0, 30], [0, 40, 0]])
+    assert compute_nonzero_mean_intensity(image_data) == 25.0
+
+    image_data = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+    assert compute_nonzero_mean_intensity(image_data) == 0",100.0
+"def gcf(a, b, epsilon=1e-16):
+    
+    result = max(a, b)
+    remainder = min(a, b)
+    while remainder and abs(remainder) > epsilon:
+        new_remainder = result % remainder
+        result = remainder
+        remainder = new_remainder
+    return abs(result)","import pytest
+from source import gcf
+
+def test_gcf():
+    assert gcf(48, 18) == 6
+    assert gcf(101, 103) == 1
+    assert gcf(111, 222) == 111
+    assert gcf(36, 60) == 12",100.0
+"def normalize(dataset, x):
+    
+    if dataset == 'VOC2012':
+        x[:, :, 0] -= 104
+        x[:, :, 1] -= 117
+        x[:, :, 2] -= 123
+        return x / 255
+    elif dataset == 'ADP':
+        return (x - 193.09203) / 56.450138
+    elif 'DeepGlobe' in dataset:
+        return x / 255","import sys
+sys.path.append(""."")  # To include the current directory in the import path
+from source import normalize
+
+def test_normalize():
+    dataset = 'VOC2012'
+    x = [[104, 117, 123]]
+    expected_output = [[-1, -1, -1]]
+    assert normalize(dataset, x) == expected_output
+
+    dataset = 'ADP'
+    x = [193.09203]
+    expected_output = [[-19.6934]]
+    assert normalize(dataset, x) == expected_output
+
+    dataset = 'DeepGlobe'
+    x = [104, 117, 123]
+    expected_output = [[0.39215, 0.498039, 0.5041]]
+    assert normalize(dataset, x) == expected_output",100.0
+"def plot_resolution(ax, x, resolution, label=None, fmt=""bo""):
+    
+    ax.plot(x, resolution, fmt, label=label)
+
+    ax.hlines(0.0, ax.get_xlim()[0], ax.get_xlim()[1], ls=""--"", color=""ideal case"")
+
+    ax.grid(which=""both"", axis=""both"", visible=True)
+    ax.xlabel(""log10(true #phe)"")
+    ax.ylabel(""charge resolution"")
+    ax.legend(loc=""best"")
+    ax.ylim(-0.2, 1.5)
+    ax.xlim(0.0, 4.5)
+
+    return ax","import pytest
+import numpy as np
+import matplotlib.pyplot as plt
+import source  # assuming the source code is in a file called source.py in the same directory
+
+class TestPlotResolution:
+
+    def setup_method(self):
+        self.fig, self.ax = plt.subplots()
+        self.x = np.random.rand(100)
+        self.resolution = np.random.rand(100)
+
+    def test_plot_resolution(self):
+        source.plot_resolution(self.ax, self.x, self.resolution)
+
+        # Check that the function has labelled the y-axis
+        assert self.ax.get_ylabel() == ""charge resolution""
+
+        # Check that the function has labelled the x-axis
+        assert self.ax.get_xlabel() == ""log10(true #phe)""
+
+        # Check that the function has plotted the data
+        assert len(self.ax.get_lines()) == 1
+
+        # Check that the function has added a legend
+        assert len(self.ax.get_legend_handles_labels()[1]) == 1
+
+        # Check that the function has limited the y-axis
+        assert self.ax.get_ylim() == (0.0, 1.5)
+
+        # Check that the function has limited the x-axis
+        assert self.ax.get_xlim() == (0.0, 4.5)
+
+    def teardown_method(self):
+        plt.close(self.fig)",100.0
+"def dice_loss(inputs, targets, num_boxes):
+    
+    inputs = inputs.sigmoid()
+    inputs = inputs.flatten(1)
+    numerator = 2 * (inputs * targets).sum(1)
+    denominator = inputs.sum(-1) + targets.sum(-1)
+    loss = 1 - (numerator + 1) / (denominator + 1)
+    return loss.sum() / num_boxes","# test_source.py
+
+import pytest
+from source import dice_loss  # assuming the function is in source.py
+import torch
+
+def test_dice_loss():
+    inputs = torch.randn(5, 10)
+    targets = torch.randn(5, 10)
+    num_boxes = 5
+
+    loss = dice_loss(inputs, targets, num_boxes)
+
+    assert float(loss) > 0  # Just to make sure it's a positive value",100.0
+"import torch
+
+def _axis_angle_rotation(axis: str, angle):
+    
+
+    cos = torch.cos(angle)
+    sin = torch.sin(angle)
+    one = torch.ones_like(angle)
+    zero = torch.zeros_like(angle)
+
+    if axis == ""X"":
+        R_flat = (one, zero, zero, zero, cos, -sin, zero, sin, cos)
+    if axis == ""Y"":
+        R_flat = (cos, zero, sin, zero, one, zero, -sin, zero, cos)
+    if axis == ""Z"":
+        R_flat = (cos, -sin, zero, sin, cos, zero, zero, zero, one)
+
+    return torch.stack(R_flat, -1).reshape(angle.shape + (3, 3))","# import the source file
+import source 
+
+def test_axis_angle_rotation():
+    # test on a random input
+    axis = ""X""
+    angle = torch.randn(2,3)
+    result = source._axis_angle_rotation(axis, angle)
+    assert result.shape == angle.shape + (3, 3), ""The shape of the output tensor is incorrect""
+
+    # test on a specific input
+    axis = ""Z""
+    angle = torch.tensor([0, 1])
+    expected_output = torch.tensor([[1., 0., 0., 0., 0., 0., 0., 0., 1.],
+                                   [0., 0., 0., 1., 0., 0., 0., 0., 0.]])
+    result = source._axis_angle_rotation(axis, angle)
+    assert torch.allclose(result, expected_output, atol=1e-6), ""The output tensor is incorrect""
+
+# if the test file is run directly, run the tests
+if __name__ == ""__main__"":
+    test_axis_angle_rotation()",100.0
+"def evaluate_velocity_at(layer, depth, prop):
+    
+    thick = layer['bot_depth'] - layer['top_depth']
+    prop = prop.lower()
+    if prop == ""p"":
+        slope = (layer['bot_p_velocity'] - layer['top_p_velocity']) / thick
+        return slope * (depth - layer['top_depth']) + layer['top_p_velocity']
+    elif prop == ""s"":
+        slope = (layer['bot_s_velocity'] - layer['top_s_velocity']) / thick
+        return slope * (depth - layer['top_depth']) + layer['top_s_velocity']
+    elif prop in ""rd"":
+        slope = (layer['bot_density'] - layer['top_density']) / thick
+        return slope * (depth - layer['top_depth']) + layer['top_density']
+    raise ValueError(""Unknown material property, use p, s, or d."")","import os
+import pytest
+import source  # this is your source code file imported
+
+@pytest.fixture()
+def layer():
+    return {'bot_depth': 10, 'top_depth': 5, 'bot_p_velocity': 15, 'top_p_velocity': 10, 'bot_s_velocity': 20, 'top_s_velocity': 12, 'bot_density': 2500, 'top_density': 2400}
+
+@pytest.fixture()
+def prop():
+    return ""p""
+
+def test_evaluate_velocity_at(layer, prop):
+    """"""Test evaluate_velocity_at function with property 'p'.""""""
+    result = source.evaluate_velocity_at(layer, 7, prop)
+    assert result == 12.5
+
+def test_evaluate_velocity_at_s(layer, prop):
+    """"""Test evaluate_velocity_at function with property 's'.""""""
+    prop = ""s""
+    result = source.evaluate_velocity_at(layer, 7, prop)
+    assert result == 18.0
+
+def test_evaluate_velocity_at_density(layer, prop):
+    """"""Test evaluate_velocity_at function with property 'd'.""""""
+    prop = ""d""
+    result = source.evaluate_velocity_at(layer, 7, prop)
+    assert result == 2400",100.0
+"def cross(a, b):
+    
+    c = [a[1]*b[2] - a[2]*b[1],
+        a[2]*b[0] - a[0]*b[2],
+        a[0]*b[1] - a[1]*b[0]]
+
+    return c","# test_cross_product.py
+
+from source import cross
+import pytest
+
+def test_cross_product():
+    a = [1, 2, 3]
+    b = [4, 5, 6]
+    expected_output = [-3, 6, -3]
+    assert cross(a, b) == expected_output
+
+def test_cross_product_random():
+    a = [1, 2, 3]
+    b = [4, 5, 6]
+    # the cross product should be perpendicular to both of its arguments
+    assert abs(cross(a, b)[0]*(a[0]*b[0] + a[1]*b[1] + a[2]*b[2])
+            + cross(a, b)[1]*(a[0]*b[1] + a[1]*b[2] + a[2]*b[0])
+            + cross(a, b)[2]*(a[0]*b[2] + a[1]*b[0] + a[2]*b[1]) < 1e-6)",100.0
+"def calculate_runtime(start, end):
+    
+    time = end - start
+    hours, rem = divmod(time, 3600)
+    minutes, seconds = divmod(rem, 60)
+    runtime = ""{:0>2}:{:0>2}:{:05.2f}"".format(
+        int(hours), int(minutes), seconds
+    )
+
+    return runtime","# test_source.py
+
+# import the module
+import pytest
+import source
+
+def test_calculate_runtime():
+    
+    # test with known values
+    assert source.calculate_runtime(10, 20) == '00:01:00.00'
+    assert source.calculate_runtime(3600, 3600) == '01:00:00.00'
+    assert source.calculate_runtime(3600*24, 3600*24) == '24:00:00.00'
+    
+    # test with negative values
+    assert source.calculate_runtime(100, 10) == '00:00:01.00'
+    assert source.calculate_runtime(10, 100) == '00:01:40.00'",100.0
+"def Between(field, from_value, to_value):
+    
+    return {'_between': {'_field': field, '_from': from_value, '_to': to_value}}","import pytest
+from source import Between
+
+def test_between():
+    result = Between('age', 20, 30)
+    assert result == {'_between': {'_field': 'age', '_from': 20, '_to': 30}}",100.0
+"def net_radiation_canopy(rn_24, sf_soil):
+    r
+    return rn_24 * (1-sf_soil)",from path_to_source_file import net_radiation_canopy,88.0
+"def apply_ants_transform_to_image(transform, image, reference, interpolation='linear'):
+    
+    return transform.apply_to_image(image, reference, interpolation)","# test_source.py
+import pytest
+from source import apply_ants_transform_to_image
+
+def test_apply_ants_transform_to_image():
+    # Here we are just checking if the function runs without errors.
+    # You should add more specific tests related to your application.
+    transform = ...  # initialize a transform object
+    image = ...  # initialize an image object
+    reference = ...  # initialize a reference object
+    interpolation = 'linear'
+
+    assert apply_ants_transform_to_image(transform, image, reference, interpolation) is not None",88.0
+"def sample_filter_smooth(key, lds_model, n_samples, noisy_init):
+    
+    z_hist, x_hist = lds_model.sample(key, n_samples, noisy_init)
+    mu_hist, Sigma_hist, mu_cond_hist, Sigma_cond_hist = lds_model.kalman_filter(x_hist)
+    mu_hist_smooth, Sigma_hist_smooth = lds_model.kalman_smoother(mu_hist, Sigma_hist, mu_cond_hist, Sigma_cond_hist)
+
+    return {
+        ""z_hist"": z_hist,
+        ""x_hist"": x_hist,
+        ""mu_hist"": mu_hist,
+        ""Sigma_hist"": Sigma_hist,
+        ""mu_cond_hist"": mu_cond_hist,
+        ""Sigma_cond_hist"": Sigma_cond_hist,
+        ""mu_hist_smooth"": mu_hist_smooth,
+        ""Sigma_hist_smooth"": Sigma_hist_smooth
+    }","import source  # this is the module under test
+import pytest
+
+class TestSampleFilterSmooth:
+
+    @pytest.fixture
+    def lds_model(self):
+        # here you can initialize and setup your model
+        # it could be a dummy model
+        return source.LDSSampleModel()   # replace it with your real model
+
+    def test_sample(self, lds_model):
+        key = source.random.PRNGKey(0)
+        n_samples = 100
+        noisy_init = True
+        result = source.sample_filter_smooth(key, lds_model, n_samples, noisy_init)
+        # here you can add assertions to test the results
+        assert isinstance(result, dict)
+        # assuming `z_hist` is a numpy array
+        assert isinstance(result[""z_hist""], source.numpy.ndarray)
+        # do similar assertions for other fields
+        
+    # add more tests as needed",88.0
+"def lightness_correlate(Y_b, Y_w, Q, Q_w):
+    
+
+    Z = 1 + (Y_b / Y_w) ** 0.5
+    J = 100 * (Q / Q_w) ** Z
+
+    return J","import pytest
+from source import lightness_correlate
+
+def test_lightness_correlate():
+    Y_b = 10
+    Y_w = 20
+    Q = 30
+    Q_w = 40
+
+    assert lightness_correlate(Y_b, Y_w, Q, Q_w) == 100 * (Q / Q_w) ** (1 + (Y_b / Y_w) ** 0.5)",88.0
+"def _guess_spatial_dimensions(image):
+    
+    if image.ndim == 2:
+        return 2
+    if image.ndim == 3 and image.shape[-1] != 3:
+        return 3
+    if image.ndim == 3 and image.shape[-1] == 3:
+        return None
+    if image.ndim == 4 and image.shape[-1] == 3:
+        return 3
+    else:
+        raise ValueError(""Expected 2D, 3D, or 4D array, got %iD."" % image.ndim)","# test_source.py
+
+import pytest
+import numpy as np
+from source import _guess_spatial_dimensions
+
+def test__guess_spatial_dimensions():
+    
+    image1 = np.zeros((10,10))
+    assert _guess_spatial_dimensions(image1) == 2
+    
+    image2 = np.zeros((10,10,3))
+    assert _guess_spatial_dimensions(image2) == 3
+    
+    image3 = np.zeros((10,10,4))
+    assert _guess_spatial_dimensions(image3) == 3
+    
+    image4 = np.zeros((10,10,1))
+    with pytest.raises(ValueError):
+        _guess_spatial_dimensions(image4)",88.0
+"def double_ion_thrust_correction(double_fraction):
+    
+    if double_fraction < 0 or double_fraction > 1:
+        raise ValueError('double_fraction {:.f} is not in [0, 1]'.format(double_fraction))
+
+    return (1  + (0.5)**0.5 * double_fraction) / (1 + double_fraction)","import pytest
+import sys
+sys.path.append(""."")  # to import source.py from the same directory
+from source import double_ion_thrust_correction
+
+def test_double_ion_thrust_correction():
+    # normal case
+    assert double_ion_thrust_correction(0.5) == 0.7071067811865475
+    # edge case: double_fraction = 0
+    assert double_ion_thrust_correction(0) == 1
+    # edge case: double_fraction = 1
+    assert double_ion_thrust_correction(1) == 2
+    # error case: double_fraction < 0
+    with pytest.raises(ValueError):
+        double_ion_thrust_correction(-0.5)
+    # error case: double_fraction > 1
+    with pytest.raises(ValueError):
+        double_ion_thrust_correction(1.5)",88.0
+"import torch
+
+def distance2bbox(points, distance, max_shape=None):
+    
+    x1 = points[..., 0] - distance[..., 0]
+    y1 = points[..., 1] - distance[..., 1]
+    x2 = points[..., 0] + distance[..., 2]
+    y2 = points[..., 1] + distance[..., 3]
+
+    bboxes = torch.stack([x1, y1, x2, y2], -1)
+
+    if max_shape is not None:
+        # clip bboxes with dynamic `min` and `max` for onnx
+        if torch.onnx.is_in_onnx_export():
+            from mmdet.core.export import dynamic_clip_for_onnx
+            x1, y1, x2, y2 = dynamic_clip_for_onnx(x1, y1, x2, y2, max_shape)
+            bboxes = torch.stack([x1, y1, x2, y2], dim=-1)
+            return bboxes
+        if not isinstance(max_shape, torch.Tensor):
+            max_shape = x1.new_tensor(max_shape)
+        max_shape = max_shape[..., :2].type_as(x1)
+        if max_shape.ndim == 2:
+            assert bboxes.ndim == 3
+            assert max_shape.size(0) == bboxes.size(0)
+
+        min_xy = x1.new_tensor(0)
+        max_xy = torch.cat([max_shape, max_shape],
+                           dim=-1).flip(-1).unsqueeze(-2)
+        bboxes = torch.where(bboxes < min_xy, min_xy, bboxes)
+        bboxes = torch.where(bboxes > max_xy, max_xy, bboxes)
+
+    return bboxes","import torch
+import pytest
+from source import distance2bbox
+
+def test_distance2bbox():
+    points = torch.tensor([[[10, 20], [30, 40], [50, 60]]])
+    distance = torch.tensor([[[5, 5], [5, 10]]])
+    max_shape = torch.tensor([[60, 70]])
+    expected_output = torch.tensor([[[6, 15], [25, 30], [35, 45]]])
+    assert torch.allclose(distance2bbox(points, distance, max_shape), expected_output)
+
+    points = torch.tensor([[[10, 20], [30, 40], [50, 60]]])
+    distance = torch.tensor([[[5, 5], [5, 10]]])
+    assert torch.allclose(distance2bbox(points, distance), expected_output)
+
+    points = torch.tensor([[[10, 20], [30, 40], [50, 60]]])
+    distance = torch.tensor([[[5, 5], [5, 10]]])
+    max_shape = None
+    expected_output = torch.tensor([[[6, 15], [25, 30], [35, 45]]])
+    assert torch.allclose(distance2bbox(points, distance, max_shape), expected_output)
+
+test_distance2bbox()",88.0
