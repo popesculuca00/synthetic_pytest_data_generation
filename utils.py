@@ -1,16 +1,11 @@
 import sys, subprocess, os, shutil
+import string
+import random
 import re
 import ast
 import uuid
 from concurrent.futures import ThreadPoolExecutor, TimeoutError, as_completed
 from functools import wraps
-
-
-import string
-import random
-
-
-# from pytest_runner import run_pytest as run_pytest_with_coverage
 
 
 def timeout(time_limit):
@@ -26,9 +21,7 @@ def timeout(time_limit):
                     raise TimeoutError(
                         f"{func.__name__} exceeded timeout of {time_limit} seconds"
                     )
-
         return wrapper
-
     return decorator
 
 
@@ -63,65 +56,15 @@ def delete_object_from_code(func_name, code):
             if node.name == func_name:
                 return None
             return node
-
     tree = ast.parse(code)
     modified_tree = FunctionDeleter().visit(tree)
     modified_code = ast.unparse(modified_tree)
-
     return modified_code
 
 
 def strip_ansi_escape_sequences(s):
     ansi_escape_regex = re.compile(r"\x1b\[([0-9A-Za-z]+)(;[0-9]+)*m")
     return ansi_escape_regex.sub("", s)
-
-
-# def run_pytest_with_coverage(input_code, pytest_code, tmp_folder='tmp'):
-#     current_dir = os.getcwd()
-#     tmp_dir_path = os.path.join(current_dir, tmp_folder)
-#     os.makedirs(tmp_dir_path, exist_ok=True)
-#     solution_file_path = os.path.join(tmp_dir_path, 'source.py')
-#     test_file_path = os.path.join(tmp_dir_path, 'test_source.py')
-#     with open(solution_file_path, 'w', encoding="utf-8") as solution_file:
-#         solution_file.write(input_code)
-#     with open(test_file_path, 'w', encoding="utf-8") as test_file:
-#         test_file.write(pytest_code)
-
-#     try:
-#         result = subprocess.run(['pytest', '--cov=source', test_file_path, '--cov-report', 'term-missing', '-vv'], capture_output=True, text=True, cwd=tmp_dir_path, timeout=10)
-#     except Exception as e:
-#         print("Failed to run tests:", str(e))
-
-
-#     result.stdout = strip_ansi_escape_sequences(result.stdout)
-
-#     # COVERAGE
-#     coverage_match = re.search(r"TOTAL\s+\d+\s+\d+\s+(\d+)%", result.stdout)
-#     if coverage_match:
-#         coverage_percent = coverage_match.group(1)
-#         # print(f"Coverage percent: {coverage_percent}")
-#     else:
-#         coverage_percent = 0.0
-#         # print("Coverage information not found.")
-
-#     try:
-#         coverage_percent = float(coverage_percent)
-#     except ValueError as e:
-#         print(f"Error converting {coverage_percent} to float")
-
-
-#     #FAILED TESTS
-#     num_fails = re.search("(\d+) failed", result.stdout)
-#     if num_fails is None:
-#         num_fails = 0
-#     else:
-#         num_fails = int(num_fails[1])
-
-
-#     return {"coverage" : coverage_percent,
-#             "stdout" : result.stdout,
-#             "stderr" : result.stderr,
-#             "failed_assertions" : num_fails > 0}
 
 
 def extract_code(text):
