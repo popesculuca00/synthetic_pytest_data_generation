@@ -41,7 +41,3 @@ The project includes several shared utility scripts that facilitate various oper
 2. Run the notebooks in the order listed above.
 3. Adjust parameters as needed in each notebook.
 4. Use the generated dataset for training and evaluating language models on unit test generation tasks.
-
-## Note
-
-This project is part of a larger research effort on fine-tuning transformer models for unit test generation. For more details, refer to the associated dissertation paper.
